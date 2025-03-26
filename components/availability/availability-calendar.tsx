@@ -9,6 +9,17 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { checkAvailability } from "@/lib/api"
 import type { MotorcycleUnit } from "@/lib/types"
 import AvailableMotorcycleCard from "@/components/availability/available-motorcycle-card"
+import { useSocket, SocketEvents } from "@/hooks/use-socket"
+import { toast } from "sonner"
+
+// Event type untuk realtime updates
+type AvailabilityEvent = {
+  motorId: string;
+  isAvailable: boolean;
+  tanggalMulai?: string;
+  tanggalSelesai?: string;
+  reason?: string;
+}
 
 export default function AvailabilityCalendar() {
   const searchParams = useSearchParams()
@@ -18,6 +29,95 @@ export default function AvailabilityCalendar() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [view, setView] = useState<"calendar" | "list">("calendar")
+  
+  // Menggunakan socket untuk realtime updates
+  const { isConnected, socket } = useSocket({
+    room: 'availability',
+    events: {
+      'motor-status-update': handleMotorStatusUpdate,
+      'availability-update': handleAvailabilityUpdate,
+      'booking-created': handleBookingCreated,
+    }
+  });
+
+  // Handler untuk update status motor
+  function handleMotorStatusUpdate(data: any) {
+    if (!data || !data.id) return;
+    
+    setAvailableMotorcycles(prev => {
+      return prev.map(motor => {
+        if (motor.id === data.id) {
+          // Update status motor dengan nilai yang valid
+          return {
+            ...motor,
+            status: data.status === 'tersedia' ? 'TERSEDIA' : 
+                   data.status === 'disewa' ? 'DISEWA' : 
+                   data.status === 'servis' ? 'SERVIS' : 'OVERDUE'
+          };
+        }
+        return motor;
+      });
+    });
+    
+    // Tampilkan notifikasi
+    toast.info('Status Motor Diperbarui', {
+      description: `Motor ${data.plat_nomor || 'ID: ' + data.id} sekarang ${data.status}`,
+    });
+  }
+  
+  // Handler untuk update ketersediaan
+  function handleAvailabilityUpdate(data: AvailabilityEvent) {
+    if (!data || !data.motorId) return;
+    
+    setAvailableMotorcycles(prev => {
+      // Jika motor menjadi tidak tersedia, hapus dari daftar
+      if (!data.isAvailable) {
+        return prev.filter(motor => motor.id !== data.motorId);
+      }
+      
+      // Jika motor menjadi tersedia dan belum ada di daftar,
+      // reload data dari server karena kita butuh informasi lengkap motor
+      const exists = prev.some(motor => motor.id === data.motorId);
+      if (!exists && startDate && endDate) {
+        fetchAvailabilityData();
+      }
+      
+      return prev;
+    });
+    
+    // Tampilkan notifikasi
+    toast.info(
+      data.isAvailable ? 'Motor Tersedia' : 'Motor Tidak Tersedia', 
+      { description: data.reason || 'Status ketersediaan telah diperbarui' }
+    );
+  }
+  
+  // Handler ketika ada booking baru
+  function handleBookingCreated(data: any) {
+    if (!data) return;
+    
+    // Jika rentang waktu booking bertabrakan dengan filter saat ini, update list
+    if (startDate && endDate && data.tanggalMulai && data.tanggalSelesai) {
+      const bookingStart = new Date(data.tanggalMulai);
+      const bookingEnd = new Date(data.tanggalSelesai);
+      
+      const hasOverlap = 
+        (bookingStart <= endDate && bookingEnd >= startDate) ||
+        (startDate <= bookingEnd && endDate >= bookingStart);
+      
+      if (hasOverlap && data.motorId) {
+        // Hapus motor yang sudah di-booking dari daftar tersedia
+        setAvailableMotorcycles(prev => 
+          prev.filter(motor => motor.id !== data.motorId)
+        );
+        
+        // Notify user
+        toast.warning('Booking Baru Dibuat', {
+          description: `Motor dengan ID ${data.motorId} baru saja dibooking untuk periode yang Anda cari.`,
+        });
+      }
+    }
+  }
 
   useEffect(() => {
     const startParam = searchParams.get("startDate")
@@ -38,28 +138,7 @@ export default function AvailabilityCalendar() {
         timeoutId = setTimeout(async () => {
           if (!isMounted) return
           
-          setIsLoading(true)
-          setError(null)
-
-          try {
-            const data = await checkAvailability({
-              tanggalMulai: startParam,
-              tanggalSelesai: endParam,
-            })
-            
-            if (isMounted) {
-              setAvailableMotorcycles(data)
-            }
-          } catch (err: any) {
-            if (isMounted) {
-              setError(err?.message || "Failed to fetch availability data")
-              console.error(err)
-            }
-          } finally {
-            if (isMounted) {
-              setIsLoading(false)
-            }
-          }
+          fetchAvailabilityData();
         }, 500) // Delay 500ms untuk debounce
       }
 
@@ -72,6 +151,28 @@ export default function AvailabilityCalendar() {
       }
     }
   }, [searchParams])
+  
+  // Function untuk mengambil data ketersediaan
+  const fetchAvailabilityData = async () => {
+    if (!startDate || !endDate) return;
+    
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const data = await checkAvailability({
+        tanggalMulai: format(startDate, 'yyyy-MM-dd'),
+        tanggalSelesai: format(endDate, 'yyyy-MM-dd'),
+      })
+      
+      setAvailableMotorcycles(data)
+    } catch (err: any) {
+      setError(err?.message || "Failed to fetch availability data")
+      console.error(err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   // Placeholder data for when API fails or during development
   const placeholderMotorcycles = [
@@ -158,16 +259,23 @@ export default function AvailabilityCalendar() {
           </p>
         </div>
 
-        <Tabs
-          defaultValue="calendar"
-          className="w-full md:w-auto"
-          onValueChange={(value) => setView(value as "calendar" | "list")}
-        >
-          <TabsList className="grid w-full grid-cols-2 md:w-[200px]">
-            <TabsTrigger value="calendar">Calendar View</TabsTrigger>
-            <TabsTrigger value="list">List View</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="flex gap-3 items-center">
+          <div className="flex items-center">
+            <span className={`h-2 w-2 rounded-full mr-1.5 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+            <span className="text-xs text-gray-400">{isConnected ? 'Realtime aktif' : 'Offline'}</span>
+          </div>
+          
+          <Tabs
+            defaultValue="calendar"
+            className="w-full md:w-auto"
+            onValueChange={(value) => setView(value as "calendar" | "list")}
+          >
+            <TabsList className="grid w-full grid-cols-2 md:w-[200px]">
+              <TabsTrigger value="calendar">Calendar View</TabsTrigger>
+              <TabsTrigger value="list">List View</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
       </div>
 
       {isLoading ? (
@@ -177,7 +285,7 @@ export default function AvailabilityCalendar() {
       ) : error ? (
         <div className="text-center py-10">
           <p className="text-red-500 mb-4">{error}</p>
-          <Button onClick={() => window.location.reload()}>Try Again</Button>
+          <Button onClick={() => fetchAvailabilityData()}>Try Again</Button>
         </div>
       ) : (
         <>
@@ -248,23 +356,21 @@ export default function AvailabilityCalendar() {
   )
 }
 
-// Helper icon component for the calendar view
 function CalendarIcon({ className }: { className?: string }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
       fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
       stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
       className={className}
     >
-      <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-      <line x1="16" x2="16" y1="2" y2="6" />
-      <line x1="8" x2="8" y1="2" y2="6" />
-      <line x1="3" x2="21" y1="10" y2="10" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
+      />
     </svg>
   )
 }

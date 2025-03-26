@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { format } from "date-fns"
@@ -22,6 +22,9 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import type { MotorcycleUnit } from "@/lib/types"
 import { createTransaction } from "@/lib/api"
+import { useSocket, SocketEvents } from "@/hooks/use-socket"
+import { Badge } from "@/components/ui/badge"
+import { toast } from "@/components/ui/use-toast"
 
 interface AvailableMotorcycleCardProps {
   motorcycle: MotorcycleUnit
@@ -40,6 +43,68 @@ export default function AvailableMotorcycleCard({ motorcycle, startDate, endDate
     nomorKTP: "",
   })
   const [formError, setFormError] = useState<string | null>(null)
+  const [localMotorcycle, setLocalMotorcycle] = useState<MotorcycleUnit>(motorcycle)
+  const [isAvailable, setIsAvailable] = useState(motorcycle.status === "TERSEDIA")
+
+  // Socket untuk updates real-time pada status motor
+  const { isConnected } = useSocket({
+    room: `motorcycle-${motorcycle.id}`,
+    events: {
+      [SocketEvents.MOTOR_STATUS_UPDATE]: handleMotorStatusUpdate,
+      'booking-created': handleBookingCreated
+    }
+  })
+
+  // Update lokal ketika prop motorcycle berubah
+  useEffect(() => {
+    setLocalMotorcycle(motorcycle)
+    setIsAvailable(motorcycle.status === "TERSEDIA")
+  }, [motorcycle])
+
+  // Handler untuk update status motor dari socket
+  function handleMotorStatusUpdate(data: any) {
+    if (data && data.unitId === motorcycle.id) {
+      setLocalMotorcycle(prev => ({
+        ...prev,
+        status: data.status
+      }))
+      
+      setIsAvailable(data.status === "TERSEDIA")
+      
+      const statusText = data.status === "TERSEDIA" ? "tersedia" : 
+                         data.status === "DISEWA" ? "sedang disewa" : 
+                         data.status === "SERVIS" ? "dalam servis" : "tidak tersedia";
+                         
+      toast({
+        title: "Status Motor Berubah",
+        description: `Unit ${motorcycle.platNomor} sekarang ${statusText}`,
+        variant: data.status === "TERSEDIA" ? "default" : "destructive"
+      })
+    }
+  }
+  
+  // Handler untuk booking yang baru dibuat oleh pengguna lain
+  function handleBookingCreated(data: any) {
+    if (data && data.unitId === motorcycle.id) {
+      setLocalMotorcycle(prev => ({
+        ...prev,
+        status: "DISEWA"
+      }))
+      
+      setIsAvailable(false)
+      
+      toast({
+        title: "Motor Telah Dipesan",
+        description: `Unit ${motorcycle.platNomor} baru saja dipesan oleh pengguna lain`,
+        variant: "destructive"
+      })
+      
+      // Tutup dialog jika sedang terbuka
+      if (isDialogOpen) {
+        setIsDialogOpen(false)
+      }
+    }
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -48,6 +113,13 @@ export default function AvailableMotorcycleCard({ motorcycle, startDate, endDate
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Periksa lagi statusnya sebelum submit
+    if (!isAvailable) {
+      setFormError("Motor tidak tersedia lagi. Silakan pilih motor lain.")
+      return
+    }
+    
     setIsSubmitting(true)
     setFormError(null)
 
@@ -62,7 +134,7 @@ export default function AvailableMotorcycleCard({ motorcycle, startDate, endDate
       setIsDialogOpen(false)
       router.push("/booking-success")
     } catch (err) {
-      setFormError("Failed to create booking. Please try again.")
+      setFormError("Gagal membuat pemesanan. Silakan coba lagi.")
       console.error(err)
     } finally {
       setIsSubmitting(false)
@@ -70,50 +142,62 @@ export default function AvailableMotorcycleCard({ motorcycle, startDate, endDate
   }
 
   const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
-  const totalPrice = motorcycle.hargaSewa * totalDays
+  const totalPrice = localMotorcycle.hargaSewa * totalDays
 
   return (
-    <Card className="bg-gray-900 border-gray-800 overflow-hidden hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/10">
+    <Card className={`bg-gray-900 border-gray-800 overflow-hidden transition-all ${isAvailable ? 'hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10' : 'opacity-70'}`}>
       <div className="relative h-48 overflow-hidden">
         <Image
-          src={motorcycle.jenis?.gambar || `/motorcycle-placeholder.svg`}
-          alt={`${motorcycle.jenis?.merk || 'Motor'} ${motorcycle.jenis?.model || ''}`}
+          src={localMotorcycle.jenis?.gambar || `/motorcycle-placeholder.svg`}
+          alt={`${localMotorcycle.jenis?.merk || 'Motor'} ${localMotorcycle.jenis?.model || ''}`}
           fill
           className="object-cover"
         />
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
           <h3 className="text-lg font-bold">
-            {motorcycle.jenis?.merk || 'Motor'} {motorcycle.jenis?.model || ''}
+            {localMotorcycle.jenis?.merk || 'Motor'} {localMotorcycle.jenis?.model || ''}
           </h3>
         </div>
+        
+        {/* Socket status indicator */}
+        {isConnected && (
+          <div className="absolute top-2 right-2">
+            <Badge variant="outline" className="bg-black/50 text-xs">
+              Live
+            </Badge>
+          </div>
+        )}
       </div>
       <CardContent className="p-4">
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
-            <p className="text-sm text-gray-400">License Plate</p>
-            <p className="font-medium">{motorcycle.platNomor}</p>
+            <p className="text-sm text-gray-400">Plat Nomor</p>
+            <p className="font-medium">{localMotorcycle.platNomor}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-400">Color</p>
-            <p className="font-medium">{motorcycle.warna}</p>
+            <p className="text-sm text-gray-400">Warna</p>
+            <p className="font-medium">{localMotorcycle.warna}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-400">Daily Rate</p>
-            <p className="font-medium">Rp {motorcycle.hargaSewa.toLocaleString()}</p>
+            <p className="text-sm text-gray-400">Tarif Harian</p>
+            <p className="font-medium">Rp {localMotorcycle.hargaSewa.toLocaleString()}</p>
           </div>
           <div>
             <p className="text-sm text-gray-400">Status</p>
-            <p className="font-medium text-green-500">Available</p>
+            <p className={`font-medium ${isAvailable ? 'text-green-500' : 'text-red-500'}`}>
+              {isAvailable ? 'Tersedia' : localMotorcycle.status === 'DISEWA' ? 'Disewa' : 
+               localMotorcycle.status === 'SERVIS' ? 'Dalam Servis' : 'Tidak Tersedia'}
+            </p>
           </div>
         </div>
 
         <div className="bg-gray-800/50 rounded-lg p-3">
           <div className="flex justify-between mb-2">
-            <span className="text-sm text-gray-400">Rental Period:</span>
-            <span className="text-sm font-medium">{totalDays} days</span>
+            <span className="text-sm text-gray-400">Periode Sewa:</span>
+            <span className="text-sm font-medium">{totalDays} hari</span>
           </div>
           <div className="flex justify-between font-medium">
-            <span>Total Price:</span>
+            <span>Total Harga:</span>
             <span className="text-primary">Rp {totalPrice.toLocaleString()}</span>
           </div>
         </div>
@@ -121,21 +205,26 @@ export default function AvailableMotorcycleCard({ motorcycle, startDate, endDate
       <CardFooter className="p-4 pt-0">
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="w-full bg-primary hover:bg-primary/90">Book Now</Button>
+            <Button 
+              className="w-full bg-primary hover:bg-primary/90"
+              disabled={!isAvailable}
+            >
+              {isAvailable ? "Pesan Sekarang" : "Tidak Tersedia"}
+            </Button>
           </DialogTrigger>
           <DialogContent className="bg-gray-900 border-gray-800 sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>Complete Your Booking</DialogTitle>
+              <DialogTitle>Lengkapi Pemesanan Anda</DialogTitle>
               <DialogDescription>
-                Fill in your details to book the {motorcycle.jenis?.merk || 'Motor'} {motorcycle.jenis?.model || ''} for{" "}
-                {totalDays} days.
+                Isi data diri Anda untuk memesan {localMotorcycle.jenis?.merk || 'Motor'} {localMotorcycle.jenis?.model || ''} selama{" "}
+                {totalDays} hari.
               </DialogDescription>
             </DialogHeader>
 
             <form onSubmit={handleSubmit} className="space-y-4 py-4">
               <div className="grid grid-cols-1 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="namaCustomer">Full Name</Label>
+                  <Label htmlFor="namaCustomer">Nama Lengkap</Label>
                   <Input
                     id="namaCustomer"
                     name="namaCustomer"
@@ -147,7 +236,7 @@ export default function AvailableMotorcycleCard({ motorcycle, startDate, endDate
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="noHP">Phone Number</Label>
+                  <Label htmlFor="noHP">Nomor Telepon</Label>
                   <Input
                     id="noHP"
                     name="noHP"
@@ -159,7 +248,7 @@ export default function AvailableMotorcycleCard({ motorcycle, startDate, endDate
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="nomorKTP">ID Card Number</Label>
+                  <Label htmlFor="nomorKTP">Nomor KTP</Label>
                   <Input
                     id="nomorKTP"
                     name="nomorKTP"
@@ -171,7 +260,7 @@ export default function AvailableMotorcycleCard({ motorcycle, startDate, endDate
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="alamat">Address</Label>
+                  <Label htmlFor="alamat">Alamat</Label>
                   <Textarea
                     id="alamat"
                     name="alamat"
@@ -185,23 +274,23 @@ export default function AvailableMotorcycleCard({ motorcycle, startDate, endDate
 
               <div className="bg-gray-800/50 rounded-lg p-3 space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-400">Motorcycle:</span>
+                  <span className="text-sm text-gray-400">Motor:</span>
                   <span className="text-sm">
-                    {motorcycle.jenis?.merk || 'Motor'} {motorcycle.jenis?.model || ''}
+                    {localMotorcycle.jenis?.merk || 'Motor'} {localMotorcycle.jenis?.model || ''}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-400">License Plate:</span>
-                  <span className="text-sm">{motorcycle.platNomor}</span>
+                  <span className="text-sm text-gray-400">Plat Nomor:</span>
+                  <span className="text-sm">{localMotorcycle.platNomor}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-400">Rental Period:</span>
+                  <span className="text-sm text-gray-400">Periode Sewa:</span>
                   <span className="text-sm">
-                    {format(startDate, "MMM d, yyyy")} - {format(endDate, "MMM d, yyyy")}
+                    {format(startDate, "d MMM yyyy")} - {format(endDate, "d MMM yyyy")}
                   </span>
                 </div>
                 <div className="flex justify-between font-medium pt-1 border-t border-gray-700">
-                  <span>Total Price:</span>
+                  <span>Total Harga:</span>
                   <span className="text-primary">Rp {totalPrice.toLocaleString()}</span>
                 </div>
               </div>
@@ -236,10 +325,10 @@ export default function AvailableMotorcycleCard({ motorcycle, startDate, endDate
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                         ></path>
                       </svg>
-                      Processing...
+                      Memproses...
                     </span>
                   ) : (
-                    "Confirm Booking"
+                    "Konfirmasi Pesanan"
                   )}
                 </Button>
               </DialogFooter>

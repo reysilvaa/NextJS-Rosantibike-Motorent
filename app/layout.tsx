@@ -10,9 +10,8 @@ import { Providers } from "./providers"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "MotoCruise - Premium Motorcycle Rental",
-  description: "Rent premium motorcycles for your adventures",
-    generator: 'v0.dev'
+  title: "Aplikasi Rental Motor",
+  description: "Aplikasi untuk manajemen rental motor",
 }
 
 export default function RootLayout({
@@ -21,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="id" suppressHydrationWarning>
       <body className={`${inter.className} bg-black text-white min-h-screen flex flex-col`}>
         <Providers>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
@@ -34,7 +33,3 @@ export default function RootLayout({
     </html>
   )
 }
-
-
-
-import './globals.css'

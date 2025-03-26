@@ -13,6 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useMotorcycleTypes } from "@/hooks/use-motorcycles"
 import { cn } from "@/lib/utils"
 import type { AvailabilitySearchParams } from "@/lib/types"
+import { useSocket } from "@/hooks/use-socket"
+import { Badge } from "@/components/ui/badge"
 
 export default function AvailabilitySearch() {
   const router = useRouter()
@@ -20,6 +22,11 @@ export default function AvailabilitySearch() {
   const [startDate, setStartDate] = useState<Date | undefined>()
   const [endDate, setEndDate] = useState<Date | undefined>()
   const [motorcycleType, setMotorcycleType] = useState<string | undefined>()
+  
+  // Koneksi Socket.IO untuk menampilkan status koneksi
+  const { isConnected } = useSocket({
+    room: "availability", // Bergabung ke room availability untuk event umum
+  })
 
   const handleSearch = () => {
     if (!startDate || !endDate) {
@@ -33,13 +40,9 @@ export default function AvailabilitySearch() {
       tanggalSelesai: format(endDate, "yyyy-MM-dd"),
     }
 
-    // Logging untuk membantu debug
-    console.log("Motorcycle type selected:", motorcycleType)
-
     // Hanya tambahkan jenisMotorId jika bukan "all" dan nilai ada
     if (motorcycleType && motorcycleType !== "all") {
       searchParams.jenisMotorId = motorcycleType
-      console.log("Added motorcycle type filter:", motorcycleType)
     }
 
     // Buat query string untuk URL dengan nama parameter yang sesuai dengan backend
@@ -51,7 +54,6 @@ export default function AvailabilitySearch() {
     }
 
     const searchUrl = `/availability?${queryString.toString()}`
-    console.log("Navigating to:", searchUrl)
 
     // Arahkan ke halaman availability dengan parameter
     router.push(searchUrl)
@@ -59,13 +61,25 @@ export default function AvailabilitySearch() {
 
   return (
     <Card className="bg-gray-900/50 border-gray-800">
-      <CardHeader>
-        <CardTitle className="text-xl font-bold">Check Motorcycle Availability</CardTitle>
+      <CardHeader className="relative">
+        <CardTitle className="text-xl font-bold">Cek Ketersediaan Motor</CardTitle>
+        {/* Socket Connection Indicator */}
+        <div className="absolute top-4 right-4">
+          <Badge 
+            variant={isConnected ? "outline" : "destructive"} 
+            className={cn(
+              "text-xs",
+              isConnected && "bg-green-500/10 text-green-400 hover:bg-green-500/20 hover:text-green-300"
+            )}
+          >
+            {isConnected ? "Update Realtime" : "Offline"}
+          </Badge>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Start Date</label>
+            <label className="text-sm font-medium">Tanggal Mulai</label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -73,7 +87,7 @@ export default function AvailabilitySearch() {
                   className="w-full justify-start text-left font-normal bg-gray-950/50 border-gray-800"
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {startDate ? format(startDate, "PPP") : <span>Select date</span>}
+                  {startDate ? format(startDate, "PPP") : <span>Pilih tanggal</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -88,7 +102,7 @@ export default function AvailabilitySearch() {
             </Popover>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">End Date</label>
+            <label className="text-sm font-medium">Tanggal Selesai</label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -96,7 +110,7 @@ export default function AvailabilitySearch() {
                   className="w-full justify-start text-left font-normal bg-gray-950/50 border-gray-800"
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {endDate ? format(endDate, "PPP") : <span>Select date</span>}
+                  {endDate ? format(endDate, "PPP") : <span>Pilih tanggal</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -112,13 +126,13 @@ export default function AvailabilitySearch() {
           </div>
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium">Motorcycle Type (Optional)</label>
+          <label className="text-sm font-medium">Jenis Motor (Opsional)</label>
           <Select value={motorcycleType} onValueChange={setMotorcycleType}>
             <SelectTrigger className="bg-gray-950/50 border-gray-800">
-              <SelectValue placeholder="Any motorcycle type" />
+              <SelectValue placeholder="Semua jenis motor" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Any motorcycle type</SelectItem>
+              <SelectItem value="all">Semua jenis motor</SelectItem>
               {motorcycleTypes?.map((type) => (
                 <SelectItem key={type.id} value={type.id}>
                   {type.merk} {type.model}
@@ -128,7 +142,7 @@ export default function AvailabilitySearch() {
           </Select>
         </div>
         <Button className="w-full" onClick={handleSearch}>
-          Check Availability
+          Cek Ketersediaan
         </Button>
       </CardContent>
     </Card>

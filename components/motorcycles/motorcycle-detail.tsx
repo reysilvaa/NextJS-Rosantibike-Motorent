@@ -18,9 +18,11 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
-import { fetchMotorcycleTypeById } from "@/lib/api"
+import { fetchMotorcycleTypeById, checkAvailability } from "@/lib/api"
 import { motion } from "framer-motion"
 import type { MotorcycleType, MotorcycleUnit } from "@/lib/types"
+import { useSocket, SocketEvents } from "@/hooks/use-socket"
+import { toast } from "@/components/ui/use-toast"
 
 // Placeholder statis yang dijamin ada di folder public
 const MOTORCYCLE_PLACEHOLDER = "/motorcycle-placeholder.svg"
@@ -36,6 +38,95 @@ export default function MotorcycleDetail({ id }: { id: string }) {
   const [formattedEndDate, setFormattedEndDate] = useState<string | undefined>(undefined)
   const [imageSrc, setImageSrc] = useState<string>(MOTORCYCLE_PLACEHOLDER)
   const [units, setUnits] = useState<MotorcycleUnit[]>([])
+  
+  // State untuk ketersediaan
+  const [isCheckingAvailability, setIsCheckingAvailability] = useState(false)
+  const [availableUnits, setAvailableUnits] = useState<MotorcycleUnit[]>([])
+  const [showAvailability, setShowAvailability] = useState(false)
+  
+  // Socket connection untuk mendapatkan real-time updates
+  const { isConnected } = useSocket({
+    room: `motorcycle-${id}`,
+    events: {
+      [SocketEvents.MOTOR_STATUS_UPDATE]: handleMotorStatusUpdate,
+      'unit-update': handleUnitUpdate,
+      'unit-delete': handleUnitDelete
+    }
+  })
+
+  // Handler untuk update status motor
+  function handleMotorStatusUpdate(data: any) {
+    if (data && data.unitId) {
+      // Update status pada unit yang sesuai
+      setUnits(prevUnits => prevUnits.map(unit => {
+        if (unit.id === data.unitId) {
+          // Toast notification untuk update status
+          const statusText = data.status === "TERSEDIA" ? "tersedia" : 
+                            data.status === "DISEWA" ? "sedang disewa" : 
+                            data.status === "SERVIS" ? "dalam servis" : "tidak tersedia";
+          
+          toast({
+            title: "Status Motor Berubah",
+            description: `Unit ${unit.platNomor} sekarang ${statusText}`,
+            variant: data.status === "TERSEDIA" ? "default" : "destructive"
+          })
+          
+          return { ...unit, status: data.status };
+        }
+        return unit;
+      }))
+    }
+  }
+
+  // Handler untuk update informasi unit
+  function handleUnitUpdate(updatedUnit: MotorcycleUnit) {
+    if (!updatedUnit || !updatedUnit.id) return;
+    
+    // Periksa apakah unit sudah ada dalam daftar
+    const unitExists = units.some(unit => unit.id === updatedUnit.id);
+    
+    if (unitExists) {
+      // Update unit yang sudah ada
+      setUnits(prevUnits => prevUnits.map(unit => 
+        unit.id === updatedUnit.id ? { ...unit, ...updatedUnit } : unit
+      ));
+      
+      toast({
+        title: "Unit Motor Diperbarui",
+        description: `Informasi untuk ${updatedUnit.platNomor} telah diperbarui`,
+      });
+    } else {
+      // Tambahkan unit baru jika jenisnya cocok dengan yang sedang dilihat
+      if (updatedUnit.jenis?.id === id) {
+        setUnits(prevUnits => [...prevUnits, updatedUnit]);
+        
+        toast({
+          title: "Unit Motor Baru",
+          description: `Unit baru ${updatedUnit.platNomor} telah ditambahkan`,
+          variant: "default"
+        });
+      }
+    }
+  }
+
+  // Handler untuk penghapusan unit
+  function handleUnitDelete(deletedUnit: { id: string, platNomor?: string }) {
+    if (!deletedUnit || !deletedUnit.id) return;
+    
+    // Cek apakah unit ada dalam daftar
+    const unitToDelete = units.find(unit => unit.id === deletedUnit.id);
+    
+    if (unitToDelete) {
+      // Hapus unit dari daftar
+      setUnits(prevUnits => prevUnits.filter(unit => unit.id !== deletedUnit.id));
+      
+      toast({
+        title: "Unit Motor Dihapus",
+        description: `Unit ${unitToDelete.platNomor || deletedUnit.platNomor || 'motor'} telah dihapus dari sistem`,
+        variant: "destructive"
+      });
+    }
+  }
 
   useEffect(() => {
     const fetchMotorcycleDetail = async () => {
@@ -89,18 +180,163 @@ export default function MotorcycleDetail({ id }: { id: string }) {
     }
   }, [endDate])
 
-  const handleCheckAvailability = () => {
+  // Fungsi untuk memeriksa ketersediaan motor
+  const handleCheckAvailability = async () => {
     if (!startDate || !endDate) {
-      return
+      toast({
+        title: "Error",
+        description: "Harap pilih tanggal mulai dan tanggal selesai",
+        variant: "destructive"
+      });
+      return;
     }
 
-    const formattedStartDate = format(startDate, "yyyy-MM-dd")
-    const formattedEndDate = format(endDate, "yyyy-MM-dd")
+    // Validasi tanggal mulai tidak boleh lebih besar dari tanggal selesai
+    if (startDate > endDate) {
+      toast({
+        title: "Error Tanggal",
+        description: "Tanggal mulai tidak boleh lebih besar dari tanggal selesai",
+        variant: "destructive"
+      });
+      return;
+    }
 
-    router.push(
-      `/availability?tanggalMulai=${formattedStartDate}&tanggalSelesai=${formattedEndDate}&jenisMotorId=${id}`
-    )
-  }
+    try {
+      setIsCheckingAvailability(true);
+      
+      // Format tanggal dalam bentuk YYYY-MM-DD (tanpa waktu)
+      const formattedStartDate = format(startDate, "yyyy-MM-dd");
+      const formattedEndDate = format(endDate, "yyyy-MM-dd");
+      
+      const searchParams = {
+        tanggalMulai: formattedStartDate,
+        tanggalSelesai: formattedEndDate,
+        jenisMotorId: id
+      };
+      
+      // Tambahkan logging untuk membantu debug
+      console.log("Checking availability with params:", searchParams);
+      
+      // Ambil data ketersediaan dari API
+      const response = await checkAvailability(searchParams);
+      console.log("API response:", response);
+      
+      // Siapkan array untuk unit yang tersedia
+      let availableMotorcycles: any[] = [];
+      
+      // Cek apakah respons berupa array langsung atau objek dengan properti units
+      if (Array.isArray(response)) {
+        availableMotorcycles = response;
+      } else if (response && typeof response === 'object') {
+        // Gunakan type assertion untuk mengatasi error linter
+        const responseObj = response as { units?: any[] };
+        if (responseObj.units && Array.isArray(responseObj.units)) {
+          availableMotorcycles = responseObj.units;
+        } else {
+          console.warn("Tidak menemukan array units dalam respons:", response);
+          setAvailableUnits([]);
+          toast({
+            title: "Tidak Tersedia",
+            description: "Tidak ada unit yang tersedia untuk tanggal yang dipilih",
+            variant: "destructive"
+          });
+          setShowAvailability(true);
+          return;
+        }
+      } else {
+        console.warn("Format respons API tidak dikenali:", response);
+        setAvailableUnits([]);
+        toast({
+          title: "Tidak Tersedia",
+          description: "Tidak ada unit yang tersedia untuk tanggal yang dipilih",
+          variant: "destructive"
+        });
+        setShowAvailability(true);
+        return;
+      }
+      
+      // Filter unit yang tersedia untuk jenis motor ini
+      const availableUnitsForThisType = availableMotorcycles.filter(unit => 
+        unit.status === "TERSEDIA" && 
+        ((unit.jenis && unit.jenis.id === id) || 
+         (unit.jenisMotor && unit.jenisMotor.id === id))
+      );
+      
+      // Jika tidak ada unit tersedia, tampilkan pesan
+      if (availableUnitsForThisType.length === 0) {
+        setAvailableUnits([]);
+        toast({
+          title: "Tidak Tersedia",
+          description: "Tidak ada unit yang tersedia untuk tanggal yang dipilih",
+          variant: "destructive"
+        });
+        setShowAvailability(true);
+        return;
+      }
+      
+      // Simpan unit yang tersedia
+      setAvailableUnits(availableUnitsForThisType);
+      
+      // Buat peta ID unit yang tersedia
+      const availableUnitIds = new Set(
+        availableUnitsForThisType.map(unit => unit.unitId || unit.id)
+      );
+      
+      // Update units dengan status ketersediaan yang benar
+      setUnits(prevUnits => {
+        return prevUnits.map(unit => {
+          // Cari unit yang cocok dalam respons API berdasarkan ID
+          const apiUnit = availableMotorcycles.find(u => 
+            (u.unitId && u.unitId === unit.id) || u.id === unit.id
+          );
+          
+          if (apiUnit) {
+            // Gunakan status langsung dari API
+            return {
+              ...unit,
+              status: apiUnit.status
+            };
+          } else if (availableUnitIds.has(unit.id)) {
+            // Unit ada di daftar tersedia
+            return {
+              ...unit,
+              status: "TERSEDIA"
+            };
+          } else {
+            // Unit tidak ditemukan dalam respons, anggap tidak tersedia
+            return {
+              ...unit,
+              status: "DISEWA"
+            };
+          }
+        });
+      });
+      
+      // Tampilkan notifikasi sukses
+      toast({
+        title: "Ketersediaan Diperiksa",
+        description: `Ditemukan ${availableUnitsForThisType.length} unit tersedia untuk tanggal yang dipilih`,
+        variant: availableUnitsForThisType.length > 0 ? "default" : "destructive"
+      });
+      
+      // Tampilkan bagian ketersediaan
+      setShowAvailability(true);
+      
+    } catch (err: any) {
+      console.error("Error checking availability:", err);
+      
+      // Menampilkan pesan error yang lebih informatif
+      const errorMessage = err.message || "Terjadi kesalahan saat memeriksa ketersediaan";
+      
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive"
+      });
+    } finally {
+      setIsCheckingAvailability(false);
+    }
+  };
 
   const handleImageError = () => {
     setImageSrc(MOTORCYCLE_PLACEHOLDER)
@@ -108,8 +344,11 @@ export default function MotorcycleDetail({ id }: { id: string }) {
 
   const handleRent = (unitId: string) => {
     if (!startDate || !endDate) {
-      router.push(`/availability?jenisMotorId=${id}`)
-      return
+      toast({
+        title: "Pilih Tanggal",
+        description: "Harap pilih tanggal penyewaan terlebih dahulu",
+      });
+      return;
     }
     
     if (!formattedStartDate || !formattedEndDate) return;
@@ -177,6 +416,13 @@ export default function MotorcycleDetail({ id }: { id: string }) {
         Kembali ke Daftar Motor
       </Link>
 
+      {/* Socket Connection Status */}
+      <div className="mb-4 flex items-center">
+        <Badge variant={isConnected ? "outline" : "destructive"} className="text-xs">
+          {isConnected ? "Live Updates Aktif" : "Live Updates Tidak Aktif"}
+        </Badge>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="relative aspect-video rounded-lg overflow-hidden border border-gray-800">
           <Image
@@ -240,9 +486,9 @@ export default function MotorcycleDetail({ id }: { id: string }) {
               <Button 
                 className="w-full" 
                 onClick={handleCheckAvailability}
-                disabled={!startDate || !endDate}
+                disabled={!startDate || !endDate || isCheckingAvailability}
               >
-                Periksa Ketersediaan
+                {isCheckingAvailability ? "Memeriksa..." : "Periksa Ketersediaan"}
               </Button>
             </CardFooter>
           </Card>
@@ -367,7 +613,7 @@ export default function MotorcycleDetail({ id }: { id: string }) {
                       <Button 
                         className="w-full mt-4" 
                         variant="outline"
-                        onClick={() => router.push(`/availability?jenisMotorId=${id}`)}
+                        onClick={handleCheckAvailability}
                       >
                         Cek Ketersediaan & Harga
                       </Button>
