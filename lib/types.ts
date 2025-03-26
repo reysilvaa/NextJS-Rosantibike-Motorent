@@ -94,6 +94,7 @@ export interface BlogPost {
   konten: string
   featuredImage: string
   status: "draft" | "published"
+  thumbnail?: string;
   kategori: string
   tags?: string[]
   meta_description?: string

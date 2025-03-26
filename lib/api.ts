@@ -275,16 +275,63 @@ export async function fetchBlogPostById(id: string): Promise<BlogPost> {
 
 export async function fetchBlogPostBySlug(slug: string): Promise<BlogPost | null> {
   try {
-    const response = await apiRequest<PaginatedResponse<BlogPost>>(`${API_CONFIG.ENDPOINTS.BLOG}?slug=${encodeURIComponent(slug)}`)
-    if (Array.isArray(response)) {
-      const post = response.length > 0 ? response.find((post) => post.slug === slug) : null
-      return post || null
+    // Periksa jika kita memiliki URL API valid
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    if (!apiUrl) {
+      console.error('NEXT_PUBLIC_API_URL tidak terdefinisi');
+      return null;
     }
-    const post = response.data && response.data.length > 0 ? response.data.find((post) => post.slug === slug) : null
-    return post || null
+
+    console.log(`Mencoba mengambil blog post dari: ${apiUrl}/blog/by-slug/${slug}`);
+
+    // Panggil API untuk mendapatkan data blog post
+    const response = await fetch(`${apiUrl}/blog/by-slug/${slug}`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        console.error(`Blog post dengan slug '${slug}' tidak ditemukan`);
+        return null;
+      }
+      throw new Error(`Error fetching blog post: ${response.statusText}`);
+    }
+
+    // Periksa jika respons adalah JSON
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      console.error('Respons bukan JSON:', contentType);
+      throw new Error('Respons dari server bukan dalam format JSON');
+    }
+
+    const responseData = await response.json();
+    console.log('Data yang diterima dari API:', responseData);
+    
+    // Periksa apakah data valid dan ambil properti data jika ada
+    let data = responseData;
+    if (responseData && responseData.data && typeof responseData.data === 'object') {
+      data = responseData.data;
+    }
+    
+    // Periksa apakah data valid
+    if (!data || typeof data !== 'object') {
+      console.error('Data tidak valid:', data);
+      return null;
+    }
+    
+    // Konversi status dari backend ke format frontend
+    if (data && data.status === 'TERBIT') {
+      data.status = 'published';
+    } else if (data && data.status === 'DRAFT') {
+      data.status = 'draft';
+    }
+    return data;
   } catch (error) {
-    console.error("Error fetching blog post by slug:", error)
-    return null
+    console.error('Error fetching blog post by slug:', error);
+    // Jika terjadi error, kembalikan null daripada melempar error
+    return null;
   }
 }
 
