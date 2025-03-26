@@ -1,57 +1,44 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { ChevronLeft, ChevronRight, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { useTranslation } from "@/i18n/hooks"
+import reviewsData from "@/lib/reviews.json"
+
+interface Review {
+  Author: string;
+  "Review Text": string;
+  "Review Rating": number;
+  Date: string;
+  Likes: number;
+}
 
 export default function Testimonials() {
   const [activeIndex, setActiveIndex] = useState(0)
   const { t } = useTranslation()
+  const [reviews, setReviews] = useState<Review[]>([])
 
-  const testimonials = [
-    {
-      id: 1,
-      name: "Alex Johnson",
-      location: "California",
-      image: "/placeholder.svg?height=200&width=200",
-      rating: 5,
-      text: t("testimonial1"),
-    },
-    {
-      id: 2,
-      name: "Sarah Williams",
-      location: "New York",
-      image: "/placeholder.svg?height=200&width=200",
-      rating: 5,
-      text: t("testimonial2"),
-    },
-    {
-      id: 3,
-      name: "Michael Chen",
-      location: "Texas",
-      image: "/placeholder.svg?height=200&width=200",
-      rating: 4,
-      text: t("testimonial3"),
-    },
-    {
-      id: 4,
-      name: "Emily Rodriguez",
-      location: "Florida",
-      image: "/placeholder.svg?height=200&width=200",
-      rating: 5,
-      text: t("testimonial4"),
-    },
-  ]
+  useEffect(() => {
+    // Mengambil 8 ulasan acak dari reviewsData (jika ada banyak)
+    const shuffled = [...reviewsData].sort(() => 0.5 - Math.random());
+    const selectedReviews = shuffled.slice(0, 8);
+    setReviews(selectedReviews);
+  }, []);
 
   const nextTestimonial = () => {
-    setActiveIndex((prev) => (prev + 1) % testimonials.length)
+    setActiveIndex((prev) => (prev + 1) % reviews.length)
   }
 
   const prevTestimonial = () => {
-    setActiveIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length)
+    setActiveIndex((prev) => (prev - 1 + reviews.length) % reviews.length)
+  }
+
+  // Jika belum ada data yang dimuat
+  if (reviews.length === 0) {
+    return null;
   }
 
   return (
@@ -70,34 +57,34 @@ export default function Testimonials() {
               className="flex transition-transform duration-500 ease-in-out"
               style={{ transform: `translateX(-${activeIndex * 100}%)` }}
             >
-              {testimonials.map((testimonial) => (
-                <div key={testimonial.id} className="w-full flex-shrink-0 px-4">
-                  <Card className="bg-gray-900/50 border-gray-800">
-                    <CardContent className="p-8">
-                      <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
+              {reviews.map((review, index) => (
+                <div key={index} className="w-full flex-shrink-0 px-4">
+                  <Card className="bg-gray-900/50 border-gray-800 h-full">
+                    <CardContent className="p-8 h-full flex flex-col">
+                      <div className="flex flex-col md:flex-row gap-6 items-center md:items-start h-full">
                         <div className="relative w-20 h-20 rounded-full overflow-hidden flex-shrink-0">
                           <Image
-                            src={testimonial.image || "/placeholder.svg"}
-                            alt={testimonial.name}
+                            src={`/avatars/avatar-${(index % 8) + 1}.png`}
+                            alt={review.Author}
                             fill
                             className="object-cover"
                           />
                         </div>
-                        <div className="flex-1 text-center md:text-left">
+                        <div className="flex-1 text-center md:text-left flex flex-col h-full">
                           <div className="flex justify-center md:justify-start mb-2">
                             {[...Array(5)].map((_, i) => (
                               <Star
                                 key={i}
                                 className={`h-5 w-5 ${
-                                  i < testimonial.rating ? "text-yellow-500 fill-yellow-500" : "text-gray-600"
+                                  i < review["Review Rating"] ? "text-yellow-500 fill-yellow-500" : "text-gray-600"
                                 }`}
                               />
                             ))}
                           </div>
-                          <p className="text-gray-300 mb-4 italic">"{testimonial.text}"</p>
+                          <p className="text-gray-300 mb-4 italic flex-grow min-h-[100px] overflow-y-auto">"{review["Review Text"]}"</p>
                           <div>
-                            <h4 className="font-semibold">{testimonial.name}</h4>
-                            <p className="text-gray-400 text-sm">{testimonial.location}</p>
+                            <h4 className="font-semibold">{review.Author}</h4>
+                            <p className="text-gray-400 text-sm">{review.Date}</p>
                           </div>
                         </div>
                       </div>
@@ -129,7 +116,7 @@ export default function Testimonials() {
           </Button>
 
           <div className="flex justify-center mt-6 gap-2">
-            {testimonials.map((_, index) => (
+            {reviews.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setActiveIndex(index)}
