@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator"
 import { motion } from "framer-motion"
 import { fetchMotorcycleUnits } from "@/lib/api"
 import type { MotorcycleUnit } from "@/lib/types"
+import { useTranslation } from "@/i18n/hooks"
 
 interface MotorcycleUnitsProps {
   typeId: string
@@ -18,6 +19,7 @@ interface MotorcycleUnitsProps {
 }
 
 export default function MotorcycleUnits({ typeId, startDate, endDate }: MotorcycleUnitsProps) {
+  const { t } = useTranslation()
   const router = useRouter()
   const [units, setUnits] = useState<MotorcycleUnit[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -39,7 +41,7 @@ export default function MotorcycleUnits({ typeId, startDate, endDate }: Motorcyc
         setError(null)
       } catch (err: any) {
         console.error("Error fetching motorcycle units:", err)
-        setError(err.message || "Gagal memuat unit motor")
+        setError(err.message || t("failedToLoadMotorcycleUnits"))
         setUnits([])
       } finally {
         setIsLoading(false)
@@ -49,10 +51,10 @@ export default function MotorcycleUnits({ typeId, startDate, endDate }: Motorcyc
     if (typeId) {
       fetchUnits()
     } else {
-      setError("ID jenis motor tidak valid")
+      setError(t("invalidMotorcycleTypeId"))
       setIsLoading(false)
     }
-  }, [typeId, startDate, endDate])
+  }, [typeId, startDate, endDate, t])
 
   const handleRent = (unitId: string) => {
     if (!startDate || !endDate) {
@@ -68,7 +70,7 @@ export default function MotorcycleUnits({ typeId, startDate, endDate }: Motorcyc
   if (isLoading) {
     return (
       <div className="space-y-4 mt-8">
-        <h2 className="text-2xl font-bold mb-4">Unit Motor Tersedia</h2>
+        <h2 className="text-2xl font-bold mb-4">{t("availableMotorcycleUnits")}</h2>
         {[1, 2, 3].map((i) => (
           <Card key={i} className="bg-gray-900/50 border-gray-800">
             <CardHeader>
@@ -90,7 +92,7 @@ export default function MotorcycleUnits({ typeId, startDate, endDate }: Motorcyc
   if (error) {
     return (
       <div className="mt-8">
-        <h2 className="text-2xl font-bold mb-4">Unit Motor Tersedia</h2>
+        <h2 className="text-2xl font-bold mb-4">{t("availableMotorcycleUnits")}</h2>
         <Card className="bg-red-900/20 border-red-800">
           <CardContent className="pt-6">
             <p className="text-red-400">{error}</p>
@@ -103,13 +105,13 @@ export default function MotorcycleUnits({ typeId, startDate, endDate }: Motorcyc
   if (units.length === 0) {
     return (
       <div className="mt-8">
-        <h2 className="text-2xl font-bold mb-4">Unit Motor Tersedia</h2>
+        <h2 className="text-2xl font-bold mb-4">{t("availableMotorcycleUnits")}</h2>
         <Card className="bg-gray-900/50 border-gray-800">
           <CardContent className="pt-6">
             <p className="text-gray-400">
               {startDate && endDate
-                ? "Tidak ada unit tersedia untuk tanggal yang dipilih"
-                : "Tidak ada unit tersedia saat ini"
+                ? t("noUnitsAvailableForSelectedDates")
+                : t("noUnitsAvailableNow")
               }
             </p>
           </CardContent>
@@ -121,7 +123,7 @@ export default function MotorcycleUnits({ typeId, startDate, endDate }: Motorcyc
   return (
     <div className="mt-8">
       <h2 className="text-2xl font-bold mb-4">
-        Unit Motor Tersedia
+        {t("availableMotorcycleUnits")}
         {startDate && endDate && (
           <span className="ml-2 text-sm font-normal text-gray-400">
             ({format(new Date(startDate), "dd/MM/yyyy")} - {format(new Date(endDate), "dd/MM/yyyy")})
@@ -152,13 +154,15 @@ export default function MotorcycleUnits({ typeId, startDate, endDate }: Motorcyc
                       "bg-red-500/20 text-red-300 hover:bg-red-500/30"
                     }
                   >
-                    {unit.status}
+                    {unit.status === "TERSEDIA" ? t("available") : 
+                     unit.status === "DISEWA" ? t("rented") : 
+                     unit.status === "SERVIS" ? t("service") : t("unavailable")}
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-300 mb-2">
-                  Rp {unit.hargaSewa.toLocaleString("id-ID")} / hari
+                  Rp {unit.hargaSewa.toLocaleString("id-ID")} / {t("day")}
                 </p>
                 
                 {startDate && endDate && (
@@ -166,9 +170,9 @@ export default function MotorcycleUnits({ typeId, startDate, endDate }: Motorcyc
                     <Separator className="my-4" />
                     <div className="flex justify-between items-center">
                       <div>
-                        <p className="text-gray-400 text-sm">Total untuk {
+                        <p className="text-gray-400 text-sm">{t("totalFor")} {
                           Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24))
-                        } hari:</p>
+                        } {t("days")}:</p>
                         <p className="text-xl font-bold">
                           Rp {(unit.hargaSewa * Math.ceil(
                             (new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24)
@@ -181,7 +185,7 @@ export default function MotorcycleUnits({ typeId, startDate, endDate }: Motorcyc
                         disabled={unit.status !== "TERSEDIA"}
                         onClick={() => handleRent(unit.id)}
                       >
-                        {unit.status === "TERSEDIA" ? "Sewa Sekarang" : "Tidak Tersedia"}
+                        {unit.status === "TERSEDIA" ? t("rentNow") : t("unavailable")}
                       </Button>
                     </div>
                   </>
@@ -193,7 +197,7 @@ export default function MotorcycleUnits({ typeId, startDate, endDate }: Motorcyc
                     variant="outline"
                     onClick={() => router.push(`/availability?jenisMotorId=${typeId}`)}
                   >
-                    Cek Ketersediaan & Harga
+                    {t("checkAvailabilityAndPrice")}
                   </Button>
                 )}
               </CardContent>

@@ -4,17 +4,17 @@ import BlogSidebar from "@/components/blog/blog-sidebar"
 
 export const metadata: Metadata = {
   title: "Blog | MotoCruise",
-  description: "Latest news, tips, and stories about motorcycles and riding adventures",
+  description: "Berita terbaru, tips, dan cerita tentang motor dan petualangan berkendara",
 }
 
 export default function BlogPage() {
   return (
-    <div className="pt-20 pb-20">
-      <div className="container mx-auto px-4">
-        <div className="py-10">
+    <div className="container mx-auto px-4 py-20">
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-10">
           <h1 className="text-4xl font-bold mb-6">Blog</h1>
           <p className="text-gray-400 max-w-3xl">
-            Stay updated with the latest motorcycle news, riding tips, and adventure stories from our blog.
+            Tetap update dengan berita motor terbaru, tips berkendara, dan cerita petualangan dari blog kami.
           </p>
         </div>
 

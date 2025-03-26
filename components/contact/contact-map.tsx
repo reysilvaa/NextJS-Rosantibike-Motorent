@@ -3,8 +3,11 @@
 import { motion } from "framer-motion"
 import { Card } from "@/components/ui/card"
 import GoogleMapComponent from "@/components/google-map"
+import { useTranslation } from "@/i18n/hooks"
 
 export default function ContactMap() {
+  const { t } = useTranslation()
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -12,7 +15,7 @@ export default function ContactMap() {
       transition={{ duration: 0.5, delay: 0.2 }}
     >
       <Card className="bg-gray-900/50 border-gray-800 overflow-hidden">
-        <div className="h-[400px]">
+        <div className="h-[400px]" aria-label={t("ourLocation")}>
           <GoogleMapComponent />
         </div>
       </Card>

@@ -9,11 +9,13 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
+import { useTranslation } from "@/i18n/hooks"
 
 export default function AvailabilityPreview() {
   const router = useRouter()
   const [startDate, setStartDate] = useState<Date>()
   const [endDate, setEndDate] = useState<Date>()
+  const { t } = useTranslation()
 
   const handleSearch = () => {
     if (startDate && endDate) {
@@ -34,15 +36,15 @@ export default function AvailabilityPreview() {
           className="bg-gradient-to-r from-gray-900 to-black border border-gray-800 rounded-xl p-8 md:p-12 max-w-4xl mx-auto"
         >
           <div className="text-center mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Check Motorcycle Availability</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{t("checkAvailabilityTitle")}</h2>
             <p className="text-gray-400 max-w-2xl mx-auto">
-              Find the perfect motorcycle for your adventure. Enter your desired dates to check availability.
+              {t("checkAvailabilityDescription")}
             </p>
           </div>
 
           <div className="flex flex-col md:flex-row gap-4 max-w-3xl mx-auto">
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-400 mb-2">Start Date</label>
+              <label className="block text-sm font-medium text-gray-400 mb-2">{t("startDate")}</label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -53,7 +55,7 @@ export default function AvailabilityPreview() {
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {startDate ? format(startDate, "PPP") : "Select date"}
+                    {startDate ? format(startDate, "PPP") : t("selectDate")}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0 bg-gray-900 border-gray-800">
@@ -69,7 +71,7 @@ export default function AvailabilityPreview() {
             </div>
 
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-400 mb-2">End Date</label>
+              <label className="block text-sm font-medium text-gray-400 mb-2">{t("endDate")}</label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -80,7 +82,7 @@ export default function AvailabilityPreview() {
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {endDate ? format(endDate, "PPP") : "Select date"}
+                    {endDate ? format(endDate, "PPP") : t("selectDate")}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0 bg-gray-900 border-gray-800">
@@ -102,7 +104,7 @@ export default function AvailabilityPreview() {
                 disabled={!startDate || !endDate}
               >
                 <Search className="mr-2 h-4 w-4" />
-                Check
+                {t("check")}
               </Button>
             </div>
           </div>

@@ -15,8 +15,10 @@ import { cn } from "@/lib/utils"
 import type { AvailabilitySearchParams } from "@/lib/types"
 import { useSocket } from "@/hooks/use-socket"
 import { Badge } from "@/components/ui/badge"
+import { useTranslation } from "@/i18n/hooks"
 
 export default function AvailabilitySearch() {
+  const { t } = useTranslation()
   const router = useRouter()
   const { data: motorcycleTypes, isLoading: isLoadingTypes } = useMotorcycleTypes()
   const [startDate, setStartDate] = useState<Date | undefined>()
@@ -31,7 +33,7 @@ export default function AvailabilitySearch() {
   const handleSearch = () => {
     if (!startDate || !endDate) {
       // Tambahkan validasi error disini jika diperlukan
-      console.warn("Tanggal mulai dan tanggal selesai harus diisi")
+      console.warn(t("startAndEndDateRequired"))
       return
     }
 
@@ -62,7 +64,7 @@ export default function AvailabilitySearch() {
   return (
     <Card className="bg-gray-900/50 border-gray-800">
       <CardHeader className="relative">
-        <CardTitle className="text-xl font-bold">Cek Ketersediaan Motor</CardTitle>
+        <CardTitle className="text-xl font-bold">{t("checkMotorcycleAvailability")}</CardTitle>
         {/* Socket Connection Indicator */}
         <div className="absolute top-4 right-4">
           <Badge 
@@ -72,14 +74,14 @@ export default function AvailabilitySearch() {
               isConnected && "bg-green-500/10 text-green-400 hover:bg-green-500/20 hover:text-green-300"
             )}
           >
-            {isConnected ? "Update Realtime" : "Offline"}
+            {isConnected ? t("realtimeUpdate") : t("offline")}
           </Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Tanggal Mulai</label>
+            <label className="text-sm font-medium">{t("startDate")}</label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -87,7 +89,7 @@ export default function AvailabilitySearch() {
                   className="w-full justify-start text-left font-normal bg-gray-950/50 border-gray-800"
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {startDate ? format(startDate, "PPP") : <span>Pilih tanggal</span>}
+                  {startDate ? format(startDate, "PPP") : <span>{t("selectDate")}</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -102,7 +104,7 @@ export default function AvailabilitySearch() {
             </Popover>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">Tanggal Selesai</label>
+            <label className="text-sm font-medium">{t("endDate")}</label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -110,7 +112,7 @@ export default function AvailabilitySearch() {
                   className="w-full justify-start text-left font-normal bg-gray-950/50 border-gray-800"
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {endDate ? format(endDate, "PPP") : <span>Pilih tanggal</span>}
+                  {endDate ? format(endDate, "PPP") : <span>{t("selectDate")}</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -126,13 +128,13 @@ export default function AvailabilitySearch() {
           </div>
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium">Jenis Motor (Opsional)</label>
+          <label className="text-sm font-medium">{t("motorcycleTypeOptional")}</label>
           <Select value={motorcycleType} onValueChange={setMotorcycleType}>
             <SelectTrigger className="bg-gray-950/50 border-gray-800">
-              <SelectValue placeholder="Semua jenis motor" />
+              <SelectValue placeholder={t("allMotorcycleTypes")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Semua jenis motor</SelectItem>
+              <SelectItem value="all">{t("allMotorcycleTypes")}</SelectItem>
               {motorcycleTypes?.map((type) => (
                 <SelectItem key={type.id} value={type.id}>
                   {type.merk} {type.model}
@@ -142,7 +144,7 @@ export default function AvailabilitySearch() {
           </Select>
         </div>
         <Button className="w-full" onClick={handleSearch}>
-          Cek Ketersediaan
+          {t("checkAvailability")}
         </Button>
       </CardContent>
     </Card>

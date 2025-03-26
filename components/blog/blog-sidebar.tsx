@@ -9,84 +9,86 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { useTranslation } from "@/i18n/hooks"
 
 export default function BlogSidebar() {
+  const { t } = useTranslation()
   const [searchQuery, setSearchQuery] = useState("")
 
   const categories = [
-    { name: "Travel", count: 12 },
-    { name: "Maintenance", count: 8 },
-    { name: "Gear", count: 10 },
-    { name: "Technical", count: 6 },
-    { name: "History", count: 4 },
-    { name: "Events", count: 5 },
+    { name: t("travel"), count: 12 },
+    { name: t("maintenance"), count: 8 },
+    { name: t("gear"), count: 10 },
+    { name: t("technical"), count: 6 },
+    { name: t("history"), count: 4 },
+    { name: t("events"), count: 5 },
   ]
 
   const tags = [
-    "Adventure",
-    "Sport Bikes",
-    "Cruisers",
-    "Maintenance",
-    "Safety",
-    "Gear Reviews",
-    "Road Trips",
-    "Motorcycle Culture",
-    "Beginner Tips",
-    "Customization",
-    "Vintage",
-    "Racing",
+    t("adventure"),
+    t("sportBikes"),
+    t("cruisers"),
+    t("maintenance"),
+    t("safety"),
+    t("gearReviews"),
+    t("roadTrips"),
+    t("motorcycleCulture"),
+    t("beginnerTips"),
+    t("customization"),
+    t("vintage"),
+    t("racing"),
   ]
 
   const recentPosts = [
     {
       id: "1",
-      title: "Essential Safety Tips for Night Riding",
+      title: t("blogPost1Title"),
       slug: "essential-safety-tips-night-riding",
-      date: "August 15, 2023",
+      date: t("blogPost1Date"),
     },
     {
       id: "2",
-      title: "How to Choose the Perfect Motorcycle Helmet",
+      title: t("blogPost2Title"),
       slug: "choose-perfect-motorcycle-helmet",
-      date: "August 8, 2023",
+      date: t("blogPost2Date"),
     },
     {
       id: "3",
-      title: "Motorcycle Camping: A Beginner's Guide",
+      title: t("blogPost3Title"),
       slug: "motorcycle-camping-beginners-guide",
-      date: "July 29, 2023",
+      date: t("blogPost3Date"),
     },
     {
       id: "4",
-      title: "Understanding Motorcycle Insurance Options",
+      title: t("blogPost4Title"),
       slug: "understanding-motorcycle-insurance-options",
-      date: "July 22, 2023",
+      date: t("blogPost4Date"),
     },
   ]
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     // In a real app, this would redirect to search results
-    console.log("Searching for:", searchQuery)
+    console.log(t("searchingFor"), searchQuery)
   }
 
   return (
     <div className="space-y-6">
       <Card className="bg-gray-900/50 border-gray-800">
         <CardHeader>
-          <CardTitle>Search</CardTitle>
+          <CardTitle>{t("search")}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSearch} className="flex gap-2">
             <Input
-              placeholder="Search articles..."
+              placeholder={t("searchArticles")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-gray-800/50 border-gray-700"
             />
             <Button type="submit" size="icon">
               <Search className="h-4 w-4" />
-              <span className="sr-only">Search</span>
+              <span className="sr-only">{t("search")}</span>
             </Button>
           </form>
         </CardContent>
@@ -94,7 +96,7 @@ export default function BlogSidebar() {
 
       <Card className="bg-gray-900/50 border-gray-800">
         <CardHeader>
-          <CardTitle>Categories</CardTitle>
+          <CardTitle>{t("categories")}</CardTitle>
         </CardHeader>
         <CardContent>
           <ul className="space-y-2">
@@ -115,7 +117,7 @@ export default function BlogSidebar() {
 
       <Card className="bg-gray-900/50 border-gray-800">
         <CardHeader>
-          <CardTitle>Recent Posts</CardTitle>
+          <CardTitle>{t("recentPosts")}</CardTitle>
         </CardHeader>
         <CardContent>
           <ul className="space-y-4">
@@ -133,7 +135,7 @@ export default function BlogSidebar() {
 
       <Card className="bg-gray-900/50 border-gray-800">
         <CardHeader>
-          <CardTitle>Tags</CardTitle>
+          <CardTitle>{t("tags")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">

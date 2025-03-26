@@ -11,11 +11,13 @@ import { useMotorcycleTypes } from "@/hooks/use-motorcycles"
 import { useSocket, SocketEvents } from "@/hooks/use-socket"
 import { toast } from "sonner"
 import type { MotorcycleType } from "@/lib/types"
+import { useTranslation } from "@/i18n/hooks"
 
 // Placeholder statis yang dijamin ada di folder public
 const MOTORCYCLE_PLACEHOLDER = "/motorcycle-placeholder.svg"
 
 export default function MotorcycleList() {
+  const { t } = useTranslation()
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined)
   const { data: motorcycles, isLoading, error, refetch } = useMotorcycleTypes(searchTerm)
   const [hasNewMotor, setHasNewMotor] = useState(false)
@@ -42,10 +44,10 @@ export default function MotorcycleList() {
   function handleNewMotorcycle(data: any) {
     if (!data || !data.id) return;
     
-    toast.success('Motor Baru Ditambahkan', {
-      description: `${data.merk || ''} ${data.model || ''} telah ditambahkan ke daftar motor.`,
+    toast.success(t("newMotorcycleAdded"), {
+      description: `${data.merk || ''} ${data.model || ''} ${t("hasBeenAddedToList")}`,
       action: {
-        label: 'Refresh',
+        label: t("refresh"),
         onClick: () => refetch(),
       },
     });
@@ -65,8 +67,8 @@ export default function MotorcycleList() {
         )
       );
       
-      toast.info('Informasi Motor Diperbarui', {
-        description: `Data ${data.merk || ''} ${data.model || ''} telah diperbarui.`
+      toast.info(t("motorcycleInfoUpdated"), {
+        description: `${t("dataOf")} ${data.merk || ''} ${data.model || ''} ${t("hasBeenUpdated")}`
       });
     }
   }
@@ -81,8 +83,8 @@ export default function MotorcycleList() {
         localMotorcycles.filter(motor => motor.id !== data.id)
       );
       
-      toast.warning('Motor Dihapus', {
-        description: `Motor telah dihapus dari sistem.`
+      toast.warning(t("motorcycleDeleted"), {
+        description: t("motorcycleRemovedFromSystem")
       });
     }
   }
@@ -110,7 +112,7 @@ export default function MotorcycleList() {
     return (
       <div className="text-center py-10">
         <p className="text-red-500 mb-4">{error}</p>
-        <Button onClick={() => window.location.reload()}>Coba Lagi</Button>
+        <Button onClick={() => window.location.reload()}>{t("tryAgain")}</Button>
       </div>
     )
   }
@@ -120,8 +122,8 @@ export default function MotorcycleList() {
       <div className="space-y-6">
         <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-4 flex justify-between items-center">
           <div>
-            <p className="text-blue-400">Data motor baru telah ditambahkan</p>
-            <p className="text-sm text-blue-200/70">Muat ulang untuk melihat motor terbaru</p>
+            <p className="text-blue-400">{t("newMotorcycleData")}</p>
+            <p className="text-sm text-blue-200/70">{t("reloadToSeeLatest")}</p>
           </div>
           <Button
             onClick={() => {
@@ -130,7 +132,7 @@ export default function MotorcycleList() {
             }}
             className="bg-blue-600 hover:bg-blue-700"
           >
-            Muat Ulang
+            {t("reload")}
           </Button>
         </div>
         
@@ -159,6 +161,8 @@ interface MotorcycleCardProps {
 }
 
 function MotorcycleCard({ motorcycle, index }: MotorcycleCardProps) {
+  const { t } = useTranslation()
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -185,7 +189,7 @@ function MotorcycleCard({ motorcycle, index }: MotorcycleCardProps) {
             <h3 className="text-xl font-bold mb-1">
               {motorcycle.merk} {motorcycle.model}
             </h3>
-            <p className="text-gray-400 text-sm mb-3">Tahun: {motorcycle.tahun}</p>
+            <p className="text-gray-400 text-sm mb-3">{t("year")}: {motorcycle.tahun}</p>
             <p className="text-gray-300 line-clamp-3">{motorcycle.deskripsi}</p>
           </CardContent>
         </Card>

@@ -17,6 +17,7 @@ import {
 import { formatCurrency } from "@/lib/utils"
 import type { MotorcycleUnit } from "@/lib/types"
 import { useRouter } from "next/navigation"
+import { useTranslation } from "@/i18n/hooks"
 
 interface AvailabilityResultsProps {
   motorcycles: MotorcycleUnit[]
@@ -25,6 +26,7 @@ interface AvailabilityResultsProps {
 }
 
 export default function AvailabilityResults({ motorcycles, startDate, endDate }: AvailabilityResultsProps) {
+  const { t } = useTranslation()
   const router = useRouter()
   const [sortOption, setSortOption] = useState("price-asc")
   
@@ -52,11 +54,11 @@ export default function AvailabilityResults({ motorcycles, startDate, endDate }:
   if (motorcycles.length === 0) {
     return (
       <Card className="bg-gray-900/50 border-gray-800 p-6 text-center">
-        <h3 className="text-xl font-semibold mb-2">No motorcycles available</h3>
+        <h3 className="text-xl font-semibold mb-2">{t("noMotorcyclesAvailable")}</h3>
         <p className="text-gray-400 mb-4">
-          We couldn't find any motorcycles available for the selected dates.
+          {t("noMotorcyclesAvailableDesc")}
         </p>
-        <p className="text-sm text-gray-500 mb-6">Try selecting different dates or motorcycle types.</p>
+        <p className="text-sm text-gray-500 mb-6">{t("tryDifferentDates")}</p>
       </Card>
     )
   }
@@ -66,21 +68,21 @@ export default function AvailabilityResults({ motorcycles, startDate, endDate }:
       <div className="flex justify-between items-center">
         <div>
           <p className="text-gray-400">
-            <span className="font-medium text-white">{motorcycles.length}</span> motorcycles available
+            <span className="font-medium text-white">{motorcycles.length}</span> {t("motorcyclesAvailable")}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-400">Sort by:</span>
+          <span className="text-sm text-gray-400">{t("sortBy")}:</span>
           <Select value={sortOption} onValueChange={setSortOption}>
             <SelectTrigger className="w-[180px] bg-gray-950/50 border-gray-800">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="price-asc">Price (lowest first)</SelectItem>
-                <SelectItem value="price-desc">Price (highest first)</SelectItem>
-                <SelectItem value="name-asc">Name (A-Z)</SelectItem>
-                <SelectItem value="name-desc">Name (Z-A)</SelectItem>
+                <SelectItem value="price-asc">{t("priceLowestFirst")}</SelectItem>
+                <SelectItem value="price-desc">{t("priceHighestFirst")}</SelectItem>
+                <SelectItem value="name-asc">{t("nameAZ")}</SelectItem>
+                <SelectItem value="name-desc">{t("nameZA")}</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
@@ -104,28 +106,28 @@ export default function AvailabilityResults({ motorcycles, startDate, endDate }:
                   <h3 className="text-xl font-bold mb-1">
                     {motorcycle.jenis?.merk || 'Motor'} {motorcycle.jenis?.model || ''}
                   </h3>
-                  <p className="text-gray-400 text-sm mb-4">Plat No: {motorcycle.platNomor} • {motorcycle.warna || "N/A"}</p>
+                  <p className="text-gray-400 text-sm mb-4">{t("licensePlate")}: {motorcycle.platNomor} • {motorcycle.warna || "N/A"}</p>
                   
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div key={`price-${motorcycle.id}`}>
-                      <p className="text-sm text-gray-500">Price per day</p>
+                      <p className="text-sm text-gray-500">{t("pricePerDay")}</p>
                       <p className="font-medium">{formatCurrency(motorcycle.hargaSewa)}</p>
                     </div>
                     <div key={`total-${motorcycle.id}`}>
-                      <p className="text-sm text-gray-500">Total ({rentalDays} days)</p>
+                      <p className="text-sm text-gray-500">{t("total")} ({rentalDays} {t("days")})</p>
                       <p className="font-medium">{formatCurrency(motorcycle.hargaSewa * rentalDays)}</p>
                     </div>
                   </div>
                 </div>
                 <div className="mt-4 md:mt-0 flex flex-col justify-center">
                   <Button className="min-w-32" onClick={() => handleBookNow(motorcycle.id)}>
-                    Book Now
+                    {t("bookNow")}
                   </Button>
                   <Link 
                     href={`/motorcycles/${motorcycle.jenis?.id || ''}`} 
                     className="text-center text-xs text-primary mt-2 hover:underline"
                   >
-                    View Details
+                    {t("viewDetails")}
                   </Link>
                 </div>
               </CardContent>

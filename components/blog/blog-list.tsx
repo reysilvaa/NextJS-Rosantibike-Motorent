@@ -10,8 +10,10 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { fetchBlogPosts } from "@/lib/api"
 import type { BlogPost } from "@/lib/types"
+import { useTranslation } from "@/i18n/hooks"
 
 export default function BlogList() {
+  const { t, i18n } = useTranslation()
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -27,14 +29,14 @@ export default function BlogList() {
         setTotalPages(3) // Hardcoded for now, would come from API response in real app
         setIsLoading(false)
       } catch (err) {
-        setError("Failed to load blog posts")
+        setError(t("failedToLoadBlogPosts"))
         setIsLoading(false) 
         console.error(err)
       }
     }
 
     getBlogPosts()
-  }, [currentPage])
+  }, [currentPage, t])
 
   // Placeholder data for when API fails or during development
   const placeholderPosts = [
@@ -98,7 +100,8 @@ export default function BlogList() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
-    return date.toLocaleDateString("en-US", {
+    // Format date based on current language
+    return date.toLocaleDateString(i18n.language === "id" ? "id-ID" : "en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -135,7 +138,7 @@ export default function BlogList() {
       ) : error ? (
         <div className="text-center py-10">
           <p className="text-red-500 mb-4">{error}</p>
-          <Button onClick={() => window.location.reload()}>Try Again</Button>
+          <Button onClick={() => window.location.reload()}>{t("tryAgain")}</Button>
         </div>
       ) : (
         <>
@@ -176,7 +179,7 @@ export default function BlogList() {
             <div className="flex items-center gap-2">
               <Button variant="outline" size="icon" onClick={handlePreviousPage} disabled={currentPage === 1}>
                 <ChevronLeft className="h-4 w-4" />
-                <span className="sr-only">Previous page</span>
+                <span className="sr-only">{t("previousPage")}</span>
               </Button>
 
               {[...Array(totalPages)].map((_, i) => (
@@ -192,7 +195,7 @@ export default function BlogList() {
 
               <Button variant="outline" size="icon" onClick={handleNextPage} disabled={currentPage === totalPages}>
                 <ChevronRight className="h-4 w-4" />
-                <span className="sr-only">Next page</span>
+                <span className="sr-only">{t("nextPage")}</span>
               </Button>
             </div>
           </div>

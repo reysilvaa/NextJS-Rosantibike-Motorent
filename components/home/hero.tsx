@@ -6,25 +6,27 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Calendar, ChevronRight } from "lucide-react"
+import { useTranslation } from "@/i18n/hooks"
 
 export default function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0)
+  const { t, language } = useTranslation()
 
   const slides = [
     {
       image: "/placeholder.svg?height=1080&width=1920",
-      title: "Experience the Thrill of the Road",
-      subtitle: "Premium motorcycles for your adventures",
+      title: t("heroSlide1Title") || "Experience the Thrill of the Road",
+      subtitle: t("heroSlide1Subtitle") || "Premium motorcycles for your adventures",
     },
     {
       image: "/placeholder.svg?height=1080&width=1920",
-      title: "Ride in Style",
-      subtitle: "Choose from our wide range of motorcycles",
+      title: t("heroSlide2Title") || "Ride in Style",
+      subtitle: t("heroSlide2Subtitle") || "Choose from our wide range of motorcycles",
     },
     {
       image: "/placeholder.svg?height=1080&width=1920",
-      title: "Affordable Luxury",
-      subtitle: "Quality rides at competitive prices",
+      title: t("heroSlide3Title") || "Affordable Luxury",
+      subtitle: t("heroSlide3Subtitle") || "Quality rides at competitive prices",
     },
   ]
 
@@ -68,14 +70,14 @@ export default function Hero() {
                 size="lg"
                 className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600"
               >
-                Browse Motorcycles
+                {t("motorcycles")}
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
             <Link href="/availability">
               <Button size="lg" variant="outline" className="border-white/20 hover:bg-white/10">
                 <Calendar className="mr-2 h-4 w-4" />
-                Check Availability
+                {t("availability")}
               </Button>
             </Link>
           </div>

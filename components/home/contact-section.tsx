@@ -10,8 +10,10 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import GoogleMapComponent from "@/components/google-map"
+import { useTranslation } from "@/i18n/hooks"
 
 export default function ContactSection() {
+  const { t } = useTranslation()
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -46,7 +48,7 @@ export default function ContactSection() {
       setSubmitSuccess(true)
       setFormData({ name: "", email: "", phone: "", message: "" })
     } catch (error) {
-      setSubmitError("Failed to send message. Please try again.")
+      setSubmitError(t("messageSendFailed"))
       console.error(error)
     } finally {
       setIsSubmitting(false)
@@ -56,18 +58,18 @@ export default function ContactSection() {
   const contactInfo = [
     {
       icon: <Phone className="h-5 w-5 text-primary" />,
-      title: "Phone",
-      details: "+1 (234) 567-8900",
+      title: t("phone"),
+      details: t("phoneNumber"),
     },
     {
       icon: <Mail className="h-5 w-5 text-primary" />,
-      title: "Email",
-      details: "info@motocruise.com",
+      title: t("email"),
+      details: t("emailAddress"),
     },
     {
       icon: <MapPin className="h-5 w-5 text-primary" />,
-      title: "Address",
-      details: "123 Ride Street, Bike City, BC 12345",
+      title: t("address"),
+      details: t("addressDetails"),
     },
   ]
 
@@ -75,9 +77,9 @@ export default function ContactSection() {
     <section className="py-20 bg-gradient-to-b from-gray-900 to-black">
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Contact Us</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">{t("contactUs")}</h2>
           <p className="text-gray-400">
-            Have questions or need assistance? Reach out to our team and we'll get back to you as soon as possible.
+            {t("contactDescription")}
           </p>
         </div>
 
@@ -94,7 +96,7 @@ export default function ContactSection() {
               </div>
 
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-4">Our Location</h3>
+                <h3 className="text-xl font-semibold mb-4">{t("ourLocation")}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {contactInfo.map((item, index) => (
                     <Card key={index} className="bg-black/30 border-gray-800">
@@ -117,21 +119,21 @@ export default function ContactSection() {
             transition={{ duration: 0.5 }}
           >
             <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 lg:p-8 h-full">
-              <h3 className="text-xl font-semibold mb-6">Send Us a Message</h3>
+              <h3 className="text-xl font-semibold mb-6">{t("contactFormTitle")}</h3>
 
               {submitSuccess ? (
                 <div className="bg-green-900/30 border border-green-800 rounded-lg p-4 text-center">
-                  <h4 className="font-semibold text-green-400 mb-2">Message Sent Successfully!</h4>
-                  <p className="text-gray-300">Thank you for contacting us. We'll get back to you shortly.</p>
+                  <h4 className="font-semibold text-green-400 mb-2">{t("messageSentSuccess")}</h4>
+                  <p className="text-gray-300">{t("messageSentSuccessDesc")}</p>
                   <Button className="mt-4" variant="outline" onClick={() => setSubmitSuccess(false)}>
-                    Send Another Message
+                    {t("sendAnotherMessage")}
                   </Button>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-400 mb-1">
-                      Name
+                      {t("fullName")}
                     </label>
                     <Input
                       id="name"
@@ -146,7 +148,7 @@ export default function ContactSection() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label htmlFor="email" className="block text-sm font-medium text-gray-400 mb-1">
-                        Email
+                        {t("email")}
                       </label>
                       <Input
                         id="email"
@@ -161,7 +163,7 @@ export default function ContactSection() {
 
                     <div>
                       <label htmlFor="phone" className="block text-sm font-medium text-gray-400 mb-1">
-                        Phone
+                        {t("phone")}
                       </label>
                       <Input
                         id="phone"
@@ -175,7 +177,7 @@ export default function ContactSection() {
 
                   <div>
                     <label htmlFor="message" className="block text-sm font-medium text-gray-400 mb-1">
-                      Message
+                      {t("message")}
                     </label>
                     <Textarea
                       id="message"
@@ -217,12 +219,12 @@ export default function ContactSection() {
                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                           ></path>
                         </svg>
-                        Sending...
+                        {t("sending")}
                       </span>
                     ) : (
                       <span className="flex items-center">
                         <Send className="mr-2 h-4 w-4" />
-                        Send Message
+                        {t("sendMessage")}
                       </span>
                     )}
                   </Button>

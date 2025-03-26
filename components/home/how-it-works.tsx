@@ -2,28 +2,31 @@
 
 import { motion } from "framer-motion"
 import { Calendar, BikeIcon as Motorcycle, CreditCard, CheckCircle } from "lucide-react"
+import { useTranslation } from "@/i18n/hooks"
 
 export default function HowItWorks() {
+  const { t } = useTranslation()
+  
   const steps = [
     {
       icon: <Calendar className="h-10 w-10 text-primary" />,
-      title: "Check Availability",
-      description: "Browse our selection and check availability for your desired dates.",
+      title: t("howItWorksStep1Title"),
+      description: t("howItWorksStep1Desc"),
     },
     {
       icon: <Motorcycle className="h-10 w-10 text-primary" />,
-      title: "Choose Your Ride",
-      description: "Select the perfect motorcycle that matches your style and needs.",
+      title: t("howItWorksStep2Title"),
+      description: t("howItWorksStep2Desc"),
     },
     {
       icon: <CreditCard className="h-10 w-10 text-primary" />,
-      title: "Book & Pay",
-      description: "Complete your booking with our secure payment system.",
+      title: t("howItWorksStep3Title"),
+      description: t("howItWorksStep3Desc"),
     },
     {
       icon: <CheckCircle className="h-10 w-10 text-primary" />,
-      title: "Enjoy Your Ride",
-      description: "Pick up your motorcycle and hit the road for an unforgettable experience.",
+      title: t("howItWorksStep4Title"),
+      description: t("howItWorksStep4Desc"),
     },
   ]
 
@@ -31,9 +34,9 @@ export default function HowItWorks() {
     <section className="py-20 bg-black">
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">{t("howItWorks")}</h2>
           <p className="text-gray-400">
-            Renting a motorcycle with us is quick and easy. Follow these simple steps to get on the road in no time.
+            {t("howItWorksDescription")}
           </p>
         </div>
 

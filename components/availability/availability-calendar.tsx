@@ -11,6 +11,7 @@ import type { MotorcycleUnit } from "@/lib/types"
 import AvailableMotorcycleCard from "@/components/availability/available-motorcycle-card"
 import { useSocket, SocketEvents } from "@/hooks/use-socket"
 import { toast } from "sonner"
+import { useTranslation } from "@/i18n/hooks"
 
 // Event type untuk realtime updates
 type AvailabilityEvent = {
@@ -22,6 +23,7 @@ type AvailabilityEvent = {
 }
 
 export default function AvailabilityCalendar() {
+  const { t } = useTranslation()
   const searchParams = useSearchParams()
   const [startDate, setStartDate] = useState<Date | null>(null)
   const [endDate, setEndDate] = useState<Date | null>(null)
@@ -60,8 +62,8 @@ export default function AvailabilityCalendar() {
     });
     
     // Tampilkan notifikasi
-    toast.info('Status Motor Diperbarui', {
-      description: `Motor ${data.plat_nomor || 'ID: ' + data.id} sekarang ${data.status}`,
+    toast.info(t("motorStatusUpdated"), {
+      description: `${t("motor")} ${data.plat_nomor || 'ID: ' + data.id} ${t("nowInStatus")} ${data.status}`,
     });
   }
   
@@ -87,8 +89,8 @@ export default function AvailabilityCalendar() {
     
     // Tampilkan notifikasi
     toast.info(
-      data.isAvailable ? 'Motor Tersedia' : 'Motor Tidak Tersedia', 
-      { description: data.reason || 'Status ketersediaan telah diperbarui' }
+      data.isAvailable ? t("motorAvailable") : t("motorUnavailable"), 
+      { description: data.reason || t("availabilityStatusUpdated") }
     );
   }
   
@@ -112,8 +114,8 @@ export default function AvailabilityCalendar() {
         );
         
         // Notify user
-        toast.warning('Booking Baru Dibuat', {
-          description: `Motor dengan ID ${data.motorId} baru saja dibooking untuk periode yang Anda cari.`,
+        toast.warning(t("newBookingCreated"), {
+          description: t("motorJustBookedForPeriod", { id: data.motorId }),
         });
       }
     }
@@ -167,7 +169,7 @@ export default function AvailabilityCalendar() {
       
       setAvailableMotorcycles(data)
     } catch (err: any) {
-      setError(err?.message || "Failed to fetch availability data")
+      setError(err?.message || t("failedToFetchAvailabilityData"))
       console.error(err)
     } finally {
       setIsLoading(false)
@@ -231,8 +233,8 @@ export default function AvailabilityCalendar() {
   if (!startDate || !endDate) {
     return (
       <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 md:p-8 text-center">
-        <h2 className="text-2xl font-semibold mb-4">Check Motorcycle Availability</h2>
-        <p className="text-gray-400 mb-6">Please select your rental dates above to see available motorcycles.</p>
+        <h2 className="text-2xl font-semibold mb-4">{t("checkMotorcycleAvailability")}</h2>
+        <p className="text-gray-400 mb-6">{t("pleaseSelectRentalDates")}</p>
         <div className="max-w-md mx-auto">
           <div className="bg-gray-800/50 rounded-lg p-8 flex items-center justify-center">
             <CalendarIcon className="h-16 w-16 text-gray-600" />
@@ -246,15 +248,15 @@ export default function AvailabilityCalendar() {
     <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 md:p-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
-          <h2 className="text-2xl font-semibold">Available Motorcycles</h2>
+          <h2 className="text-2xl font-semibold">{t("availableMotorcycles")}</h2>
           <p className="text-gray-400">
             {startDate && endDate ? (
               <>
                 {format(startDate, "MMM d, yyyy")} - {format(endDate, "MMM d, yyyy")} (
-                {Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))} days)
+                {Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))} {t("days")})
               </>
             ) : (
-              "Select dates to see availability"
+              t("selectDatesToSeeAvailability")
             )}
           </p>
         </div>
@@ -262,7 +264,7 @@ export default function AvailabilityCalendar() {
         <div className="flex gap-3 items-center">
           <div className="flex items-center">
             <span className={`h-2 w-2 rounded-full mr-1.5 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
-            <span className="text-xs text-gray-400">{isConnected ? 'Realtime aktif' : 'Offline'}</span>
+            <span className="text-xs text-gray-400">{isConnected ? t("realtimeActive") : t("offline")}</span>
           </div>
           
           <Tabs
@@ -271,8 +273,8 @@ export default function AvailabilityCalendar() {
             onValueChange={(value) => setView(value as "calendar" | "list")}
           >
             <TabsList className="grid w-full grid-cols-2 md:w-[200px]">
-              <TabsTrigger value="calendar">Calendar View</TabsTrigger>
-              <TabsTrigger value="list">List View</TabsTrigger>
+              <TabsTrigger value="calendar">{t("calendarView")}</TabsTrigger>
+              <TabsTrigger value="list">{t("listView")}</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -285,7 +287,7 @@ export default function AvailabilityCalendar() {
       ) : error ? (
         <div className="text-center py-10">
           <p className="text-red-500 mb-4">{error}</p>
-          <Button onClick={() => fetchAvailabilityData()}>Try Again</Button>
+          <Button onClick={() => fetchAvailabilityData()}>{t("tryAgain")}</Button>
         </div>
       ) : (
         <>
@@ -294,7 +296,7 @@ export default function AvailabilityCalendar() {
               <div className="min-w-[800px]">
                 <div className="grid grid-cols-[200px_1fr] gap-4">
                   <div className="bg-gray-800/50 rounded-lg p-4">
-                    <h3 className="font-semibold mb-2">Motorcycle</h3>
+                    <h3 className="font-semibold mb-2">{t("motorcycle")}</h3>
                   </div>
                   <div className="grid grid-cols-7 gap-1">
                     {days.map((day) => (
@@ -315,11 +317,11 @@ export default function AvailabilityCalendar() {
                     >
                       <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
                         <div className="font-medium">
-                          {motorcycle.jenis?.merk || 'Motor'} {motorcycle.jenis?.model || ''}
+                          {motorcycle.jenis?.merk || t("motor")} {motorcycle.jenis?.model || ''}
                         </div>
                         <div className="text-sm text-gray-400">{motorcycle.platNomor}</div>
                         <div className="text-sm text-gray-400">{motorcycle.warna}</div>
-                        <div className="font-medium text-primary mt-2">Rp {motorcycle.hargaSewa?.toLocaleString() || 0}/day</div>
+                        <div className="font-medium text-primary mt-2">Rp {motorcycle.hargaSewa?.toLocaleString() || 0}/{t("day")}</div>
                       </div>
                       <div className="grid grid-cols-7 gap-1">
                         {days.map((day) => (
@@ -327,7 +329,7 @@ export default function AvailabilityCalendar() {
                             key={`${motorcycle.id}-${day.toISOString()}`}
                             className="bg-green-900/20 border border-green-900/30 rounded-lg p-2 text-center"
                           >
-                            <div className="text-green-500 text-xs">Available</div>
+                            <div className="text-green-500 text-xs">{t("available")}</div>
                           </div>
                         ))}
                       </div>

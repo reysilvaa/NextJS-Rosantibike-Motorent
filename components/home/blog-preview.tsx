@@ -10,11 +10,13 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { fetchBlogPosts } from "@/lib/api"
 import type { BlogPost } from "@/lib/types"
+import { useTranslation } from "@/i18n/hooks"
 
 export default function BlogPreview() {
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { t } = useTranslation()
 
   useEffect(() => {
     const getBlogPosts = async () => {
@@ -24,14 +26,14 @@ export default function BlogPreview() {
         setPosts(data.slice(0, 3)) // Get first 3 posts
         setIsLoading(false)
       } catch (err) {
-        setError("Failed to load blog posts")
+        setError(t("loadingFailed"))
         setIsLoading(false)
         console.error(err)
       }
     }
 
     getBlogPosts()
-  }, [])
+  }, [t])
 
   // Placeholder data for when API fails or during development
   const placeholderPosts = [
@@ -80,14 +82,14 @@ export default function BlogPreview() {
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12">
           <div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Latest from Our Blog</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{t("latestBlogTitle")}</h2>
             <p className="text-gray-400 max-w-2xl">
-              Stay updated with the latest motorcycle news, riding tips, and adventure stories from our blog.
+              {t("latestBlogDescription")}
             </p>
           </div>
           <Link href="/blog" className="mt-4 md:mt-0">
             <Button variant="link" className="text-primary">
-              View all articles
+              {t("viewAllArticles")}
               <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
           </Link>
@@ -109,7 +111,7 @@ export default function BlogPreview() {
         ) : error ? (
           <div className="text-center py-10">
             <p className="text-red-500 mb-4">{error}</p>
-            <Button onClick={() => window.location.reload()}>Try Again</Button>
+            <Button onClick={() => window.location.reload()}>{t("tryAgain")}</Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

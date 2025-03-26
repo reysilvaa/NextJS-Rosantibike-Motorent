@@ -9,8 +9,10 @@ import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
+import { useTranslation } from "@/i18n/hooks"
 
 export default function AvailabilityPage() {
+  const { t } = useTranslation()
   const searchParams = useSearchParams()
   
   // Extract search params
@@ -41,7 +43,7 @@ export default function AvailabilityPage() {
   return (
     <div className="container mx-auto px-4 py-20">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-4xl font-bold mb-6">Motorcycle Availability</h1>
+        <h1 className="text-4xl font-bold mb-6">{t("motorcycleAvailability")}</h1>
         
         <div className="mb-8">
           <AvailabilitySearch />
@@ -52,10 +54,10 @@ export default function AvailabilityPage() {
             <Separator className="my-8" />
             
             <div className="mb-6">
-              <h2 className="text-2xl font-semibold mb-1">Available Motorcycles</h2>
+              <h2 className="text-2xl font-semibold mb-1">{t("availableMotorcycles")}</h2>
               <p className="text-gray-400">
                 {startDate} - {endDate}
-                {jenisMotorId && " • Filtered by motorcycle type"}
+                {jenisMotorId && ` • ${t("filteredByMotorcycleType")}`}
               </p>
             </div>
             
@@ -77,7 +79,7 @@ export default function AvailabilityPage() {
             ) : error ? (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
+                <AlertTitle>{t("error")}</AlertTitle>
                 <AlertDescription>
                   {error}
                 </AlertDescription>

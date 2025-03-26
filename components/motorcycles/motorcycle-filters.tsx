@@ -9,8 +9,10 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { useTranslation } from "@/i18n/hooks"
 
 export default function MotorcycleFilters() {
+  const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const [ccRange, setCcRange] = useState([0, 1500])
   const [yearRange, setYearRange] = useState([2018, 2023])
@@ -41,7 +43,7 @@ export default function MotorcycleFilters() {
       <div className="lg:hidden mb-6">
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
           <div className="flex items-center gap-2 mb-4">
-            <Input placeholder="Search motorcycles..." className="bg-gray-900/50 border-gray-800" />
+            <Input placeholder={t("searchMotorcycles")} className="bg-gray-900/50 border-gray-800" />
             <CollapsibleTrigger asChild>
               <Button variant="outline" size="icon">
                 <Filter className="h-4 w-4" />
@@ -52,7 +54,7 @@ export default function MotorcycleFilters() {
           <CollapsibleContent>
             <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-4 space-y-6">
               <div>
-                <h3 className="font-medium mb-3">Engine Size (CC)</h3>
+                <h3 className="font-medium mb-3">{t("engineSizeCC")}</h3>
                 <Slider
                   defaultValue={ccRange}
                   min={0}
@@ -68,7 +70,7 @@ export default function MotorcycleFilters() {
               </div>
 
               <div>
-                <h3 className="font-medium mb-3">Year</h3>
+                <h3 className="font-medium mb-3">{t("year")}</h3>
                 <Slider
                   defaultValue={yearRange}
                   min={2010}
@@ -85,7 +87,7 @@ export default function MotorcycleFilters() {
 
               <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="brands" className="border-gray-800">
-                  <AccordionTrigger className="py-2">Brands</AccordionTrigger>
+                  <AccordionTrigger className="py-2">{t("brands")}</AccordionTrigger>
                   <AccordionContent>
                     <div className="space-y-2">
                       {brands.map((brand) => (
@@ -101,7 +103,7 @@ export default function MotorcycleFilters() {
                 </AccordionItem>
 
                 <AccordionItem value="categories" className="border-gray-800">
-                  <AccordionTrigger className="py-2">Categories</AccordionTrigger>
+                  <AccordionTrigger className="py-2">{t("categories")}</AccordionTrigger>
                   <AccordionContent>
                     <div className="space-y-2">
                       {categories.map((category) => (
@@ -119,9 +121,9 @@ export default function MotorcycleFilters() {
 
               <div className="pt-2 flex gap-2">
                 <Button variant="outline" className="flex-1">
-                  Reset
+                  {t("reset")}
                 </Button>
-                <Button className="flex-1">Apply Filters</Button>
+                <Button className="flex-1">{t("applyFilters")}</Button>
               </div>
             </div>
           </CollapsibleContent>
@@ -132,15 +134,15 @@ export default function MotorcycleFilters() {
       <div className="hidden lg:block sticky top-24">
         <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-6 space-y-6">
           <div>
-            <h3 className="font-medium mb-3">Search</h3>
+            <h3 className="font-medium mb-3">{t("search")}</h3>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-              <Input placeholder="Search motorcycles..." className="pl-9 bg-gray-800/50 border-gray-700" />
+              <Input placeholder={t("searchMotorcycles")} className="pl-9 bg-gray-800/50 border-gray-700" />
             </div>
           </div>
 
           <div>
-            <h3 className="font-medium mb-3">Engine Size (CC)</h3>
+            <h3 className="font-medium mb-3">{t("engineSizeCC")}</h3>
             <Slider defaultValue={ccRange} min={0} max={1500} step={50} onValueChange={setCcRange} className="mb-2" />
             <div className="flex justify-between text-sm text-gray-400">
               <span>{ccRange[0]} CC</span>
@@ -149,7 +151,7 @@ export default function MotorcycleFilters() {
           </div>
 
           <div>
-            <h3 className="font-medium mb-3">Year</h3>
+            <h3 className="font-medium mb-3">{t("year")}</h3>
             <Slider
               defaultValue={yearRange}
               min={2010}
@@ -165,7 +167,7 @@ export default function MotorcycleFilters() {
           </div>
 
           <div>
-            <h3 className="font-medium mb-3">Brands</h3>
+            <h3 className="font-medium mb-3">{t("brands")}</h3>
             <div className="space-y-2">
               {brands.map((brand) => (
                 <div key={brand.id} className="flex items-center space-x-2">
@@ -179,7 +181,7 @@ export default function MotorcycleFilters() {
           </div>
 
           <div>
-            <h3 className="font-medium mb-3">Categories</h3>
+            <h3 className="font-medium mb-3">{t("categories")}</h3>
             <div className="space-y-2">
               {categories.map((category) => (
                 <div key={category.id} className="flex items-center space-x-2">
@@ -194,9 +196,9 @@ export default function MotorcycleFilters() {
 
           <div className="pt-2 flex gap-2">
             <Button variant="outline" className="flex-1">
-              Reset
+              {t("reset")}
             </Button>
-            <Button className="flex-1">Apply Filters</Button>
+            <Button className="flex-1">{t("applyFilters")}</Button>
           </div>
         </div>
       </div>

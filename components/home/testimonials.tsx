@@ -5,9 +5,11 @@ import Image from "next/image"
 import { ChevronLeft, ChevronRight, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { useTranslation } from "@/i18n/hooks"
 
 export default function Testimonials() {
   const [activeIndex, setActiveIndex] = useState(0)
+  const { t } = useTranslation()
 
   const testimonials = [
     {
@@ -16,7 +18,7 @@ export default function Testimonials() {
       location: "California",
       image: "/placeholder.svg?height=200&width=200",
       rating: 5,
-      text: "The motorcycle was in perfect condition and the rental process was incredibly smooth. I had an amazing weekend exploring the coastal roads. Will definitely rent again!",
+      text: t("testimonial1"),
     },
     {
       id: 2,
@@ -24,7 +26,7 @@ export default function Testimonials() {
       location: "New York",
       image: "/placeholder.svg?height=200&width=200",
       rating: 5,
-      text: "Exceptional service from start to finish. The staff was knowledgeable and helped me choose the perfect bike for my skill level. The online booking system was also very convenient.",
+      text: t("testimonial2"),
     },
     {
       id: 3,
@@ -32,7 +34,7 @@ export default function Testimonials() {
       location: "Texas",
       image: "/placeholder.svg?height=200&width=200",
       rating: 4,
-      text: "Great experience overall. The motorcycle was well-maintained and performed flawlessly during my trip. The only minor issue was a slight delay during pickup, but the staff was apologetic and professional.",
+      text: t("testimonial3"),
     },
     {
       id: 4,
@@ -40,7 +42,7 @@ export default function Testimonials() {
       location: "Florida",
       image: "/placeholder.svg?height=200&width=200",
       rating: 5,
-      text: "As a first-time renter, I was a bit nervous, but the team made me feel comfortable and provided all the information I needed. The bike was amazing and made my vacation unforgettable!",
+      text: t("testimonial4"),
     },
   ]
 
@@ -56,9 +58,9 @@ export default function Testimonials() {
     <section className="py-20 bg-gradient-to-b from-gray-900 to-black">
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">What Our Customers Say</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">{t("testimonialsTitle")}</h2>
           <p className="text-gray-400">
-            Don't just take our word for it. Here's what our customers have to say about their rental experiences.
+            {t("testimonialsDescription")}
           </p>
         </div>
 
@@ -113,7 +115,7 @@ export default function Testimonials() {
             onClick={prevTestimonial}
           >
             <ChevronLeft className="h-4 w-4" />
-            <span className="sr-only">Previous testimonial</span>
+            <span className="sr-only">{t("previousTestimonial")}</span>
           </Button>
 
           <Button
@@ -123,7 +125,7 @@ export default function Testimonials() {
             onClick={nextTestimonial}
           >
             <ChevronRight className="h-4 w-4" />
-            <span className="sr-only">Next testimonial</span>
+            <span className="sr-only">{t("nextTestimonial")}</span>
           </Button>
 
           <div className="flex justify-center mt-6 gap-2">
@@ -134,7 +136,7 @@ export default function Testimonials() {
                 className={`w-2 h-2 rounded-full transition-all ${
                   index === activeIndex ? "bg-primary w-6" : "bg-gray-600"
                 }`}
-                aria-label={`Go to testimonial ${index + 1}`}
+                aria-label={t("goToTestimonial", { number: index + 1 })}
               />
             ))}
           </div>

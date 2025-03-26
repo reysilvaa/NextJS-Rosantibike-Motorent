@@ -23,11 +23,13 @@ import { motion } from "framer-motion"
 import type { MotorcycleType, MotorcycleUnit } from "@/lib/types"
 import { useSocket, SocketEvents } from "@/hooks/use-socket"
 import { toast } from "@/components/ui/use-toast"
+import { useTranslation } from "@/i18n/hooks"
 
 // Placeholder statis yang dijamin ada di folder public
 const MOTORCYCLE_PLACEHOLDER = "/motorcycle-placeholder.svg"
 
 export default function MotorcycleDetail({ id }: { id: string }) {
+  const { t } = useTranslation()
   const router = useRouter()
   const [motorcycle, setMotorcycle] = useState<MotorcycleType | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -61,13 +63,13 @@ export default function MotorcycleDetail({ id }: { id: string }) {
       setUnits(prevUnits => prevUnits.map(unit => {
         if (unit.id === data.unitId) {
           // Toast notification untuk update status
-          const statusText = data.status === "TERSEDIA" ? "tersedia" : 
-                            data.status === "DISEWA" ? "sedang disewa" : 
-                            data.status === "SERVIS" ? "dalam servis" : "tidak tersedia";
+          const statusText = data.status === "TERSEDIA" ? t("available").toLowerCase() : 
+                            data.status === "DISEWA" ? t("rented").toLowerCase() : 
+                            data.status === "SERVIS" ? t("service").toLowerCase() : t("unavailable").toLowerCase();
           
           toast({
-            title: "Status Motor Berubah",
-            description: `Unit ${unit.platNomor} sekarang ${statusText}`,
+            title: t("motorcycleStatusChanged"),
+            description: `${t("unit")} ${unit.platNomor} ${t("isNow")} ${statusText}`,
             variant: data.status === "TERSEDIA" ? "default" : "destructive"
           })
           
@@ -92,8 +94,8 @@ export default function MotorcycleDetail({ id }: { id: string }) {
       ));
       
       toast({
-        title: "Unit Motor Diperbarui",
-        description: `Informasi untuk ${updatedUnit.platNomor} telah diperbarui`,
+        title: t("motorcycleUnitUpdated"),
+        description: `${t("infoFor")} ${updatedUnit.platNomor} ${t("hasBeenUpdated")}`,
       });
     } else {
       // Tambahkan unit baru jika jenisnya cocok dengan yang sedang dilihat
@@ -101,8 +103,8 @@ export default function MotorcycleDetail({ id }: { id: string }) {
         setUnits(prevUnits => [...prevUnits, updatedUnit]);
         
         toast({
-          title: "Unit Motor Baru",
-          description: `Unit baru ${updatedUnit.platNomor} telah ditambahkan`,
+          title: t("newMotorcycleUnit"),
+          description: `${t("newUnit")} ${updatedUnit.platNomor} ${t("hasBeenAdded")}`,
           variant: "default"
         });
       }
@@ -121,8 +123,8 @@ export default function MotorcycleDetail({ id }: { id: string }) {
       setUnits(prevUnits => prevUnits.filter(unit => unit.id !== deletedUnit.id));
       
       toast({
-        title: "Unit Motor Dihapus",
-        description: `Unit ${unitToDelete.platNomor || deletedUnit.platNomor || 'motor'} telah dihapus dari sistem`,
+        title: t("motorcycleUnitDeleted"),
+        description: `${t("unit")} ${unitToDelete.platNomor || deletedUnit.platNomor || t("motorcycle")} ${t("hasBeenRemovedFromSystem")}`,
         variant: "destructive"
       });
     }
@@ -151,18 +153,18 @@ export default function MotorcycleDetail({ id }: { id: string }) {
           setError(null)
         } else {
           // Handle kasus data tidak ada
-          setError("Data motor tidak ditemukan")
+          setError(t("motorcycleDataNotFound"))
         }
       } catch (err: any) {
         console.error("Error fetching motorcycle details:", err)
-        setError(err.message || "Gagal memuat detail motor")
+        setError(err.message || t("failedToLoadMotorcycleDetails"))
       } finally {
         setIsLoading(false)
       }
     }
 
     fetchMotorcycleDetail()
-  }, [id])
+  }, [id, t])
 
   useEffect(() => {
     if (startDate) {
@@ -184,8 +186,8 @@ export default function MotorcycleDetail({ id }: { id: string }) {
   const handleCheckAvailability = async () => {
     if (!startDate || !endDate) {
       toast({
-        title: "Error",
-        description: "Harap pilih tanggal mulai dan tanggal selesai",
+        title: t("error"),
+        description: t("dateRequired"),
         variant: "destructive"
       });
       return;
@@ -194,8 +196,8 @@ export default function MotorcycleDetail({ id }: { id: string }) {
     // Validasi tanggal mulai tidak boleh lebih besar dari tanggal selesai
     if (startDate > endDate) {
       toast({
-        title: "Error Tanggal",
-        description: "Tanggal mulai tidak boleh lebih besar dari tanggal selesai",
+        title: t("dateError"),
+        description: t("invalidDateRange"),
         variant: "destructive"
       });
       return;
@@ -236,8 +238,8 @@ export default function MotorcycleDetail({ id }: { id: string }) {
           console.warn("Tidak menemukan array units dalam respons:", response);
           setAvailableUnits([]);
           toast({
-            title: "Tidak Tersedia",
-            description: "Tidak ada unit yang tersedia untuk tanggal yang dipilih",
+            title: t("unavailable"),
+            description: t("noUnitsAvailableForSelectedDates"),
             variant: "destructive"
           });
           setShowAvailability(true);
@@ -247,90 +249,31 @@ export default function MotorcycleDetail({ id }: { id: string }) {
         console.warn("Format respons API tidak dikenali:", response);
         setAvailableUnits([]);
         toast({
-          title: "Tidak Tersedia",
-          description: "Tidak ada unit yang tersedia untuk tanggal yang dipilih",
+          title: t("unavailable"),
+          description: t("noUnitsAvailableForSelectedDates"),
           variant: "destructive"
         });
         setShowAvailability(true);
         return;
       }
       
-      // Filter unit yang tersedia untuk jenis motor ini
-      const availableUnitsForThisType = availableMotorcycles.filter(unit => 
-        unit.status === "TERSEDIA" && 
-        ((unit.jenis && unit.jenis.id === id) || 
-         (unit.jenisMotor && unit.jenisMotor.id === id))
-      );
-      
-      // Jika tidak ada unit tersedia, tampilkan pesan
-      if (availableUnitsForThisType.length === 0) {
-        setAvailableUnits([]);
-        toast({
-          title: "Tidak Tersedia",
-          description: "Tidak ada unit yang tersedia untuk tanggal yang dipilih",
-          variant: "destructive"
-        });
-        setShowAvailability(true);
-        return;
-      }
-      
-      // Simpan unit yang tersedia
-      setAvailableUnits(availableUnitsForThisType);
-      
-      // Buat peta ID unit yang tersedia
-      const availableUnitIds = new Set(
-        availableUnitsForThisType.map(unit => unit.unitId || unit.id)
-      );
-      
-      // Update units dengan status ketersediaan yang benar
-      setUnits(prevUnits => {
-        return prevUnits.map(unit => {
-          // Cari unit yang cocok dalam respons API berdasarkan ID
-          const apiUnit = availableMotorcycles.find(u => 
-            (u.unitId && u.unitId === unit.id) || u.id === unit.id
-          );
-          
-          if (apiUnit) {
-            // Gunakan status langsung dari API
-            return {
-              ...unit,
-              status: apiUnit.status
-            };
-          } else if (availableUnitIds.has(unit.id)) {
-            // Unit ada di daftar tersedia
-            return {
-              ...unit,
-              status: "TERSEDIA"
-            };
-          } else {
-            // Unit tidak ditemukan dalam respons, anggap tidak tersedia
-            return {
-              ...unit,
-              status: "DISEWA"
-            };
-          }
-        });
-      });
-      
-      // Tampilkan notifikasi sukses
-      toast({
-        title: "Ketersediaan Diperiksa",
-        description: `Ditemukan ${availableUnitsForThisType.length} unit tersedia untuk tanggal yang dipilih`,
-        variant: availableUnitsForThisType.length > 0 ? "default" : "destructive"
-      });
-      
-      // Tampilkan bagian ketersediaan
+      // Update state dengan unit yang tersedia
+      setAvailableUnits(availableMotorcycles);
       setShowAvailability(true);
       
-    } catch (err: any) {
-      console.error("Error checking availability:", err);
-      
-      // Menampilkan pesan error yang lebih informatif
-      const errorMessage = err.message || "Terjadi kesalahan saat memeriksa ketersediaan";
-      
+      // Tampilkan pesan jika tidak ada motor yang tersedia
+      if (availableMotorcycles.length === 0) {
+        toast({
+          title: t("unavailable"),
+          description: t("noUnitsAvailableForSelectedDates"),
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Error checking availability:", error);
       toast({
-        title: "Error",
-        description: errorMessage,
+        title: t("error"),
+        description: t("failedToCheckAvailability"),
         variant: "destructive"
       });
     } finally {

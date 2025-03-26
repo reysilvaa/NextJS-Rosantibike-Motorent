@@ -9,11 +9,14 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/hooks/use-auth"
 import { ThemeToggle } from "./theme-toggle"
+import LanguageSwitcher from "./language-switcher"
+import { useTranslation } from "@/i18n/hooks"
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const pathname = usePathname()
   const { isAuthenticated, logout } = useAuth()
+  const { t } = useTranslation()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,11 +28,11 @@ export default function Navbar() {
   }, [])
 
   const navLinks = [
-    { href: "/", label: "Home" },
-    { href: "/motorcycles", label: "Motorcycles" },
-    { href: "/availability", label: "Check Availability" },
-    { href: "/blog", label: "Blog" },
-    { href: "/contact", label: "Contact" },
+    { href: "/", label: t("home") },
+    { href: "/motorcycles", label: t("motorcycles") },
+    { href: "/availability", label: t("availability") },
+    { href: "/blog", label: t("blog") },
+    { href: "/contact", label: t("contact") },
   ]
 
   return (
@@ -63,23 +66,24 @@ export default function Navbar() {
         </nav>
 
         <div className="hidden md:flex items-center space-x-4">
+          <LanguageSwitcher />
           <ThemeToggle />
           {isAuthenticated ? (
             <>
               <Link href="/admin">
                 <Button variant="ghost" size="sm">
                   <User className="h-4 w-4 mr-2" />
-                  Dashboard
+                  {t("dashboard")}
                 </Button>
               </Link>
               <Button variant="destructive" size="sm" onClick={logout}>
-                Logout
+                {t("logout")}
               </Button>
             </>
           ) : (
             <Link href="/login">
               <Button variant="default" size="sm">
-                Login
+                {t("login")}
               </Button>
             </Link>
           )}
@@ -90,7 +94,7 @@ export default function Navbar() {
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="md:hidden">
               <Menu className="h-6 w-6" />
-              <span className="sr-only">Toggle menu</span>
+              <span className="sr-only">{t("mobileMenuTitle")}</span>
             </Button>
           </SheetTrigger>
           <SheetContent side="right" className="border-l border-gray-800">
@@ -108,24 +112,29 @@ export default function Navbar() {
                 </Link>
               ))}
 
-              <div className="flex items-center py-4">
-                <span className="text-sm font-medium mr-2">Tema:</span>
+              <div className="flex items-center justify-between py-4">
+                <span className="text-sm font-medium mr-2">{t("theme")}:</span>
                 <ThemeToggle />
+              </div>
+              
+              <div className="flex items-center justify-between py-2">
+                <span className="text-sm font-medium mr-2">{t("language")}:</span>
+                <LanguageSwitcher />
               </div>
 
               {isAuthenticated ? (
                 <>
                   <Link href="/admin" className="text-lg font-medium text-primary">
-                    Dashboard
+                    {t("dashboard")}
                   </Link>
                   <Button variant="destructive" onClick={logout}>
-                    Logout
+                    {t("logout")}
                   </Button>
                 </>
               ) : (
                 <Link href="/login">
                   <Button className="w-full" variant="default">
-                    Login
+                    {t("login")}
                   </Button>
                 </Link>
               )}

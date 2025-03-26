@@ -10,11 +10,13 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { fetchMotorcycleTypes } from "@/lib/api"
 import type { MotorcycleType } from "@/lib/types"
+import { useTranslation } from "@/i18n/hooks"
 
 export default function FeaturedMotorcycles() {
   const [motorcycles, setMotorcycles] = useState<MotorcycleType[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { t } = useTranslation()
 
   useEffect(() => {
     const getMotorcycles = async () => {
@@ -36,13 +38,13 @@ export default function FeaturedMotorcycles() {
         setIsLoading(false)
       } catch (err) {
         console.error("Error saat fetching data motor:", err)
-        setError("Failed to load motorcycles")
+        setError(t("loadingFailed"))
         setIsLoading(false)
       }
     }
 
     getMotorcycles()
-  }, [])
+  }, [t])
 
   // Placeholder data for when API fails or during development
   // const placeholderMotorcycles = [
@@ -91,15 +93,14 @@ export default function FeaturedMotorcycles() {
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12">
           <div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Featured Motorcycles</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{t("featuredMotorcycles")}</h2>
             <p className="text-gray-400 max-w-2xl">
-              Discover our premium selection of motorcycles available for rent. From sporty rides to comfortable
-              cruisers, we have the perfect bike for your adventure.
+              {t("footerDescription")}
             </p>
           </div>
           <Link href="/motorcycles" className="mt-4 md:mt-0">
             <Button variant="link" className="text-primary">
-              View all motorcycles
+              {t("viewAll")}
               <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
           </Link>
@@ -121,7 +122,7 @@ export default function FeaturedMotorcycles() {
         ) : error ? (
           <div className="text-center py-10">
             <p className="text-red-500 mb-4">{error}</p>
-            <Button onClick={() => window.location.reload()}>Try Again</Button>
+            <Button onClick={() => window.location.reload()}>{t("tryAgain")}</Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -147,7 +148,7 @@ export default function FeaturedMotorcycles() {
                       <h3 className="text-xl font-bold mb-1">
                         {motorcycle.merk} {motorcycle.model}
                       </h3>
-                      <p className="text-gray-400 text-sm mb-3">Year: {motorcycle.tahun}</p>
+                      <p className="text-gray-400 text-sm mb-3">{t("year")}: {motorcycle.tahun}</p>
                       <p className="text-gray-300 line-clamp-3">{motorcycle.deskripsi}</p>
                     </CardContent>
                   </Card>
