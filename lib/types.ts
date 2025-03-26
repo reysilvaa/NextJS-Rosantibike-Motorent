@@ -53,7 +53,7 @@ export interface MotorcycleUnit {
     merk: string
     model: string
     cc?: number
-    gambar?: string
+    gambar?: string | null
   }
   createdAt?: string
   updatedAt?: string
@@ -61,6 +61,7 @@ export interface MotorcycleUnit {
     date: string
     isAvailable: boolean
   }[]
+  jenisId?: string
 }
 
 // Transaction Types
@@ -141,11 +142,29 @@ export interface TransactionFormData {
   unitMotorId?: string
 }
 
+// Tipe untuk respons endpoint availability asli dari backend
+export interface BackendUnitAvailability {
+  unitId: string
+  platNomor: string
+  jenisMotor: {
+    id: string
+    merk: string
+    model: string
+    cc: number
+  }
+  hargaSewa: number | string
+  status: "TERSEDIA" | "DISEWA" | "SERVIS" | "OVERDUE"
+  availability: {
+    date: string
+    isAvailable: boolean
+  }[]
+}
+
 // Response untuk availability check
 export interface AvailabilityResponse {
   startDate: string
   endDate: string
   totalUnits: number
-  units: MotorcycleUnit[]
+  units: BackendUnitAvailability[]
 }
 

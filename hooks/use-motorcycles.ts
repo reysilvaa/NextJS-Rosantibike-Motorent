@@ -68,7 +68,10 @@ export function useAvailability(params: AvailabilitySearchParams | null) {
   const THROTTLE_DELAY = 1000; // 1 detik delay antara request
 
   const fetchData = useCallback(async () => {
-    if (!params) return;
+    if (!params) {
+      console.log('No params provided, skipping availability check');
+      return;
+    }
     
     // Cek jika belum cukup waktu sejak request terakhir
     const now = Date.now();
@@ -83,12 +86,45 @@ export function useAvailability(params: AvailabilitySearchParams | null) {
       // Update timestamp request
       setLastRequestTime(now);
       
+      // Panggil API
       const result = await withLoading(checkAvailability(params));
       
+      console.log('Availability result returned:', result);
+      
+      // Handle berbagai format respons
       if (Array.isArray(result)) {
+        console.log(`Received array of ${result.length} motorcycles from API`);
+        
+        // Log detail untuk debugging
+        if (result.length > 0) {
+          console.log('Sample motor from availability:', result[0]);
+        } else {
+          console.log('No motorcycles returned from availability API');
+        }
+        
         setData(result);
+      } else if (result && typeof result === 'object') {
+        console.log('Received object result instead of array:', result);
+        
+        // Coba ekstrak data dari berbagai format yang mungkin
+        // Cast result sebagai any untuk menghindari error typing
+        const responseObj = result as any;
+        
+        if (responseObj.data && Array.isArray(responseObj.data)) {
+          console.log(`Found ${responseObj.data.length} motorcycles in data property`);
+          setData(responseObj.data);
+        } else if (responseObj.units && Array.isArray(responseObj.units)) {
+          console.log(`Found ${responseObj.units.length} motorcycles in units property`);
+          setData(responseObj.units);
+        } else if (responseObj.motorcycles && Array.isArray(responseObj.motorcycles)) {
+          console.log(`Found ${responseObj.motorcycles.length} motorcycles in motorcycles property`);
+          setData(responseObj.motorcycles);
+        } else {
+          console.warn('Could not find valid motorcycle array in response');
+          setData([]);
+        }
       } else {
-        console.warn('API returned non-array result:', result);
+        console.warn('API returned unknown result type:', result);
         setData([]);
       }
       
@@ -106,6 +142,7 @@ export function useAvailability(params: AvailabilitySearchParams | null) {
 
   useEffect(() => {
     if (params) {
+      console.log('Params changed, preparing to fetch availability data');
       // Gunakan timeout untuk debounce request
       const timer = setTimeout(() => {
         fetchData();
@@ -113,6 +150,7 @@ export function useAvailability(params: AvailabilitySearchParams | null) {
       
       return () => clearTimeout(timer);
     } else {
+      console.log('No params available, clearing data');
       setData([]);
     }
   }, [params, fetchData]);
@@ -124,6 +162,7 @@ export function useAvailability(params: AvailabilitySearchParams | null) {
       console.log('Refetch ditunda karena terlalu cepat setelah request sebelumnya');
       setTimeout(fetchData, THROTTLE_DELAY);
     } else {
+      console.log('Manually refetching availability data');
       fetchData();
     }
   }, [fetchData, lastRequestTime]);

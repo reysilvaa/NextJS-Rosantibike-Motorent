@@ -25,7 +25,7 @@ export default function BookingPage() {
   const [endDate, setEndDate] = useState<Date | null>(null);
 
   useEffect(() => {
-    if (!unitId || !startDateParam || !endDateParam) {
+    if (!unitId || !startDateParam || !endDateParam || unitId === 'undefined') {
       toast({
         title: "Parameter tidak lengkap",
         description: "Silakan pilih motor dari halaman ketersediaan",
@@ -41,6 +41,9 @@ export default function BookingPage() {
     const loadMotorcycle = async () => {
       try {
         setIsLoading(true);
+        if (unitId === 'undefined' || !unitId.trim()) {
+          throw new Error("ID motor tidak valid");
+        }
         console.log("Mencoba mengambil data motor dengan ID:", unitId);
         const data = await fetchMotorcycleUnitById(unitId);
         console.log("Data motor berhasil didapatkan:", data);

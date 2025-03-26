@@ -146,6 +146,19 @@ export async function fetchMotorcycleUnits(filter?: Record<string, any>): Promis
 
 export async function fetchMotorcycleUnitById(id: string): Promise<MotorcycleUnit> {
   try {
+    // Validasi ID sebelum melakukan request
+    if (!id || id === 'undefined' || id === 'null' || id.trim() === '') {
+      console.error('Invalid motorcycle ID:', id);
+      throw new Error('ID motor tidak valid');
+    }
+    
+    // Validasi format UUID
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(id)) {
+      console.error('ID motor tidak dalam format UUID yang valid:', id);
+      throw new Error('Format ID motor tidak valid');
+    }
+
     console.log(`Fetching motorcycle unit with ID: ${id}`);
     const response = await apiRequest<ApiResponse<MotorcycleUnit>>(`${API_CONFIG.ENDPOINTS.UNIT_MOTOR}/${id}`);
     
@@ -210,26 +223,101 @@ export async function checkAvailability(params: AvailabilitySearchParams): Promi
       return cachedData.data;
     }
     
-    console.log(`Making request to: ${endpoint}`);
+    // Dapatkan data dari endpoint availability
+    try {
+      console.log(`Making request to: ${endpoint}`);
+      const availabilityResponse = await apiRequest<AvailabilityResponse>(endpoint);
+      console.log("Availability API response:", availabilityResponse);
+      
+      // Sesuai dengan format backend, response harus memiliki property 'units'
+      if (availabilityResponse && typeof availabilityResponse === 'object' && 'units' in availabilityResponse) {
+        // Extract data dari response format backend
+        const units = availabilityResponse.units;
+        
+        // Transformasi ke format yang diharapkan frontend, dengan memastikan
+        // bahwa motor dikembalikan dalam format yang konsisten
+        const result: MotorcycleUnit[] = units
+          .filter(unit => unit.status === "TERSEDIA")
+          .map(unit => {
+            // Pastikan semua field yang dibutuhkan ada
+            return {
+              id: unit.unitId,
+              platNomor: unit.platNomor,
+              status: unit.status,
+              hargaSewa: typeof unit.hargaSewa === 'string' ? parseInt(unit.hargaSewa) : unit.hargaSewa,
+              jenis: unit.jenisMotor ? {
+                id: unit.jenisMotor.id,
+                merk: unit.jenisMotor.merk || "",
+                model: unit.jenisMotor.model || "",
+                cc: unit.jenisMotor.cc || 0,
+                gambar: null
+              } : {
+                id: "", 
+                merk: "Motor", 
+                model: unit.platNomor,
+                cc: 0,
+                gambar: null
+              },
+              jenisId: unit.jenisMotor?.id || "",
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            };
+          });
+        
+        // Simpan ke cache
+        availabilityCache[cacheKey] = {
+          data: result,
+          timestamp: now
+        };
+        
+        console.log(`Returning ${result.length} transformed units from availability endpoint`);
+        return result;
+      } else if (Array.isArray(availabilityResponse)) {
+        // Jika response adalah array langsung
+        const result = (availabilityResponse as MotorcycleUnit[]).filter(unit => unit.status === "TERSEDIA");
+        
+        // Simpan ke cache
+        availabilityCache[cacheKey] = {
+          data: result,
+          timestamp: now
+        };
+        
+        console.log(`Returning ${result.length} units as direct array from availability endpoint`);
+        return result;
+      }
+      
+      // Jika format tidak sesuai, gunakan endpoint alternatif
+      console.warn("Invalid response format from availability endpoint, using alternative endpoint");
+    } catch (error) {
+      console.error("Error fetching from availability endpoint:", error);
+    }
     
-    const response = await apiRequest<AvailabilityResponse>(endpoint);
+    // Gunakan endpoint unit-motor biasa sebagai fallback
+    console.log("Using unit-motor endpoint as fallback");
+    const alternativeResponse = await apiRequest<ApiResponse<MotorcycleUnit[]> | MotorcycleUnit[]>(API_CONFIG.ENDPOINTS.UNIT_MOTOR);
     
-    // Log respons untuk debug
-    console.log("Availability API response:", response);
+    console.log("Alternative endpoint response:", alternativeResponse);
     
     let result: MotorcycleUnit[] = [];
     
-    // Validasi hasil API
-    if (response && response.units && Array.isArray(response.units)) {
-      result = response.units;
-      
-      // Simpan hasil ke cache
+    if (Array.isArray(alternativeResponse)) {
+      // Filter hanya motor yang tersedia
+      result = alternativeResponse.filter(unit => unit.status === "TERSEDIA");
+    } else if (alternativeResponse && typeof alternativeResponse === 'object') {
+      // Cast ke tipe yang sesuai
+      const typedResponse = alternativeResponse as unknown as { data?: MotorcycleUnit[] };
+      if (typedResponse.data && Array.isArray(typedResponse.data)) {
+        result = typedResponse.data.filter((unit: MotorcycleUnit) => unit.status === "TERSEDIA");
+      }
+    }
+    
+    // Simpan hasil ke cache
+    if (result.length > 0) {
+      console.log(`Caching ${result.length} motorcycles from alternative endpoint`);
       availabilityCache[cacheKey] = {
         data: result,
         timestamp: now
       };
-    } else {
-      console.warn("Invalid API response format:", response);
     }
     
     return result;

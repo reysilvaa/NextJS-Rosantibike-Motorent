@@ -19,19 +19,25 @@ export default function BookingSuccessPage() {
   const startDate = searchParams.get("startDate") || "Tanggal pemesanan";
 
   useEffect(() => {
-    const timer = setInterval(() => {
+    const timer = setTimeout(() => {
+      router.push("/");
+    }, countdown * 1000);
+
+    const countdownInterval = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
-          clearInterval(timer);
-          router.push("/");
+          clearInterval(countdownInterval);
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
 
-    return () => clearInterval(timer);
-  }, [router]);
+    return () => {
+      clearTimeout(timer);
+      clearInterval(countdownInterval);
+    };
+  }, [router, countdown]);
 
   return (
     <div className="container mx-auto py-12 px-4">

@@ -11,6 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 import { useTranslation } from "@/i18n/hooks"
 import { PageHeader } from "@/components/ui/page-header"
+import { useEffect } from "react"
 
 export default function AvailabilityPage() {
   const { t } = useTranslation()
@@ -41,13 +42,25 @@ export default function AvailabilityPage() {
   
   const { data: availableMotorcycles, isLoading, error } = useAvailability(searchParamsObj)
 
+  // Log untuk debugging
+  useEffect(() => {
+    if (availableMotorcycles) {
+      console.log(`Rendered ${availableMotorcycles.length} motorcycles in availability page`);
+      if (availableMotorcycles.length > 0) {
+        console.log('Sample motorcycle:', availableMotorcycles[0]);
+      }
+    } else {
+      console.log('No motorcycles data available');
+    }
+  }, [availableMotorcycles]);
+
   return (
     <div className="container mx-auto px-4 py-20">
       <div className="max-w-6xl mx-auto">
         <div className="mb-10">
-          <h1 className="text-4xl font-bold mb-6">Riwayat Booking</h1>
+          <h1 className="text-4xl font-bold mb-6">Ketersediaan Motor</h1>
           <p className="text-gray-400 max-w-3xl">
-            Lacak dan lihat semua riwayat pemesanan motor Anda dengan mudah. Masukkan nomor telepon yang digunakan saat pemesanan.
+            Cari dan lihat semua motor yang tersedia untuk tanggal dan waktu yang Anda pilih.
           </p>
         </div>
         
@@ -92,7 +105,19 @@ export default function AvailabilityPage() {
               </Alert>
             ) : (
               <AvailabilityResults 
-                motorcycles={availableMotorcycles} 
+                motorcycles={(availableMotorcycles || [])
+                  .filter(motor => !!motor && !!motor.id)
+                  .map(motor => ({
+                    ...motor,
+                    // Pastikan jenis selalu ada dan memiliki format yang benar
+                    jenis: motor.jenis || {
+                      id: motor.jenis || "",
+                      merk: "Motor",
+                      model: motor.platNomor || "Unknown",
+                      cc: 0,
+                      gambar: null
+                    }
+                  }))} 
                 startDate={tanggalMulai!} 
                 endDate={tanggalSelesai!}
               />

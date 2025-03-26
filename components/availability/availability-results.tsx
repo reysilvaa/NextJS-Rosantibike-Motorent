@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { differenceInDays, parseISO, format } from "date-fns"
@@ -18,6 +18,7 @@ import { formatCurrency } from "@/lib/utils"
 import type { MotorcycleUnit } from "@/lib/types"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "@/i18n/hooks"
+import { toast } from "@/components/ui/use-toast"
 
 interface AvailabilityResultsProps {
   motorcycles: MotorcycleUnit[]
@@ -29,6 +30,16 @@ export default function AvailabilityResults({ motorcycles, startDate, endDate }:
   const { t } = useTranslation()
   const router = useRouter()
   const [sortOption, setSortOption] = useState("price-asc")
+  
+  // Log untuk debugging
+  useEffect(() => {
+    console.log("AvailabilityResults received motorcycles:", motorcycles);
+    console.log("Motorcycles array length:", motorcycles.length);
+    
+    if (motorcycles.length > 0) {
+      console.log("Sample motorcycle in AvailabilityResults:", motorcycles[0]);
+    }
+  }, [motorcycles]);
   
   const rentalDays = differenceInDays(parseISO(endDate), parseISO(startDate)) + 1
   
@@ -48,7 +59,28 @@ export default function AvailabilityResults({ motorcycles, startDate, endDate }:
   })
   
   const handleBookNow = (motorcycleId: string) => {
-    router.push(`/availability/booking?unitId=${motorcycleId}&startDate=${startDate}&endDate=${endDate}`)
+    if (!motorcycleId || motorcycleId === 'undefined' || motorcycleId === 'null' || motorcycleId.trim() === '') {
+      console.error("ID motor tidak valid");
+      toast({
+        title: "Error",
+        description: "ID motor tidak valid, silakan coba motor lain",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(motorcycleId)) {
+      console.error("Format ID motor tidak valid");
+      toast({
+        title: "Error",
+        description: "Format ID motor tidak valid, silakan coba motor lain",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    router.push(`/availability/booking?unitId=${motorcycleId}&startDate=${startDate}&endDate=${endDate}`);
   }
 
   if (motorcycles.length === 0) {
@@ -64,8 +96,8 @@ export default function AvailabilityResults({ motorcycles, startDate, endDate }:
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-center bg-gray-900/70 border border-gray-800 rounded-lg p-4 mb-6">
+    <div className="space-y-6 w-full">
+      <div className="flex flex-col sm:flex-row justify-between items-center bg-gray-900/70 border border-gray-800 rounded-lg p-4 mb-6 w-full">
         <div>
           <h2 className="text-xl font-bold mb-1">Hasil Pencarian</h2>
           <p className="text-gray-400">
@@ -90,14 +122,16 @@ export default function AvailabilityResults({ motorcycles, startDate, endDate }:
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 gap-6 w-full">
         {sortedMotorcycles.map((motorcycle) => (
           <Card key={motorcycle.id} className="bg-gray-900/70 border-gray-800 overflow-hidden hover:border-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl">
             <div className="flex flex-col md:flex-row">
               <div className="md:w-1/3 lg:w-1/4 relative h-56 md:h-auto">
                 <div className="absolute inset-0 flex items-center justify-center bg-gray-800 text-gray-600">
                   <Image
-                    src={motorcycle.jenis?.gambar || ""}
+                    src={motorcycle.jenis?.gambar && motorcycle.jenis.gambar !== "" 
+                      ? motorcycle.jenis.gambar 
+                      : "/motorcycle-placeholder.svg"}
                     alt={motorcycle.jenis?.merk && motorcycle.jenis?.model ? 
                       `${motorcycle.jenis.merk} ${motorcycle.jenis.model}` : 
                       "Gambar motor tidak tersedia"}
@@ -106,8 +140,8 @@ export default function AvailabilityResults({ motorcycles, startDate, endDate }:
                     onError={(e) => {
                       // Prevent infinite loop from error event
                       e.currentTarget.onerror = null;
-                      // Set a solid color background instead of showing a broken image
-                      e.currentTarget.style.display = "none";
+                      // Set fallback image
+                      e.currentTarget.src = "/motorcycle-placeholder.svg";
                     }}
                   />
                 </div>
@@ -120,20 +154,20 @@ export default function AvailabilityResults({ motorcycles, startDate, endDate }:
                       "Detail motor tidak tersedia"}
                   </h3>
                   <div className="flex items-center gap-2 mb-4">
-                    <span className="inline-flex items-center rounded-md bg-blue-400/10 px-2 py-1 text-xs font-medium text-blue-400 ring-1 ring-inset ring-blue-400/20">
+                    <span key={`plat-${motorcycle.id}`} className="inline-flex items-center rounded-md bg-blue-400/10 px-2 py-1 text-xs font-medium text-blue-400 ring-1 ring-inset ring-blue-400/20">
                       {motorcycle.platNomor || "-"}
                     </span>
-                    <span className="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/20">
+                    <span key={`warna-${motorcycle.id}`} className="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/20">
                       {motorcycle.warna || "-"}
                     </span>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div key={`price-${motorcycle.id}`} className="bg-gray-950/40 rounded-lg p-3">
+                    <div className="bg-gray-950/40 rounded-lg p-3">
                       <p className="text-sm text-gray-500">{t("pricePerDay")}</p>
                       <p className="font-bold text-lg text-primary">{formatCurrency(motorcycle.hargaSewa)}</p>
                     </div>
-                    <div key={`total-${motorcycle.id}`} className="bg-gray-950/40 rounded-lg p-3">
+                    <div className="bg-gray-950/40 rounded-lg p-3">
                       <p className="text-sm text-gray-500">{t("total")} ({rentalDays} {t("days")})</p>
                       <p className="font-bold text-lg">{formatCurrency(motorcycle.hargaSewa * rentalDays)}</p>
                     </div>
@@ -147,7 +181,7 @@ export default function AvailabilityResults({ motorcycles, startDate, endDate }:
                     {t("bookNow")}
                   </Button>
                   <Link 
-                    href={`/motorcycles/${motorcycle.jenis?.id || ''}`} 
+                    href={motorcycle.jenis?.id ? `/motorcycles/${motorcycle.jenis.id}` : '#'} 
                     className="text-center text-sm text-primary mt-3 hover:underline"
                   >
                     {t("viewDetails")}
