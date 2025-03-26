@@ -12,21 +12,38 @@ import { Separator } from "@/components/ui/separator"
 import { fetchBlogPostBySlug } from "@/lib/api"
 import type { BlogPost } from "@/lib/types"
 import { useTranslation } from "@/i18n/hooks"
+import { formatDate } from "@/lib/utils"
 
 interface BlogPostDetailProps {
-  slug: string
+  slug?: string;
+  post?: BlogPost;
 }
 
-export default function BlogPostDetail({ slug }: BlogPostDetailProps) {
+export default function BlogPostDetail({ slug, post: initialPost }: BlogPostDetailProps) {
   const { t, i18n } = useTranslation()
-  const [blogPost, setBlogPost] = useState<BlogPost | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [blogPost, setBlogPost] = useState<BlogPost | null>(initialPost || null)
+  const [isLoading, setIsLoading] = useState(!initialPost)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    // Jika post sudah disediakan, tidak perlu mengambil dari API
+    if (initialPost) {
+      setBlogPost(initialPost)
+      setIsLoading(false)
+      return
+    }
+
     const fetchBlogPostDetail = async () => {
       try {
         setIsLoading(true)
+        
+        // Jika tidak ada slug, tampilkan error
+        if (!slug) {
+          setError(t("blogPostNotFound"))
+          setIsLoading(false)
+          return
+        }
+        
         const data = await fetchBlogPostBySlug(slug)
         if (data) {
           setBlogPost(data)
@@ -43,31 +60,30 @@ export default function BlogPostDetail({ slug }: BlogPostDetailProps) {
     }
 
     fetchBlogPostDetail()
-  }, [slug, t])
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    // Format date based on current language
-    return date.toLocaleDateString(i18n.language === "id" ? "id-ID" : "en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })
-  }
+  }, [slug, initialPost, t])
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <Skeleton className="h-8 w-3/4" />
-        <div className="flex items-center space-x-4">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-4 w-36" />
-        </div>
-        <Skeleton className="h-[400px] w-full" />
-        <div className="space-y-4">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4" />
+      <div className="container mx-auto px-4">
+        <div className="max-w-4xl mx-auto space-y-6 animate-pulse">
+          <div className="flex items-center mb-6">
+            <Skeleton className="h-4 w-24 mr-2 rounded-md" />
+            <Skeleton className="h-4 w-16 rounded-md" />
+          </div>
+          <Skeleton className="h-10 w-4/5 mb-4 rounded-md" />
+          <div className="flex items-center space-x-4 mb-6">
+            <Skeleton className="h-4 w-24 rounded-md" />
+            <Skeleton className="h-4 w-36 rounded-md" />
+            <Skeleton className="h-4 w-20 rounded-md" />
+          </div>
+          <Skeleton className="h-[300px] w-full rounded-lg mb-6" />
+          <div className="space-y-4">
+            <Skeleton className="h-4 w-full rounded-md" />
+            <Skeleton className="h-4 w-full rounded-md" />
+            <Skeleton className="h-4 w-3/4 rounded-md" />
+            <Skeleton className="h-4 w-5/6 rounded-md" />
+            <Skeleton className="h-4 w-full rounded-md" />
+          </div>
         </div>
       </div>
     )
@@ -75,20 +91,47 @@ export default function BlogPostDetail({ slug }: BlogPostDetailProps) {
 
   if (error) {
     return (
-      <div className="text-center py-10">
-        <p className="text-red-500 mb-4">{error}</p>
-        <Button onClick={() => window.location.reload()}>{t("tryAgain")}</Button>
+      <div className="container mx-auto px-4">
+        <div className="max-w-4xl mx-auto flex flex-col items-center justify-center py-16 px-4">
+          <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mb-4">
+            <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold mb-2 text-center">Artikel Tidak Ditemukan</h2>
+          <p className="text-gray-400 mb-6 text-center max-w-md">{error}</p>
+          <div className="flex gap-3">
+            <Button 
+              onClick={() => window.location.reload()} 
+              variant="outline" 
+              className="border-gray-700 hover:bg-gray-800"
+            >
+              {t("tryAgain")}
+            </Button>
+            <Link href="/blog">
+              <Button>{t("backToBlog")}</Button>
+            </Link>
+          </div>
+        </div>
       </div>
     )
   }
 
   if (!blogPost) {
     return (
-      <div className="text-center py-10">
-        <p className="text-gray-400 mb-4">{t("blogPostNotFound")}</p>
-        <Link href="/blog">
-          <Button>{t("backToBlog")}</Button>
-        </Link>
+      <div className="container mx-auto px-4">
+        <div className="max-w-4xl mx-auto flex flex-col items-center justify-center py-16 px-4">
+          <div className="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mb-4">
+            <svg className="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold mb-2">{t("blogPostNotFound")}</h2>
+          <p className="text-gray-400 mb-6 text-center max-w-md">Maaf, artikel yang Anda cari tidak ditemukan atau telah dihapus.</p>
+          <Link href="/blog">
+            <Button>{t("backToBlog")}</Button>
+          </Link>
+        </div>
       </div>
     )
   }
@@ -123,75 +166,86 @@ export default function BlogPostDetail({ slug }: BlogPostDetailProps) {
   const contentToDisplay = blogPost.konten || demoContent
 
   return (
-    <div className="space-y-8">
-      <Link href="/blog" className="inline-flex items-center text-primary hover:underline mb-6">
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        {t("backToBlog")}
-      </Link>
-
-      <div>
-        <h1 className="text-3xl md:text-4xl font-bold mb-4">{blogPost.judul}</h1>
-        <div className="flex flex-wrap items-center text-gray-400 text-sm gap-4 mb-6">
-          <div className="flex items-center">
-            <Calendar className="h-4 w-4 mr-1" />
-            {formatDate(blogPost.createdAt)}
+    <div className="container mx-auto px-4">
+      <div className="max-w-4xl mx-auto space-y-8">
+        <Link href="/blog" className="inline-flex items-center text-primary hover:text-primary/80 hover:underline transition-colors mb-6 group">
+          <div className="mr-2 h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+            <ArrowLeft className="h-4 w-4 text-primary" />
           </div>
-          <div className="flex items-center">
-            <User className="h-4 w-4 mr-1" />
-            {t("adminAuthor")}
-          </div>
-          <div className="flex items-center">
-            <Tag className="h-4 w-4 mr-1" />
-            <Badge variant="secondary">{blogPost.kategori}</Badge>
-          </div>
-        </div>
-      </div>
-
-      {blogPost.featuredImage && (
-        <div className="relative h-[400px] w-full rounded-lg overflow-hidden mb-8">
-          <Image
-            src={blogPost.featuredImage}
-            alt={blogPost.judul}
-            fill
-            className="object-cover"
-          />
-        </div>
-      )}
-
-      <Card className="bg-gray-900/50 border-gray-800">
-        <CardContent className="p-6 prose prose-invert max-w-none">
-          <div dangerouslySetInnerHTML={{ __html: contentToDisplay }} />
-        </CardContent>
-      </Card>
-
-      <Separator className="my-8" />
-
-      <div className="flex justify-between items-center">
-        <h3 className="text-xl font-semibold">{t("relatedArticles")}</h3>
-        <Link href="/blog">
-          <Button variant="outline">{t("viewAllArticles")}</Button>
+          <span className="font-medium">{t("backToBlog")}</span>
         </Link>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Placeholder untuk artikel terkait - dalam aplikasi nyata, ini bisa menggunakan data dari API */}
-        {[1, 2, 3].map((index) => (
-          <Card
-            key={index}
-            className="bg-gray-900/50 border-gray-800 overflow-hidden hover:border-primary/50 transition-all"
-          >
-            <div className="relative h-40 bg-gray-800">
-              <div className="absolute inset-0 flex items-center justify-center text-gray-500">
-                {t("imagePlaceholder")}
-              </div>
+        <div>
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">{blogPost.judul}</h1>
+          <div className="flex flex-wrap items-center text-gray-400 text-sm gap-4 mb-6">
+            <div className="flex items-center bg-gray-800/50 px-3 py-1 rounded-full">
+              <Calendar className="h-3.5 w-3.5 mr-2 text-primary" />
+              {formatDate(blogPost.createdAt)}
             </div>
-            <CardContent className="p-4">
-              <h4 className="font-medium mb-2">{t("relatedArticleTitle")} {index}</h4>
-              <p className="text-gray-400 text-sm">{formatDate(new Date().toISOString())}</p>
-            </CardContent>
-          </Card>
-        ))}
+            <div className="flex items-center bg-gray-800/50 px-3 py-1 rounded-full">
+              <User className="h-3.5 w-3.5 mr-2 text-primary" />
+              {t("adminAuthor")}
+            </div>
+            <div className="flex items-center">
+              <Tag className="h-3.5 w-3.5 mr-2 text-primary" />
+              <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20">
+                {blogPost.kategori}
+              </Badge>
+            </div>
+          </div>
+        </div>
+
+        {(blogPost.featuredImage || blogPost.thumbnail) && (
+          <div className="relative h-[400px] w-full rounded-xl overflow-hidden mb-8 shadow-lg border border-gray-800">
+            <Image
+              src={blogPost.featuredImage || blogPost.thumbnail || "/placeholder.svg"}
+              alt={blogPost.judul}
+              fill
+              className="object-cover transition-transform hover:scale-105 duration-700"
+            />
+          </div>
+        )}
+
+        <Card className="bg-gray-900/60 border-gray-800 shadow-lg rounded-xl overflow-hidden">
+          <CardContent className="p-8 prose prose-invert max-w-none prose-headings:text-primary prose-a:text-primary prose-img:rounded-lg prose-strong:text-primary/90">
+            <div dangerouslySetInnerHTML={{ __html: contentToDisplay }} />
+          </CardContent>
+        </Card>
+
+        <Separator className="my-10 bg-gray-800" />
+
+        <div className="space-y-8">
+          <div className="flex justify-between items-center">
+            <h3 className="text-xl font-semibold">{t("relatedArticles")}</h3>
+            <Link href="/blog">
+              <Button variant="outline" className="border-gray-700 hover:bg-gray-800">
+                {t("viewAllArticles")}
+              </Button>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Placeholder untuk artikel terkait - dalam aplikasi nyata, ini bisa menggunakan data dari API */}
+            {[1, 2, 3].map((index) => (
+              <Card
+                key={index}
+                className="bg-gray-900/60 border-gray-800 overflow-hidden hover:border-primary/30 hover:shadow-md hover:shadow-primary/5 transition-all duration-300 group"
+              >
+                <div className="relative h-40 bg-gray-800 overflow-hidden">
+                  <div className="absolute inset-0 flex items-center justify-center text-gray-600 group-hover:scale-110 transition-transform duration-700">
+                    {t("imagePlaceholder")}
+                  </div>
+                </div>
+                <CardContent className="p-5">
+                  <h4 className="font-medium mb-2 group-hover:text-primary transition-colors">{t("relatedArticleTitle")} {index}</h4>
+                  <p className="text-gray-400 text-sm">{formatDate(new Date().toISOString())}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )
 }
+

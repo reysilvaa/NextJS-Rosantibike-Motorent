@@ -156,12 +156,11 @@
     
     "startAndEndDateRequired": "Start date and end date must be filled",
     "checkMotorcycleAvailability": "Check Motorcycle Availability",
+    "findYourDreamMotorcycle": "Find Your Dream Motorcycle",
     "realtimeUpdate": "Realtime Update",
     "offline": "Offline",
     "motorcycleTypeOptional": "Motorcycle Type (Optional)",
     "allMotorcycleTypes": "All motorcycle types",
-    "checkAvailability": "Check Availability",
-    
     "motorcycleStatusChanged": "Motorcycle Status Changed",
     "unit": "Unit",
     "isNow": "is now",
@@ -200,5 +199,7 @@
     "monFriHours": "Monday - Friday: 9AM - 6PM",
     "satHours": "Saturday: 10AM - 4PM",
     "sunClosed": "Sunday: Closed",
-    "businessHours": "Business Hours"
+    "businessHours": "Business Hours",
+    "bookingHistory": "Booking History"
+    
   }

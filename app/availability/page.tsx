@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 import { useTranslation } from "@/i18n/hooks"
+import { PageHeader } from "@/components/ui/page-header"
 
 export default function AvailabilityPage() {
   const { t } = useTranslation()
@@ -42,8 +43,13 @@ export default function AvailabilityPage() {
 
   return (
     <div className="container mx-auto px-4 py-20">
-      <div className="max-w-5xl mx-auto">
-        <h1 className="text-4xl font-bold mb-6">{t("motorcycleAvailability")}</h1>
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-10">
+          <h1 className="text-4xl font-bold mb-6">Riwayat Booking</h1>
+          <p className="text-gray-400 max-w-3xl">
+            Lacak dan lihat semua riwayat pemesanan motor Anda dengan mudah. Masukkan nomor telepon yang digunakan saat pemesanan.
+          </p>
+        </div>
         
         <div className="mb-8">
           <AvailabilitySearch />

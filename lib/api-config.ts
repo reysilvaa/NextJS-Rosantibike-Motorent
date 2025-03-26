@@ -14,6 +14,8 @@ export const API_CONFIG = {
     // Transactions
     TRANSAKSI: "/transaksi",
     TRANSAKSI_HISTORY: "/transaksi/history",
+    TRANSAKSI_USER: "/transaksi/user",
+    TRANSAKSI_SEARCH: "/transaksi/search",
     
     // Blog
     BLOG: "/blog",

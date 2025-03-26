@@ -12,6 +12,9 @@ interface Transaksi {
   nominal: number;
   durasi: number;
   telah_dibayar?: boolean;
+  biayaDenda?: number;
+  jasHujan?: number;
+  helm?: number;
 }
 
 export const TransaksiLiveUpdates = () => {
@@ -49,16 +52,48 @@ export const TransaksiLiveUpdates = () => {
       });
     };
 
+    // Handler untuk denda
+    const handleDendaNotification = (data: any) => {
+      setTransactions(prev => {
+        return prev.map(item => {
+          if (item.id === data.id) {
+            return { ...item, biayaDenda: data.biayaDenda };
+          }
+          return item;
+        });
+      });
+    };
+
+    // Handler untuk fasilitas
+    const handleFasilitasNotification = (data: any) => {
+      setTransactions(prev => {
+        return prev.map(item => {
+          if (item.id === data.id) {
+            return { 
+              ...item, 
+              jasHujan: data.jasHujan,
+              helm: data.helm
+            };
+          }
+          return item;
+        });
+      });
+    };
+
     // Subscribe ke event
     const unsubNewTrans = listen(SocketEvents.NEW_TRANSACTION, handleNewTransaction);
     const unsubUpdate = listen(SocketEvents.UPDATE_TRANSACTION, handleNewTransaction);
     const unsubOverdue = listen(SocketEvents.OVERDUE_TRANSACTION, handleOverdueTransaction);
+    const unsubDenda = listen(SocketEvents.DENDA_NOTIFICATION, handleDendaNotification);
+    const unsubFasilitas = listen(SocketEvents.FASILITAS_NOTIFICATION, handleFasilitasNotification);
 
     // Cleanup
     return () => {
       unsubNewTrans();
       unsubUpdate();
       unsubOverdue();
+      unsubDenda();
+      unsubFasilitas();
     };
   }, [isConnected, listen]);
 
@@ -104,6 +139,8 @@ export const TransaksiLiveUpdates = () => {
                 <th className="px-4 py-2 text-left font-medium">Status</th>
                 <th className="px-4 py-2 text-left font-medium">Nominal</th>
                 <th className="px-4 py-2 text-left font-medium">Durasi</th>
+                <th className="px-4 py-2 text-left font-medium">Denda</th>
+                <th className="px-4 py-2 text-left font-medium">Fasilitas</th>
               </tr>
             </thead>
             <tbody>
@@ -129,6 +166,33 @@ export const TransaksiLiveUpdates = () => {
                   </td>
                   <td className="px-4 py-2">{formatCurrency(item.nominal)}</td>
                   <td className="px-4 py-2">{item.durasi} hari</td>
+                  <td className="px-4 py-2">
+                    {item.biayaDenda ? (
+                      <span className="text-red-600 font-medium">
+                        {formatCurrency(item.biayaDenda)}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-2">
+                    {(item.jasHujan || item.helm) ? (
+                      <div className="flex flex-col gap-1">
+                        {item.jasHujan && item.jasHujan > 0 && (
+                          <span className="inline-flex items-center text-xs">
+                            <span className="font-medium">Jas Hujan:</span> {item.jasHujan}
+                          </span>
+                        )}
+                        {item.helm && item.helm > 0 && (
+                          <span className="inline-flex items-center text-xs">
+                            <span className="font-medium">Helm:</span> {item.helm}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

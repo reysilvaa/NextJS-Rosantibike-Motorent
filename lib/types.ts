@@ -72,6 +72,8 @@ export interface Transaction {
   nomorKTP: string
   tanggalMulai: string
   tanggalSelesai: string
+  jamMulai?: string
+  jamSelesai?: string
   status: "AKTIF" | "SELESAI" | "DIBATALKAN" | "OVERDUE"
   totalBiaya: number
   unitMotor: {
@@ -92,14 +94,25 @@ export interface BlogPost {
   judul: string
   slug: string
   konten: string
-  featuredImage: string
+  featuredImage?: string
   status: "draft" | "published"
-  thumbnail?: string;
+  thumbnail?: string
   kategori: string
   tags?: string[]
   meta_description?: string
   createdAt: string
   updatedAt?: string
+  
+  // Tambahan field untuk tampilan detail blog
+  author?: string
+  tanggal_publikasi?: string
+  reading_time?: number
+  related_posts?: {
+    judul: string
+    slug: string
+    thumbnail?: string
+    tanggal_publikasi?: string
+  }[]
 }
 
 // Form Types
@@ -117,6 +130,10 @@ export interface TransactionFormData {
   tanggalMulai: string
   tanggalSelesai: string
   unitMotorId: string
+  jasHujan?: number
+  helm?: number
+  jamMulai?: string
+  jamSelesai?: string
 }
 
 // Response untuk availability check

@@ -48,7 +48,7 @@ export default function AvailabilityResults({ motorcycles, startDate, endDate }:
   })
   
   const handleBookNow = (motorcycleId: string) => {
-    router.push(`/booking?unitMotorId=${motorcycleId}&tanggalMulai=${startDate}&tanggalSelesai=${endDate}`)
+    router.push(`/availability/booking?unitId=${motorcycleId}&startDate=${startDate}&endDate=${endDate}`)
   }
 
   if (motorcycles.length === 0) {
@@ -65,13 +65,14 @@ export default function AvailabilityResults({ motorcycles, startDate, endDate }:
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-center bg-gray-900/70 border border-gray-800 rounded-lg p-4 mb-6">
         <div>
+          <h2 className="text-xl font-bold mb-1">Hasil Pencarian</h2>
           <p className="text-gray-400">
             <span className="font-medium text-white">{motorcycles.length}</span> {t("motorcyclesAvailable")}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mt-4 sm:mt-0">
           <span className="text-sm text-gray-400">{t("sortBy")}:</span>
           <Select value={sortOption} onValueChange={setSortOption}>
             <SelectTrigger className="w-[180px] bg-gray-950/50 border-gray-800">
@@ -89,43 +90,65 @@ export default function AvailabilityResults({ motorcycles, startDate, endDate }:
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-6">
         {sortedMotorcycles.map((motorcycle) => (
-          <Card key={motorcycle.id} className="bg-gray-900/50 border-gray-800 overflow-hidden">
+          <Card key={motorcycle.id} className="bg-gray-900/70 border-gray-800 overflow-hidden hover:border-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl">
             <div className="flex flex-col md:flex-row">
-              <div className="md:w-1/4 relative h-48 md:h-auto">
-                <Image
-                  src={motorcycle.jenis?.gambar || "/motorcycle-placeholder.svg"}
-                  alt={`${motorcycle.jenis?.merk || 'Motor'} ${motorcycle.jenis?.model || ''}`}
-                  fill
-                  className="object-cover"
-                />
+              <div className="md:w-1/3 lg:w-1/4 relative h-56 md:h-auto">
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-800 text-gray-600">
+                  <Image
+                    src={motorcycle.jenis?.gambar || ""}
+                    alt={motorcycle.jenis?.merk && motorcycle.jenis?.model ? 
+                      `${motorcycle.jenis.merk} ${motorcycle.jenis.model}` : 
+                      "Gambar motor tidak tersedia"}
+                    fill
+                    className="object-cover"
+                    onError={(e) => {
+                      // Prevent infinite loop from error event
+                      e.currentTarget.onerror = null;
+                      // Set a solid color background instead of showing a broken image
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                </div>
               </div>
               <CardContent className="flex-1 flex flex-col md:flex-row p-6">
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold mb-1">
-                    {motorcycle.jenis?.merk || 'Motor'} {motorcycle.jenis?.model || ''}
+                  <h3 className="text-2xl font-bold mb-1">
+                    {motorcycle.jenis?.merk && motorcycle.jenis?.model ? 
+                      `${motorcycle.jenis.merk} ${motorcycle.jenis.model}` : 
+                      "Detail motor tidak tersedia"}
                   </h3>
-                  <p className="text-gray-400 text-sm mb-4">{t("licensePlate")}: {motorcycle.platNomor} • {motorcycle.warna || "N/A"}</p>
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="inline-flex items-center rounded-md bg-blue-400/10 px-2 py-1 text-xs font-medium text-blue-400 ring-1 ring-inset ring-blue-400/20">
+                      {motorcycle.platNomor || "-"}
+                    </span>
+                    <span className="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/20">
+                      {motorcycle.warna || "-"}
+                    </span>
+                  </div>
                   
                   <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div key={`price-${motorcycle.id}`}>
+                    <div key={`price-${motorcycle.id}`} className="bg-gray-950/40 rounded-lg p-3">
                       <p className="text-sm text-gray-500">{t("pricePerDay")}</p>
-                      <p className="font-medium">{formatCurrency(motorcycle.hargaSewa)}</p>
+                      <p className="font-bold text-lg text-primary">{formatCurrency(motorcycle.hargaSewa)}</p>
                     </div>
-                    <div key={`total-${motorcycle.id}`}>
+                    <div key={`total-${motorcycle.id}`} className="bg-gray-950/40 rounded-lg p-3">
                       <p className="text-sm text-gray-500">{t("total")} ({rentalDays} {t("days")})</p>
-                      <p className="font-medium">{formatCurrency(motorcycle.hargaSewa * rentalDays)}</p>
+                      <p className="font-bold text-lg">{formatCurrency(motorcycle.hargaSewa * rentalDays)}</p>
                     </div>
                   </div>
                 </div>
-                <div className="mt-4 md:mt-0 flex flex-col justify-center">
-                  <Button className="min-w-32" onClick={() => handleBookNow(motorcycle.id)}>
+                <div className="mt-4 md:mt-0 flex flex-col justify-center items-center md:ml-6">
+                  <Button 
+                    className="min-w-40 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105" 
+                    onClick={() => handleBookNow(motorcycle.id)}
+                  >
                     {t("bookNow")}
                   </Button>
                   <Link 
                     href={`/motorcycles/${motorcycle.jenis?.id || ''}`} 
-                    className="text-center text-xs text-primary mt-2 hover:underline"
+                    className="text-center text-sm text-primary mt-3 hover:underline"
                   >
                     {t("viewDetails")}
                   </Link>

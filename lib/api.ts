@@ -127,8 +127,34 @@ export async function fetchMotorcycleUnits(filter?: Record<string, any>): Promis
 }
 
 export async function fetchMotorcycleUnitById(id: string): Promise<MotorcycleUnit> {
-  const response = await apiRequest<ApiResponse<MotorcycleUnit>>(`${API_CONFIG.ENDPOINTS.UNIT_MOTOR}/${id}`)
-  return response.data
+  try {
+    console.log(`Fetching motorcycle unit with ID: ${id}`);
+    const response = await apiRequest<ApiResponse<MotorcycleUnit>>(`${API_CONFIG.ENDPOINTS.UNIT_MOTOR}/${id}`);
+    
+    // Log respons untuk debugging
+    console.log('Motorcycle unit response:', response);
+    
+    // Cek apakah response adalah objek dan memiliki data
+    if (!response) {
+      console.error('Empty response from API');
+      throw new Error('Data motor tidak ditemukan');
+    }
+    
+    // Jika respons langsung berupa objek motor (bukan dalam property data)
+    if (!response.data && typeof response === 'object' && 'id' in response) {
+      return response as unknown as MotorcycleUnit;
+    }
+    
+    if (!response.data) {
+      console.error('No data property in response:', response);
+      throw new Error('Data motor tidak ditemukan');
+    }
+    
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching motorcycle unit by ID ${id}:`, error);
+    throw error;
+  }
 }
 
 // Cache untuk menyimpan hasil request availability
@@ -247,6 +273,20 @@ export async function completeTransaction(id: string): Promise<Transaction> {
     method: "POST",
   })
   return response.data
+}
+
+export async function fetchUserTransactions(): Promise<Transaction[]> {
+  const response = await apiRequest<ApiResponse<Transaction[]>>(API_CONFIG.ENDPOINTS.TRANSAKSI_USER);
+  return Array.isArray(response) ? response : response.data || [];
+}
+
+export async function searchTransactionsByPhone(phoneNumber: string): Promise<Transaction[]> {
+  const queryParams = new URLSearchParams();
+  queryParams.append("noHP", phoneNumber);
+  
+  const endpoint = `${API_CONFIG.ENDPOINTS.TRANSAKSI_SEARCH}?${queryParams.toString()}`;
+  const response = await apiRequest<ApiResponse<Transaction[]>>(endpoint);
+  return Array.isArray(response) ? response : response.data || [];
 }
 
 // Blog API

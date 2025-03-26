@@ -1,101 +1,90 @@
 "use client"
 
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react"
+import { createContext, useContext, useState, useEffect, ReactNode } from "react"
 import { login as apiLogin } from "@/lib/api"
-import { useLoading } from "./use-loading"
-import { toast } from "./use-toast"
+import { useRouter } from "next/navigation"
 import type { Admin } from "@/lib/types"
 
+interface User {
+  name: any
+  id: string
+  username: string
+  nama: string
+}
+
 interface AuthContextType {
+  user: User | null
   isAuthenticated: boolean
-  admin: Admin | null
+  isLoading: boolean
   login: (username: string, password: string) => Promise<void>
   logout: () => void
-  isLoading: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [admin, setAdmin] = useState<Admin | null>(null)
-  const { isLoading, withLoading } = useLoading(true)
+  const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter()
 
-  // Check if user is already logged in on mount
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const token = localStorage.getItem("auth_token")
-        const adminData = localStorage.getItem("admin_data")
+    // Coba membaca data user dari localStorage
+    const storedToken = localStorage.getItem("auth_token")
+    const storedUser = localStorage.getItem("auth_user")
 
-        if (token && adminData) {
-          try {
-            setAdmin(JSON.parse(adminData))
-          } catch (error) {
-            console.error("Gagal memuat data admin:", error)
-            localStorage.removeItem("auth_token")
-            localStorage.removeItem("admin_data")
-          }
-        }
-      } finally {
-        // Stop loading regardless of outcome
-        // (Note: withLoading isn't used here because we just want to set loading state initially)
+    if (storedToken && storedUser) {
+      try {
+        setUser(JSON.parse(storedUser))
+      } catch (e) {
+        console.error("Error parsing stored user:", e)
+        localStorage.removeItem("auth_token")
+        localStorage.removeItem("auth_user")
       }
     }
-
-    checkAuth()
-  }, [])
-
-  const login = useCallback(
-    async (username: string, password: string) => {
-      try {
-        const response = await withLoading(apiLogin(username, password))
-        
-        // Simpan data ke localStorage
-        localStorage.setItem("auth_token", response.access_token)
-        localStorage.setItem("admin_data", JSON.stringify(response.admin))
-        
-        // Update state
-        setAdmin(response.admin)
-        
-        // Tampilkan notifikasi sukses
-        toast({
-          title: "Login Berhasil",
-          description: `Selamat datang, ${response.admin.nama}`,
-        })
-      } catch (error: any) {
-        // Tampilkan error
-        toast({
-          title: "Login Gagal",
-          description: error.message || "Username atau password salah",
-          variant: "destructive",
-        })
-        throw error
-      }
-    },
-    [withLoading]
-  )
-
-  const logout = useCallback(() => {
-    localStorage.removeItem("auth_token")
-    localStorage.removeItem("admin_data")
-    setAdmin(null)
     
-    toast({
-      title: "Logout Berhasil",
-      description: "Anda telah keluar dari sistem",
-    })
+    setIsLoading(false)
   }, [])
+
+  const login = async (username: string, password: string) => {
+    setIsLoading(true)
+    try {
+      const response = await apiLogin(username, password)
+      
+      if (!response || !response.access_token) {
+        throw new Error("Login gagal: Token tidak ditemukan dalam respons")
+      }
+      
+      // Simpan token dan data user ke localStorage
+      localStorage.setItem("auth_token", response.access_token)
+      
+      const userData: User = {
+        id: response.admin.id,
+        username: response.admin.username,
+        nama: response.admin.nama,
+      }
+      
+      localStorage.setItem("auth_user", JSON.stringify(userData))
+      setUser(userData)
+      
+      // Redirect ke dashboard setelah login
+      router.push("/admin")
+    } catch (error) {
+      console.error("Login error:", error)
+      throw error
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const logout = () => {
+    localStorage.removeItem("auth_token")
+    localStorage.removeItem("auth_user")
+    setUser(null)
+    router.push("/login")
+  }
 
   return (
-    <AuthContext.Provider
-      value={{
-        isAuthenticated: !!admin,
-        admin,
-        login,
-        logout,
-        isLoading,
-      }}
-    >
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   )

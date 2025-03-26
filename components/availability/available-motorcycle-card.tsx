@@ -43,6 +43,10 @@ export default function AvailableMotorcycleCard({ motorcycle, startDate, endDate
     noHP: "",
     alamat: "",
     nomorKTP: "",
+    jasHujan: 0,
+    helm: 0,
+    jamMulai: "08:00",
+    jamSelesai: "08:00"
   })
   const [formError, setFormError] = useState<string | null>(null)
   const [localMotorcycle, setLocalMotorcycle] = useState<MotorcycleUnit>(motorcycle)
@@ -108,8 +112,12 @@ export default function AvailableMotorcycleCard({ motorcycle, startDate, endDate
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleNumericChange = (name: string, value: number) => {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
@@ -131,6 +139,8 @@ export default function AvailableMotorcycleCard({ motorcycle, startDate, endDate
         tanggalMulai: format(startDate, "yyyy-MM-dd"),
         tanggalSelesai: format(endDate, "yyyy-MM-dd"),
         unitMotorId: motorcycle.id,
+        jasHujan: Number(formData.jasHujan),
+        helm: Number(formData.helm)
       })
 
       setIsDialogOpen(false)
@@ -144,7 +154,10 @@ export default function AvailableMotorcycleCard({ motorcycle, startDate, endDate
   }
 
   const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
-  const totalPrice = localMotorcycle.hargaSewa * totalDays
+  const basePrice = localMotorcycle.hargaSewa * totalDays
+  const jasHujanPrice = 5000 * Number(formData.jasHujan)
+  const helmPrice = 5000 * Number(formData.helm)
+  const totalPrice = basePrice + jasHujanPrice + helmPrice
 
   return (
     <Card className={`bg-gray-900 border-gray-800 overflow-hidden transition-all ${isAvailable ? 'hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10' : 'opacity-70'}`}>
@@ -275,6 +288,64 @@ export default function AvailableMotorcycleCard({ motorcycle, startDate, endDate
                     className="bg-gray-800/50 border-gray-700"
                   />
                 </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="jamMulai">{t("startTime")}</Label>
+                    <Input
+                      id="jamMulai"
+                      name="jamMulai"
+                      type="time"
+                      value={formData.jamMulai}
+                      onChange={handleChange}
+                      required
+                      className="bg-gray-800/50 border-gray-700"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="jamSelesai">{t("endTime")}</Label>
+                    <Input
+                      id="jamSelesai"
+                      name="jamSelesai"
+                      type="time"
+                      value={formData.jamSelesai}
+                      onChange={handleChange}
+                      required
+                      className="bg-gray-800/50 border-gray-700"
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="jasHujan">{t("raincoat")} (Rp 5.000/unit)</Label>
+                    <select
+                      id="jasHujan"
+                      name="jasHujan"
+                      value={formData.jasHujan}
+                      onChange={handleChange}
+                      className="w-full bg-gray-800/50 border-gray-700 rounded-md px-3 py-2"
+                    >
+                      <option value="0">0</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="helm">{t("helmet")} (Rp 5.000/unit)</Label>
+                    <select
+                      id="helm"
+                      name="helm"
+                      value={formData.helm}
+                      onChange={handleChange}
+                      className="w-full bg-gray-800/50 border-gray-700 rounded-md px-3 py-2"
+                    >
+                      <option value="0">0</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                    </select>
+                  </div>
+                </div>
               </div>
 
               <div className="bg-gray-800/50 rounded-lg p-3 space-y-2">
@@ -294,6 +365,18 @@ export default function AvailableMotorcycleCard({ motorcycle, startDate, endDate
                     {format(startDate, "d MMM yyyy")} - {format(endDate, "d MMM yyyy")}
                   </span>
                 </div>
+                {formData.jasHujan > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-400">{t("raincoat")}:</span>
+                    <span className="text-sm">{formData.jasHujan} {t("unit")} (Rp {(5000 * Number(formData.jasHujan)).toLocaleString()})</span>
+                  </div>
+                )}
+                {formData.helm > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-400">{t("helmet")}:</span>
+                    <span className="text-sm">{formData.helm} {t("unit")} (Rp {(5000 * Number(formData.helm)).toLocaleString()})</span>
+                  </div>
+                )}
                 <div className="flex justify-between font-medium pt-1 border-t border-gray-700">
                   <span>{t("totalPrice")}:</span>
                   <span className="text-primary">Rp {totalPrice.toLocaleString()}</span>

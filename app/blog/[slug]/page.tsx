@@ -41,8 +41,10 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   }
 
   return (
-    <main className="min-h-screen">
-      <BlogPostDetail post={post} />
-    </main>
+    <div className="pb-16">
+      <div className="pt-16">
+        <BlogPostDetail post={post} />
+      </div>
+    </div>
   );
 }

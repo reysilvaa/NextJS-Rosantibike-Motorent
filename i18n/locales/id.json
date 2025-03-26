@@ -132,6 +132,7 @@
   "imagePlaceholder": "Placeholder Gambar",
   "relatedArticleTitle": "Artikel Terkait",
   "checkMotorcycleAvailability": "Cek Ketersediaan Motor",
+  "findYourDreamMotorcycle": "Temukan Motor Impian Anda",
   "pleaseSelectRentalDates": "Silakan pilih tanggal sewa di atas untuk melihat motor yang tersedia.",
   "selectDatesToSeeAvailability": "Pilih tanggal untuk melihat ketersediaan",
   "calendarView": "Tampilan Kalender",
@@ -280,5 +281,7 @@
   "latestBlogDescription": "Tetap update dengan berita motor terbaru, tips berkendara, dan cerita petualangan dari blog kami.",
   "sending": "Mengirim...",
   "price": "Harga",
-  "failedToCheckAvailability": "Gagal memeriksa ketersediaan"
+  "failedToCheckAvailability": "Gagal memeriksa ketersediaan",
+  "bookingHistory": "Riwayat Pemesanan",
+  "sendUsMessage": "Kirim Pesan Kepada Kami"
 } 

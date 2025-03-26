@@ -9,6 +9,8 @@ export enum SocketEvents {
   UPDATE_TRANSACTION = 'update-transaction',
   CANCEL_TRANSACTION = 'cancel-transaction',
   OVERDUE_TRANSACTION = 'overdue-transaction',
+  DENDA_NOTIFICATION = 'denda-notification',
+  FASILITAS_NOTIFICATION = 'fasilitas-notification',
   
   // Motor
   MOTOR_STATUS_UPDATE = 'motor-status-update',
@@ -27,7 +29,9 @@ export enum SocketEvents {
   // Test
   TEST_NEW_TRANSACTION = 'test-new-transaction',
   TEST_OVERDUE = 'test-overdue',
-  TEST_MOTOR_STATUS = 'test-motor-status'
+  TEST_MOTOR_STATUS = 'test-motor-status',
+  TEST_DENDA = 'test-denda',
+  TEST_FASILITAS = 'test-fasilitas'
 }
 
 // Singleton pattern untuk koneksi socket

@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { format } from "date-fns"
+import { format, parse } from "date-fns"
 import { CalendarIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -17,13 +17,42 @@ import { useSocket } from "@/hooks/use-socket"
 import { Badge } from "@/components/ui/badge"
 import { useTranslation } from "@/i18n/hooks"
 
-export default function AvailabilitySearch() {
+interface AvailabilitySearchProps {
+  onSearch?: (startDate: string, endDate: string, jenisMotorId?: string) => void;
+  initialStartDate?: string | null;
+  initialEndDate?: string | null;
+}
+
+export default function AvailabilitySearch({ 
+  onSearch, 
+  initialStartDate, 
+  initialEndDate 
+}: AvailabilitySearchProps) {
   const { t } = useTranslation()
   const router = useRouter()
   const { data: motorcycleTypes, isLoading: isLoadingTypes } = useMotorcycleTypes()
   const [startDate, setStartDate] = useState<Date | undefined>()
   const [endDate, setEndDate] = useState<Date | undefined>()
   const [motorcycleType, setMotorcycleType] = useState<string | undefined>()
+  
+  // Inisialisasi tanggal dari props jika tersedia
+  useEffect(() => {
+    if (initialStartDate) {
+      try {
+        setStartDate(parse(initialStartDate, "yyyy-MM-dd", new Date()));
+      } catch (e) {
+        console.error("Error parsing initialStartDate", e);
+      }
+    }
+    
+    if (initialEndDate) {
+      try {
+        setEndDate(parse(initialEndDate, "yyyy-MM-dd", new Date()));
+      } catch (e) {
+        console.error("Error parsing initialEndDate", e);
+      }
+    }
+  }, [initialStartDate, initialEndDate]);
   
   // Koneksi Socket.IO untuk menampilkan status koneksi
   const { isConnected } = useSocket({
@@ -37,34 +66,32 @@ export default function AvailabilitySearch() {
       return
     }
 
-    const searchParams: AvailabilitySearchParams = {
-      tanggalMulai: format(startDate, "yyyy-MM-dd"),
-      tanggalSelesai: format(endDate, "yyyy-MM-dd"),
+    const formattedStartDate = format(startDate, "yyyy-MM-dd");
+    const formattedEndDate = format(endDate, "yyyy-MM-dd");
+    const selectedMotorcycleType = motorcycleType && motorcycleType !== "all" ? motorcycleType : undefined;
+
+    // Jika onSearch prop tersedia, gunakan itu (untuk di-handling parent)
+    if (onSearch) {
+      onSearch(formattedStartDate, formattedEndDate, selectedMotorcycleType);
+      return;
     }
 
-    // Hanya tambahkan jenisMotorId jika bukan "all" dan nilai ada
-    if (motorcycleType && motorcycleType !== "all") {
-      searchParams.jenisMotorId = motorcycleType
-    }
-
-    // Buat query string untuk URL dengan nama parameter yang sesuai dengan backend
+    // Legacy behavior - navigasi dengan URL params
     const queryString = new URLSearchParams()
-    queryString.append("startDate", searchParams.tanggalMulai)
-    queryString.append("endDate", searchParams.tanggalSelesai)
-    if (searchParams.jenisMotorId) {
-      queryString.append("jenisId", searchParams.jenisMotorId)
+    queryString.append("startDate", formattedStartDate)
+    queryString.append("endDate", formattedEndDate)
+    if (selectedMotorcycleType) {
+      queryString.append("jenisId", selectedMotorcycleType)
     }
 
     const searchUrl = `/availability?${queryString.toString()}`
-
-    // Arahkan ke halaman availability dengan parameter
     router.push(searchUrl)
   }
 
   return (
-    <Card className="bg-gray-900/50 border-gray-800">
-      <CardHeader className="relative">
-        <CardTitle className="text-xl font-bold">{t("checkMotorcycleAvailability")}</CardTitle>
+    <Card className="bg-gradient-to-br from-gray-900 to-gray-950 border-gray-800 shadow-lg">
+      <CardHeader className="relative pb-2">
+        <CardTitle className="text-2xl font-bold">{t("checkMotorcycleAvailability")}</CardTitle>
         {/* Socket Connection Indicator */}
         <div className="absolute top-4 right-4">
           <Badge 
@@ -78,18 +105,21 @@ export default function AvailabilitySearch() {
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <CardContent className="space-y-5 pt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div className="space-y-2">
-            <label className="text-sm font-medium">{t("startDate")}</label>
+            <label className="text-sm font-medium flex items-center gap-2">
+              <CalendarIcon className="h-4 w-4 text-primary" />
+              {t("startDate")}
+            </label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className="w-full justify-start text-left font-normal bg-gray-950/50 border-gray-800"
+                  className="w-full justify-start text-left font-normal bg-gray-950/50 border-gray-800 hover:bg-gray-900 hover:border-gray-700"
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {startDate ? format(startDate, "PPP") : <span>{t("selectDate")}</span>}
+                  <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
+                  {startDate ? format(startDate, "PPP") : <span className="text-gray-500">{t("selectDate")}</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -99,20 +129,24 @@ export default function AvailabilitySearch() {
                   onSelect={setStartDate}
                   disabled={(date) => date < new Date()}
                   initialFocus
+                  className="rounded-lg border border-gray-800"
                 />
               </PopoverContent>
             </Popover>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">{t("endDate")}</label>
+            <label className="text-sm font-medium flex items-center gap-2">
+              <CalendarIcon className="h-4 w-4 text-primary" />
+              {t("endDate")}
+            </label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className="w-full justify-start text-left font-normal bg-gray-950/50 border-gray-800"
+                  className="w-full justify-start text-left font-normal bg-gray-950/50 border-gray-800 hover:bg-gray-900 hover:border-gray-700"
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {endDate ? format(endDate, "PPP") : <span>{t("selectDate")}</span>}
+                  <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
+                  {endDate ? format(endDate, "PPP") : <span className="text-gray-500">{t("selectDate")}</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -122,15 +156,30 @@ export default function AvailabilitySearch() {
                   onSelect={setEndDate}
                   disabled={(date) => !startDate || date <= startDate}
                   initialFocus
+                  className="rounded-lg border border-gray-800"
                 />
               </PopoverContent>
             </Popover>
           </div>
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium">{t("motorcycleTypeOptional")}</label>
+          <label className="text-sm font-medium flex items-center gap-2">
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              className="h-4 w-4 text-primary"
+            >
+              <path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 0C1.46 6.7 1.33 10.28 4 13l8 8 8-8c2.67-2.72 2.54-6.3.42-8.42z"></path>
+            </svg>
+            {t("motorcycleTypeOptional")}
+          </label>
           <Select value={motorcycleType} onValueChange={setMotorcycleType}>
-            <SelectTrigger className="bg-gray-950/50 border-gray-800">
+            <SelectTrigger className="bg-gray-950/50 border-gray-800 hover:bg-gray-900 hover:border-gray-700">
               <SelectValue placeholder={t("allMotorcycleTypes")} />
             </SelectTrigger>
             <SelectContent>
@@ -143,7 +192,10 @@ export default function AvailabilitySearch() {
             </SelectContent>
           </Select>
         </div>
-        <Button className="w-full" onClick={handleSearch}>
+        <Button 
+          className="w-full mt-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 font-bold py-6 rounded-lg transition-all duration-300 transform hover:scale-[1.02]"
+          onClick={handleSearch}
+        >
           {t("checkAvailability")}
         </Button>
       </CardContent>
