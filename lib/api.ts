@@ -33,7 +33,13 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
     })
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch (parseError) {
+        errorData = { message: `Respons tidak valid: ${response.statusText}` };
+      }
+      
       const errorResponse = {
         ...errorData,
         status: response.status,
@@ -43,7 +49,10 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
       return errorInterceptor(errorResponse, endpoint)
     }
 
-    const responseData = await response.json()
+    const responseData = await response.json().catch(error => {
+      console.error(`Error parsing JSON for ${endpoint}:`, error);
+      throw { message: 'Format respons tidak valid', originalError: error };
+    });
     
     console.log(`API response for ${endpoint}:`, responseData)
 
@@ -64,6 +73,15 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
     return responseInterceptor(result, endpoint)
   } catch (error) {
     console.error(`Error during API request to ${endpoint}:`, error)
+    
+    // Specific handling for network-related errors
+    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+      return errorInterceptor({
+        message: `Tidak dapat terhubung ke server. Periksa koneksi internet Anda atau coba lagi nanti.`,
+        originalError: error
+      }, endpoint);
+    }
+    
     return errorInterceptor(error, endpoint)
   }
 }
@@ -261,9 +279,43 @@ export async function fetchTransactionById(id: string): Promise<Transaction> {
 }
 
 export async function createTransaction(data: TransactionFormData): Promise<Transaction> {
+  // Definisikan interface untuk data yang akan dikirim ke backend
+  interface TransformedData {
+    namaPenyewa: string;
+    noWhatsapp: string;
+    unitId: string;
+    tanggalMulai: string;
+    tanggalSelesai: string;
+    jamMulai: string;
+    jamSelesai: string;
+    jasHujan: number;
+    helm: number;
+    totalBiaya?: number;
+  }
+  
+  // Membuat objek data baru yang hanya berisi field yang ada di DTO backend
+  const transformedData: TransformedData = {
+    namaPenyewa: data.namaPenyewa || data.namaCustomer || '',
+    noWhatsapp: data.noWhatsapp || data.noHP || '',
+    unitId: data.unitId || data.unitMotorId || '',
+    tanggalMulai: data.tanggalMulai,
+    tanggalSelesai: data.tanggalSelesai,
+    jamMulai: data.jamMulai || "08:00",
+    jamSelesai: data.jamSelesai || "08:00",
+    jasHujan: Number(data.jasHujan || 0),
+    helm: Number(data.helm || 0)
+  };
+  
+  // Tambahkan totalBiaya hanya jika ada nilainya
+  if (data.totalBiaya) {
+    transformedData.totalBiaya = Number(data.totalBiaya);
+  }
+
+  console.log("Data yang dikirim ke backend:", transformedData);
+
   const response = await apiRequest<ApiResponse<Transaction>>(API_CONFIG.ENDPOINTS.TRANSAKSI, {
     method: "POST",
-    body: JSON.stringify(data),
+    body: JSON.stringify(transformedData),
   })
   return response.data
 }

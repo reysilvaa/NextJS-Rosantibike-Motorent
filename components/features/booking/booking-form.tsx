@@ -56,12 +56,16 @@ export default function BookingForm({
 
     try {
       await createTransaction({
-        ...formData,
+        namaPenyewa: formData.namaCustomer,
+        noWhatsapp: formData.noHP,
+        unitId: motorcycle.id,
         tanggalMulai: format(startDate, "yyyy-MM-dd"),
         tanggalSelesai: format(endDate, "yyyy-MM-dd"),
-        unitMotorId: motorcycle.id,
-        jasHujan: Number(formData.jasHujan),
-        helm: Number(formData.helm)
+        jamMulai: formData.jamMulai || "08:00",
+        jamSelesai: formData.jamSelesai || "08:00",
+        jasHujan: Number(formData.jasHujan || 0),
+        helm: Number(formData.helm || 0),
+        totalBiaya: totalPrice
       });
 
       toast({

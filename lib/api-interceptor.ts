@@ -15,8 +15,25 @@ export const errorInterceptor = (error: any, endpoint: string): never => {
   // Log error
   console.error(`API Error [${endpoint}]:`, error)
   
+  // Handle empty error object
+  if (!error || (typeof error === 'object' && Object.keys(error).length === 0)) {
+    error = { message: `Koneksi ke server gagal atau server tidak merespons untuk ${endpoint}` };
+  }
+  
+  // Extract validation errors
+  let errorMessage = '';
+  if (error?.status === 400 && error?.message && Array.isArray(error.message)) {
+    // Handle validation errors (usually array of messages)
+    errorMessage = error.message.slice(0, 2).join('; ');
+    if (error.message.length > 2) {
+      errorMessage += `; dan ${error.message.length - 2} kesalahan lainnya`;
+    }
+  } else {
+    // Regular error message
+    errorMessage = error?.message || error?.error || 'Terjadi kesalahan pada server';
+  }
+  
   // Tampilkan toast error
-  const errorMessage = error?.message || 'Terjadi kesalahan pada server'
   toast({
     title: "Error",
     description: errorMessage,

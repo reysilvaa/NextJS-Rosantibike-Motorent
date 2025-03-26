@@ -123,17 +123,22 @@ export interface AvailabilitySearchParams {
 }
 
 export interface TransactionFormData {
-  namaCustomer: string
-  noHP: string
-  alamat: string
-  nomorKTP: string
+  namaPenyewa: string
+  noWhatsapp: string
+  unitId: string
   tanggalMulai: string
   tanggalSelesai: string
-  unitMotorId: string
+  jamMulai: string
+  jamSelesai: string
   jasHujan?: number
   helm?: number
-  jamMulai?: string
-  jamSelesai?: string
+  totalBiaya?: number
+  // Mempertahankan properti frontend untuk backward compatibility
+  namaCustomer?: string
+  noHP?: string
+  alamat?: string
+  nomorKTP?: string
+  unitMotorId?: string
 }
 
 // Response untuk availability check
