@@ -9,11 +9,11 @@ import { useTranslation } from "@/i18n/hooks"
 import reviewsData from "@/lib/reviews.json"
 
 interface Review {
-  Author: string;
-  "Review Text": string;
-  "Review Rating": number;
-  Date: string;
-  Likes: number;
+  "nama pengulas": string;
+  profil: string | number;
+  "tgl ulasan": string;
+  "isi ulasan": string;
+  rating: number;
 }
 
 export default function Testimonials() {
@@ -22,7 +22,7 @@ export default function Testimonials() {
   const [reviews, setReviews] = useState<Review[]>([])
 
   useEffect(() => {
-    // Mengambil 8 ulasan acak dari reviewsData (jika ada banyak)
+    // Mengambil 8 ulasan acak dari reviewsData
     const shuffled = [...reviewsData].sort(() => 0.5 - Math.random());
     const selectedReviews = shuffled.slice(0, 8);
     setReviews(selectedReviews);
@@ -34,6 +34,16 @@ export default function Testimonials() {
 
   const prevTestimonial = () => {
     setActiveIndex((prev) => (prev - 1 + reviews.length) % reviews.length)
+  }
+
+  // Mendapatkan inisial dari nama pengulas
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
   }
 
   // Jika belum ada data yang dimuat
@@ -62,29 +72,35 @@ export default function Testimonials() {
                   <Card className="bg-gray-900/50 border-gray-800 h-full">
                     <CardContent className="p-8 h-full flex flex-col">
                       <div className="flex flex-col md:flex-row gap-6 items-center md:items-start h-full">
-                        <div className="relative w-20 h-20 rounded-full overflow-hidden flex-shrink-0">
-                          <Image
-                            src={`/avatars/avatar-${(index % 8) + 1}.png`}
-                            alt={review.Author}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
+                        {review.profil && review.profil !== "" ? (
+                          <div className="relative w-20 h-20 rounded-full overflow-hidden flex-shrink-0">
+                            <Image
+                              src={review.profil as string}
+                              alt={review["nama pengulas"]}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-20 h-20 rounded-full flex-shrink-0 bg-primary flex items-center justify-center text-white font-bold text-xl">
+                            {getInitials(review["nama pengulas"])}
+                          </div>
+                        )}
                         <div className="flex-1 text-center md:text-left flex flex-col h-full">
                           <div className="flex justify-center md:justify-start mb-2">
                             {[...Array(5)].map((_, i) => (
                               <Star
                                 key={i}
                                 className={`h-5 w-5 ${
-                                  i < review["Review Rating"] ? "text-yellow-500 fill-yellow-500" : "text-gray-600"
+                                  i < review.rating ? "text-yellow-500 fill-yellow-500" : "text-gray-600"
                                 }`}
                               />
                             ))}
                           </div>
-                          <p className="text-gray-300 mb-4 italic flex-grow min-h-[100px] overflow-y-auto">"{review["Review Text"]}"</p>
+                          <p className="text-gray-300 mb-4 italic flex-grow min-h-[100px] overflow-y-auto">"{review["isi ulasan"]}"</p>
                           <div>
-                            <h4 className="font-semibold">{review.Author}</h4>
-                            <p className="text-gray-400 text-sm">{review.Date}</p>
+                            <h4 className="font-semibold">{review["nama pengulas"]}</h4>
+                            <p className="text-gray-400 text-sm">{review["tgl ulasan"]}</p>
                           </div>
                         </div>
                       </div>
