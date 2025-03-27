@@ -209,6 +209,7 @@ export async function checkAvailability(params: AvailabilitySearchParams): Promi
     
     if (params.jenisMotorId) {
       queryParams.append("jenisId", params.jenisMotorId)
+      console.log("Filtering by motorcycle type ID:", params.jenisMotorId);
     }
     
     const endpoint = `${API_CONFIG.ENDPOINTS.UNIT_MOTOR_AVAILABILITY}?${queryParams.toString()}`;

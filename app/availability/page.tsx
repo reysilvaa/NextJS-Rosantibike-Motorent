@@ -12,6 +12,8 @@ import { AlertCircle } from "lucide-react"
 import { useTranslation } from "@/i18n/hooks"
 import { PageHeader } from "@/components/ui/page-header"
 import { useEffect } from "react"
+import { useMotorcycleTypes } from "@/hooks/use-motorcycles"
+import { Badge } from "@/components/ui/badge"
 
 export default function AvailabilityPage() {
   const { t } = useTranslation()
@@ -20,7 +22,11 @@ export default function AvailabilityPage() {
   // Extract search params
   const tanggalMulai = searchParams.get("startDate")
   const tanggalSelesai = searchParams.get("endDate")
-  const jenisMotorId = searchParams.get("jenisId") || searchParams.get("jenisMotorId") || undefined
+  const jenisMotorId = searchParams.get("jenisId") || undefined
+  
+  // Get motorcycle type info for filter display
+  const { data: motorcycleTypes } = useMotorcycleTypes()
+  const selectedType = motorcycleTypes?.find(type => type.id === jenisMotorId)
   
   // Format dates for display
   const startDate = tanggalMulai 
@@ -74,10 +80,17 @@ export default function AvailabilityPage() {
             
             <div className="mb-6">
               <h2 className="text-2xl font-semibold mb-1">{t("availableMotorcycles")}</h2>
-              <p className="text-gray-400">
+              <div className="text-gray-400 flex items-center flex-wrap gap-2">
                 {startDate} - {endDate}
-                {jenisMotorId && ` • ${t("filteredByMotorcycleType")}`}
-              </p>
+                {selectedType && (
+                  <>
+                    <span className="mx-1">•</span>
+                    <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                      {selectedType.merk} {selectedType.model}
+                    </Badge>
+                  </>
+                )}
+              </div>
             </div>
             
             {isLoading ? (

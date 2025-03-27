@@ -41,7 +41,7 @@ export default function AvailabilityResults({ motorcycles, startDate, endDate }:
     }
   }, [motorcycles]);
   
-  const rentalDays = differenceInDays(parseISO(endDate), parseISO(startDate)) + 1
+  const rentalDays = differenceInDays(parseISO(endDate), parseISO(startDate))
   
   const sortedMotorcycles = [...motorcycles].sort((a, b) => {
     switch (sortOption) {
