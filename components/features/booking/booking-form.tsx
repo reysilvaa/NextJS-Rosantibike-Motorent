@@ -1,18 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { format } from "date-fns";
+import { format, differenceInHours } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Calendar, Clock, User, MapPin, CreditCard, Umbrella, HardHat } from 'lucide-react';
+import { Loader2, Calendar, Clock, User, MapPin, CreditCard, Umbrella, HardHat, AlertTriangle } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 import type { MotorcycleUnit } from "@/lib/types";
-import { createTransaction } from "@/lib/api";
+import { createTransaction, calculateRentalPrice } from "@/lib/api";
 import { Separator } from "@/components/ui/separator";
+import Image from "next/image";
 
 interface BookingFormProps {
   motorcycle: MotorcycleUnit;
@@ -41,6 +42,8 @@ export default function BookingForm({
     jamSelesai: "08:00"
   });
   const [formError, setFormError] = useState<string | null>(null);
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [priceDetails, setPriceDetails] = useState<any>(null);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -49,12 +52,47 @@ export default function BookingForm({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Fungsi untuk mengambil kalkulasi harga dari backend
+  const fetchPriceCalculation = useCallback(async () => {
+    setIsCalculating(true);
+    try {
+      const result = await calculateRentalPrice({
+        unitId: motorcycle.id,
+        tanggalMulai: format(startDate, "yyyy-MM-dd"),
+        tanggalSelesai: format(endDate, "yyyy-MM-dd"),
+        jamMulai: formData.jamMulai,
+        jamSelesai: formData.jamSelesai,
+        jasHujan: Number(formData.jasHujan),
+        helm: Number(formData.helm)
+      });
+      
+      setPriceDetails(result);
+      console.log("Price details from backend:", result);
+    } catch (err) {
+      console.error("Error fetching price calculation:", err);
+      toast({
+        title: "Error",
+        description: "Gagal mendapatkan perhitungan harga. Menggunakan perhitungan lokal.",
+        variant: "destructive",
+      });
+      // Biarkan perhitungan lokal sebagai fallback
+    } finally {
+      setIsCalculating(false);
+    }
+  }, [motorcycle.id, startDate, endDate, formData.jamMulai, formData.jamSelesai, formData.jasHujan, formData.helm, toast]);
+
+  // Panggil API perhitungan harga ketika input form berubah
+  useEffect(() => {
+    fetchPriceCalculation();
+  }, [fetchPriceCalculation]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setFormError(null);
 
     try {
+      // Gunakan totalPrice yang dihitung dari frontend, bukan dari backend
       await createTransaction({
         namaPenyewa: formData.namaCustomer,
         noWhatsapp: formData.noHP,
@@ -94,11 +132,44 @@ export default function BookingForm({
     }
   };
 
+  // Hitung durasi dalam hari kalender antara tanggal mulai dan selesai
   const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-  const basePrice = motorcycle.hargaSewa * totalDays;
-  const jasHujanPrice = 5000 * Number(formData.jasHujan);
-  const helmPrice = 5000 * Number(formData.helm);
-  const totalPrice = basePrice + jasHujanPrice + helmPrice;
+  
+  // Hitung jam sewa dengan benar
+  const startDateTime = new Date(startDate);
+  const endDateTime = new Date(endDate);
+  const [jamMulaiHour, jamMulaiMinute] = formData.jamMulai.split(':').map(Number);
+  const [jamSelesaiHour, jamSelesaiMinute] = formData.jamSelesai.split(':').map(Number);
+  
+  startDateTime.setHours(jamMulaiHour, jamMulaiMinute, 0, 0);
+  endDateTime.setHours(jamSelesaiHour, jamSelesaiMinute, 0, 0);
+  
+  // Hitung durasi dalam jam
+  const totalHours = Math.max(1, Math.ceil((endDateTime.getTime() - startDateTime.getTime()) / (1000 * 60 * 60)));
+  
+  // Hitung jumlah hari penuh dan jam tambahan
+  let fullDays = Math.floor(totalHours / 24);
+  let extraHours = totalHours % 24;
+  
+  // Jika extra hours lebih dari 6 jam, tambahkan 1 hari penuh
+  if (extraHours > 6) {
+    fullDays += 1;
+    extraHours = 0;
+  }
+  
+  // Hitung tarif sewa langsung dari data motor
+  const hargaSewaPerHari = motorcycle.hargaSewa;
+  
+  // Tarif keterlambatan (yang melebihi kelipatan 24 jam)
+  const dendaPerJam = 15000;
+  
+  // Hitung biaya sewa
+  const baseDailyPrice = fullDays * hargaSewaPerHari;
+  const overduePrice = extraHours > 0 ? extraHours * dendaPerJam : 0;
+  const totalPrice = baseDailyPrice + overduePrice;
+  
+  // Status keterlambatan
+  const isOverdue = extraHours > 0;
 
   return (
     <Card className="bg-card border-border shadow-lg animate-fadeIn">
@@ -109,6 +180,9 @@ export default function BookingForm({
         </CardTitle>
         <CardDescription>
           Lengkapi data diri Anda untuk menyewa motor
+          <span className="block mt-1 text-amber-600">
+            <span className="font-medium">Catatan:</span> Keterlambatan pengembalian dikenakan denda Rp 15.000/jam
+          </span>
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-6">
@@ -223,7 +297,7 @@ export default function BookingForm({
             <div className="space-y-2">
               <Label htmlFor="jasHujan" className="flex items-center gap-2">
                 <Umbrella className="h-4 w-4 text-muted-foreground" />
-                Jas Hujan (Rp 5.000/unit)
+                Jas Hujan <span className="text-xs font-medium text-green-600 bg-green-100 px-1.5 py-0.5 rounded">FREE</span>
               </Label>
               <select
                 id="jasHujan"
@@ -240,7 +314,7 @@ export default function BookingForm({
             <div className="space-y-2">
               <Label htmlFor="helm" className="flex items-center gap-2">
                 <HardHat className="h-4 w-4 text-muted-foreground" />
-                Helm (Rp 5.000/unit)
+                Helm <span className="text-xs font-medium text-green-600 bg-green-100 px-1.5 py-0.5 rounded">FREE</span>
               </Label>
               <select
                 id="helm"
@@ -282,25 +356,45 @@ export default function BookingForm({
             
             <div className="flex justify-between">
               <span className="text-sm text-muted-foreground">Durasi:</span>
-              <span className="text-sm font-medium">{totalDays} hari</span>
+              <span className="text-sm font-medium">
+                {fullDays > 0 ? `${fullDays} hari ` : ""}
+                {extraHours > 0 ? `${extraHours} jam` : fullDays > 0 ? "" : `${totalHours} jam`}
+                {isOverdue && <span className="ml-1 text-amber-600">(melebihi waktu)</span>}
+              </span>
             </div>
             
             <Separator className="my-2" />
             
             <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Harga Sewa:</span>
+              <span className="text-sm text-muted-foreground">Jam Sewa:</span>
               <span className="text-sm font-medium">
-                Rp {motorcycle.hargaSewa.toLocaleString()} × {totalDays} hari
+                {format(startDate, "d MMM yyyy")} {formData.jamMulai} - {format(endDate, "d MMM yyyy")} {formData.jamSelesai}
               </span>
             </div>
+            
+            <div className="flex justify-between">
+              <span className="text-sm text-muted-foreground">Harga Sewa:</span>
+              <span className="text-sm font-medium">
+                Rp {hargaSewaPerHari.toLocaleString()} × {fullDays} hari
+              </span>
+            </div>
+            
+            {isOverdue && (
+              <div className="flex justify-between">
+                <span className="text-sm text-muted-foreground text-amber-600">Biaya Keterlambatan:</span>
+                <span className="text-sm font-medium text-amber-600">
+                  Rp {dendaPerJam.toLocaleString()} × {extraHours} jam
+                </span>
+              </div>
+            )}
             
             {formData.jasHujan > 0 && (
               <div className="flex justify-between">
                 <span className="text-sm text-muted-foreground flex items-center gap-1">
                   <Umbrella className="h-3 w-3" /> Jas Hujan:
                 </span>
-                <span className="text-sm font-medium">
-                  {formData.jasHujan} unit (Rp {(5000 * Number(formData.jasHujan)).toLocaleString()})
+                <span className="text-sm font-medium text-green-600">
+                  {formData.jasHujan} unit <span className="text-xs font-medium bg-green-100 px-1.5 py-0.5 rounded">FREE</span>
                 </span>
               </div>
             )}
@@ -310,8 +404,8 @@ export default function BookingForm({
                 <span className="text-sm text-muted-foreground flex items-center gap-1">
                   <HardHat className="h-3 w-3" /> Helm:
                 </span>
-                <span className="text-sm font-medium">
-                  {formData.helm} unit (Rp {(5000 * Number(formData.helm)).toLocaleString()})
+                <span className="text-sm font-medium text-green-600">
+                  {formData.helm} unit <span className="text-xs font-medium bg-green-100 px-1.5 py-0.5 rounded">FREE</span>
                 </span>
               </div>
             )}
@@ -323,6 +417,22 @@ export default function BookingForm({
               <span className="text-primary font-bold text-lg">
                 Rp {totalPrice.toLocaleString()}
               </span>
+            </div>
+          </div>
+
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-amber-800 text-sm">
+            <div className="flex items-start gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 flex-shrink-0">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              <div>
+                <p className="font-medium mb-1">Informasi Tarif Sewa:</p>
+                <p>Tarif sewa motor <strong>{motorcycle.jenis?.merk} {motorcycle.jenis?.model}</strong> adalah <span className="font-medium">Rp {hargaSewaPerHari.toLocaleString()}/hari</span>.</p>
+                <p className="mt-1">Keterlambatan 1-6 jam dikenakan <span className="font-medium">biaya Rp 15.000/jam</span>.</p>
+                <p className="mt-1">Keterlambatan lebih dari 6 jam dihitung sebagai <span className="font-medium">tambahan 1 hari penuh</span>.</p>
+              </div>
             </div>
           </div>
 

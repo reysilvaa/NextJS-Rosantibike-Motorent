@@ -429,6 +429,94 @@ export async function searchTransactionsByPhone(phoneNumber: string): Promise<Tr
   return Array.isArray(response) ? response : response.data || [];
 }
 
+// Fungsi untuk menghitung harga sewa
+export async function calculateRentalPrice(data: {
+  unitId: string,
+  tanggalMulai: string,
+  tanggalSelesai: string,
+  jamMulai: string,
+  jamSelesai: string,
+  jasHujan?: number,
+  helm?: number
+}): Promise<{
+  totalBiaya: number,
+  durasi: {
+    totalHours: number,
+    fullDays: number,
+    extraHours: number
+  },
+  biaya: {
+    dasar: number,
+    jasHujan: number,
+    helm: number
+  },
+  rincian: {
+    hargaPerJam: number,
+    hargaPerHari: number
+  }
+}> {
+  // Format data ke bentuk yang diexpect backend
+  const requestData = {
+    unitId: data.unitId,
+    tanggalMulai: data.tanggalMulai,
+    tanggalSelesai: data.tanggalSelesai,
+    jamMulai: data.jamMulai || "08:00",
+    jamSelesai: data.jamSelesai || "08:00",
+    jasHujan: Number(data.jasHujan || 0),
+    helm: Number(data.helm || 0)
+  };
+
+  try {
+    console.log("Calculating rental price with data:", requestData);
+    const response = await apiRequest<any>(`${API_CONFIG.ENDPOINTS.TRANSAKSI}/calculate-price`, {
+      method: "POST",
+      body: JSON.stringify(requestData),
+    });
+    
+    console.log("Price calculation response:", response);
+    return response;
+  } catch (error) {
+    console.error("Error calculating price:", error);
+    // Return fallback calculation if API fails
+    const startDate = new Date(data.tanggalMulai);
+    const endDate = new Date(data.tanggalSelesai);
+    const [jamMulaiHour, jamMulaiMinute] = data.jamMulai.split(':').map(Number);
+    const [jamSelesaiHour, jamSelesaiMinute] = data.jamSelesai.split(':').map(Number);
+    
+    startDate.setHours(jamMulaiHour, jamMulaiMinute, 0, 0);
+    endDate.setHours(jamSelesaiHour, jamSelesaiMinute, 0, 0);
+    
+    // Calculate hours difference
+    const diffHours = Math.max(1, Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60)));
+    const fullDays = Math.floor(diffHours / 24);
+    const extraHours = diffHours % 24;
+    
+    const hourlyRate = 15000;
+    const dailyRate = hourlyRate * 24;
+    const baseCost = (fullDays * dailyRate) + (extraHours * hourlyRate);
+    const jasHujanCost = 5000 * Number(data.jasHujan || 0);
+    const helmCost = 5000 * Number(data.helm || 0);
+    
+    return {
+      totalBiaya: baseCost + jasHujanCost + helmCost,
+      durasi: {
+        totalHours: diffHours,
+        fullDays,
+        extraHours
+      },
+      biaya: {
+        dasar: baseCost,
+        jasHujan: jasHujanCost,
+        helm: helmCost
+      },
+      rincian: {
+        hargaPerJam: hourlyRate,
+        hargaPerHari: dailyRate
+      }
+    };
+  }
+}
+
 // Blog API
 export async function fetchBlogPosts(
   page = 1,
