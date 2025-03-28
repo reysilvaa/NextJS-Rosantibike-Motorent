@@ -96,9 +96,9 @@ export default function Navbar() {
     >
       <div className="container mx-auto flex items-center justify-between px-4">
         <Link href="/" className="flex items-center group">
-          <div className="mr-2 flex items-center justify-center rounded-full bg-primary/10 p-1.5 group-hover:bg-primary/20 transition-colors duration-300 animate-pulse-soft">
+          {/* <div className="mr-2 flex items-center justify-center rounded-full bg-primary/10 p-1.5 group-hover:bg-primary/20 transition-colors duration-300 animate-pulse-soft">
             <Bike className={cn("h-5 w-5", shouldUseWhiteStyle ? "text-white" : "text-primary")} />
-          </div>
+          </div> */}
           <span
             className={cn(
               "text-2xl font-bold relative",
@@ -107,7 +107,11 @@ export default function Navbar() {
                 : "bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70",
             )}
           >
-            MotoCruise
+            <img 
+              src={isHomePage ? isLightTheme ? (isScrolled ? "/logo/logo2.png" : "/logo/logo1.png") : "/logo/logo1.png" : "/logo/logo2.png"} 
+              alt="RosantiBike" 
+              className="h-10 w-30" 
+            />
             <span className={cn(
               "absolute -bottom-1 left-0 w-0 h-0.5 transition-all duration-500 group-hover:w-full",
               shouldUseWhiteStyle ? "bg-white/70" : "bg-primary/50"
@@ -267,7 +271,11 @@ export default function Navbar() {
                     <Bike className="h-5 w-5 text-primary" />
                   </div>
                   <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
-                    MotoCruise
+                    <img 
+                      src={isHomePage ? (isScrolled ? "/logo/logo2.png" : "/logo/logo1.png") : "/logo/logo2.png"} 
+                      alt="RosantiBike Motorent" 
+                      className="h-8 w-30" 
+                    />
                   </span>
                 </Link>
               </div>

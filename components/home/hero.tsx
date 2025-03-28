@@ -20,44 +20,44 @@ export default function Hero() {
     {
       videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/q0gtp8z72bayzdwqo7cp.mp4",
       imageUrl: "/placeholder.svg?height=1080&width=1920",
-      title: t("heroSlide1Title") || "Unleash Your Adventure Spirit",
-      subtitle: t("heroSlide1Subtitle") || "Premium motorcycles ready for your next journey",
+      title: t("heroSlide1Title") || "Jelajahi Keindahan dengan Motor Matic",
+      subtitle: t("heroSlide1Subtitle") || "Pengalaman wisata nyaman dengan motor matic berkualitas",
     },
     {
       videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/qst0cbu2au5l9qyks1xr.mp4",
       imageUrl: "/placeholder.svg?height=1080&width=1920",
-      title: t("heroSlide2Title") || "Discover Freedom on Two Wheels",
-      subtitle: t("heroSlide2Subtitle") || "Explore new destinations with our reliable bikes",
+      title: t("heroSlide2Title") || "Liburan Lebih Fleksibel dengan Motor Sewaan",
+      subtitle: t("heroSlide2Subtitle") || "Jangkau tempat wisata tersembunyi dengan bebas dan praktis",
     },
     {
       videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/bykdq8mjfivukkfkujtw.mp4",
       imageUrl: "/placeholder.svg?height=1080&width=1920",
-      title: t("heroSlide3Title") || "Performance Meets Comfort",
-      subtitle: t("heroSlide3Subtitle") || "Enjoy the perfect balance for long rides",
+      title: t("heroSlide3Title") || "Harga Terjangkau, Kualitas Terjamin",
+      subtitle: t("heroSlide3Subtitle") || "Nikmati tarif sewa kompetitif dengan pelayanan premium",
     },
     {
       videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/lyg6nonp8jj1ywzjqggh.mp4",
       imageUrl: "/placeholder.svg?height=1080&width=1920",
-      title: t("heroSlide4Title") || "Experience the Thrill of Speed",
-      subtitle: t("heroSlide4Subtitle") || "Feel the adrenaline rush on our sport bikes",
+      title: t("heroSlide4Title") || "Paket Wisata Motor Matic Hemat",
+      subtitle: t("heroSlide4Subtitle") || "Kombinasi sewa motor dan panduan wisata untuk pengalaman terbaik",
     },
     {
       videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/cljiyl0dbkokzax2pecf.mp4",
       imageUrl: "/placeholder.svg?height=1080&width=1920",
-      title: t("heroSlide5Title") || "Urban Commuting Redefined",
-      subtitle: t("heroSlide5Subtitle") || "Efficient and stylish rides for city adventures",
+      title: t("heroSlide5Title") || "Berkeliling Kota dengan Nyaman",
+      subtitle: t("heroSlide5Subtitle") || "Motor matic irit dan mudah dikendarai untuk wisata perkotaan",
     },
     {
       videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/ojy4yh9urck1pszysvto.mp4",
       imageUrl: "/placeholder.svg?height=1080&width=1920",
-      title: t("heroSlide6Title") || "Weekend Escapes Made Easy",
-      subtitle: t("heroSlide6Subtitle") || "Perfect companions for your getaway plans",
+      title: t("heroSlide6Title") || "Motor Matic untuk Segala Kebutuhan",
+      subtitle: t("heroSlide6Subtitle") || "Tersedia berbagai jenis motor matic sesuai dengan rencana perjalanan Anda",
     },
     {
       videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/ysed7qkyskikc36yto80.mp4",
       imageUrl: "/placeholder.svg?height=1080&width=1920",
-      title: t("heroSlide7Title") || "Ride in Ultimate Style",
-      subtitle: t("heroSlide7Subtitle") || "Turn heads with our premium motorcycle collection",
+      title: t("heroSlide7Title") || "Bebas Bereksplorasi Tanpa Batas",
+      subtitle: t("heroSlide7Subtitle") || "Temukan sudut-sudut wisata menarik dengan kebebasan berkendara sendiri",
     },
   ]
 
@@ -154,14 +154,14 @@ export default function Hero() {
                 size="lg"
                 className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground"
               >
-                {t("motorcycles")}
+                {t("motorcycles") || "Pilih Motor Matic"}
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
             <Link href="/availability">
               <Button size="lg" variant="outline" className="border-white border-2 bg-white hover:bg-white/90 text-black">
                 <Calendar className="mr-2 h-4 w-4" />
-                {t("availability")}
+                {t("availability") || "Cek Ketersediaan"}
               </Button>
             </Link>
           </div>

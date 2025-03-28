@@ -13,7 +13,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <h3 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-orange-500 mb-4">
-              MotoCruise
+              RosantiBike
             </h3>
             <p className="text-muted-foreground mb-4">
               {t("footerDescription")}
