@@ -28,6 +28,9 @@ const nextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
+  server: {
+    port: 3001,
+  },
   async rewrites() {
     return [
       {
