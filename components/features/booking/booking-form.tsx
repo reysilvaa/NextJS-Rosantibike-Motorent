@@ -180,7 +180,7 @@ export default function BookingForm({
         </CardTitle>
         <CardDescription>
           Lengkapi data diri Anda untuk menyewa motor
-          <span className="block mt-1 text-amber-600">
+          <span className="block mt-1 text-warning">
             <span className="font-medium">Catatan:</span> Keterlambatan pengembalian dikenakan denda Rp 15.000/jam
           </span>
         </CardDescription>
@@ -297,7 +297,7 @@ export default function BookingForm({
             <div className="space-y-2">
               <Label htmlFor="jasHujan" className="flex items-center gap-2">
                 <Umbrella className="h-4 w-4 text-muted-foreground" />
-                Jas Hujan <span className="text-xs font-medium text-green-600 bg-green-100 px-1.5 py-0.5 rounded">FREE</span>
+                Jas Hujan <span className="text-xs font-medium text-success bg-success/10 px-1.5 py-0.5 rounded">FREE</span>
               </Label>
               <select
                 id="jasHujan"
@@ -314,7 +314,7 @@ export default function BookingForm({
             <div className="space-y-2">
               <Label htmlFor="helm" className="flex items-center gap-2">
                 <HardHat className="h-4 w-4 text-muted-foreground" />
-                Helm <span className="text-xs font-medium text-green-600 bg-green-100 px-1.5 py-0.5 rounded">FREE</span>
+                Helm <span className="text-xs font-medium text-success bg-success/10 px-1.5 py-0.5 rounded">FREE</span>
               </Label>
               <select
                 id="helm"
@@ -359,7 +359,7 @@ export default function BookingForm({
               <span className="text-sm font-medium">
                 {fullDays > 0 ? `${fullDays} hari ` : ""}
                 {extraHours > 0 ? `${extraHours} jam` : fullDays > 0 ? "" : `${totalHours} jam`}
-                {isOverdue && <span className="ml-1 text-amber-600">(melebihi waktu)</span>}
+                {isOverdue && <span className="ml-1 text-warning">(melebihi waktu)</span>}
               </span>
             </div>
             
@@ -381,8 +381,8 @@ export default function BookingForm({
             
             {isOverdue && (
               <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground text-amber-600">Biaya Keterlambatan:</span>
-                <span className="text-sm font-medium text-amber-600">
+                <span className="text-sm text-muted-foreground text-warning">Biaya Keterlambatan:</span>
+                <span className="text-sm font-medium text-warning">
                   Rp {dendaPerJam.toLocaleString()} × {extraHours} jam
                 </span>
               </div>
@@ -393,8 +393,8 @@ export default function BookingForm({
                 <span className="text-sm text-muted-foreground flex items-center gap-1">
                   <Umbrella className="h-3 w-3" /> Jas Hujan:
                 </span>
-                <span className="text-sm font-medium text-green-600">
-                  {formData.jasHujan} unit <span className="text-xs font-medium bg-green-100 px-1.5 py-0.5 rounded">FREE</span>
+                <span className="text-sm font-medium text-success">
+                  {formData.jasHujan} unit <span className="text-xs font-medium bg-success/10 px-1.5 py-0.5 rounded">FREE</span>
                 </span>
               </div>
             )}
@@ -404,8 +404,8 @@ export default function BookingForm({
                 <span className="text-sm text-muted-foreground flex items-center gap-1">
                   <HardHat className="h-3 w-3" /> Helm:
                 </span>
-                <span className="text-sm font-medium text-green-600">
-                  {formData.helm} unit <span className="text-xs font-medium bg-green-100 px-1.5 py-0.5 rounded">FREE</span>
+                <span className="text-sm font-medium text-success">
+                  {formData.helm} unit <span className="text-xs font-medium bg-success/10 px-1.5 py-0.5 rounded">FREE</span>
                 </span>
               </div>
             )}
@@ -420,7 +420,7 @@ export default function BookingForm({
             </div>
           </div>
 
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-amber-800 text-sm">
+          <div className="bg-warning/10 border border-warning/20 rounded-lg p-4 text-warning-foreground text-sm">
             <div className="flex items-start gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 flex-shrink-0">
                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>

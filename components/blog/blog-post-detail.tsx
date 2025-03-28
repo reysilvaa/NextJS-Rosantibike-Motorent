@@ -93,18 +93,18 @@ export default function BlogPostDetail({ slug, post: initialPost }: BlogPostDeta
     return (
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto flex flex-col items-center justify-center py-16 px-4">
-          <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mb-4">
-            <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <div className="w-16 h-16 bg-destructive/20 rounded-full flex items-center justify-center mb-4">
+            <svg className="w-8 h-8 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
           <h2 className="text-xl font-bold mb-2 text-center">Artikel Tidak Ditemukan</h2>
-          <p className="text-gray-400 mb-6 text-center max-w-md">{error}</p>
+          <p className="text-muted-foreground mb-6 text-center max-w-md">{error}</p>
           <div className="flex gap-3">
             <Button 
               onClick={() => window.location.reload()} 
               variant="outline" 
-              className="border-gray-700 hover:bg-gray-800"
+              className="border-border hover:bg-accent"
             >
               {t("tryAgain")}
             </Button>
@@ -121,13 +121,13 @@ export default function BlogPostDetail({ slug, post: initialPost }: BlogPostDeta
     return (
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto flex flex-col items-center justify-center py-16 px-4">
-          <div className="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mb-4">
-            <svg className="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <div className="w-16 h-16 bg-warning/20 rounded-full flex items-center justify-center mb-4">
+            <svg className="w-8 h-8 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
           <h2 className="text-xl font-bold mb-2">{t("blogPostNotFound")}</h2>
-          <p className="text-gray-400 mb-6 text-center max-w-md">Maaf, artikel yang Anda cari tidak ditemukan atau telah dihapus.</p>
+          <p className="text-muted-foreground mb-6 text-center max-w-md">Maaf, artikel yang Anda cari tidak ditemukan atau telah dihapus.</p>
           <Link href="/blog">
             <Button>{t("backToBlog")}</Button>
           </Link>
@@ -176,13 +176,13 @@ export default function BlogPostDetail({ slug, post: initialPost }: BlogPostDeta
         </Link>
 
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">{blogPost.judul}</h1>
-          <div className="flex flex-wrap items-center text-gray-400 text-sm gap-4 mb-6">
-            <div className="flex items-center bg-gray-800/50 px-3 py-1 rounded-full">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{blogPost.judul}</h1>
+          <div className="flex flex-wrap items-center text-muted-foreground text-sm gap-4 mb-6">
+            <div className="flex items-center bg-accent/20 px-3 py-1 rounded-full">
               <Calendar className="h-3.5 w-3.5 mr-2 text-primary" />
               {formatDate(blogPost.createdAt)}
             </div>
-            <div className="flex items-center bg-gray-800/50 px-3 py-1 rounded-full">
+            <div className="flex items-center bg-accent/20 px-3 py-1 rounded-full">
               <User className="h-3.5 w-3.5 mr-2 text-primary" />
               {t("adminAuthor")}
             </div>
@@ -196,7 +196,7 @@ export default function BlogPostDetail({ slug, post: initialPost }: BlogPostDeta
         </div>
 
         {(blogPost.featuredImage || blogPost.thumbnail) && (
-          <div className="relative h-[400px] w-full rounded-xl overflow-hidden mb-8 shadow-lg border border-gray-800">
+          <div className="relative h-[400px] w-full rounded-xl overflow-hidden mb-8 shadow-lg border border-border">
             <Image
               src={blogPost.featuredImage || blogPost.thumbnail || "/placeholder.svg"}
               alt={blogPost.judul}
@@ -206,19 +206,19 @@ export default function BlogPostDetail({ slug, post: initialPost }: BlogPostDeta
           </div>
         )}
 
-        <Card className="bg-gray-900/60 border-gray-800 shadow-lg rounded-xl overflow-hidden">
+        <Card className="bg-card/60 border-border shadow-lg rounded-xl overflow-hidden">
           <CardContent className="p-8 prose prose-invert max-w-none prose-headings:text-primary prose-a:text-primary prose-img:rounded-lg prose-strong:text-primary/90">
             <div dangerouslySetInnerHTML={{ __html: contentToDisplay }} />
           </CardContent>
         </Card>
 
-        <Separator className="my-10 bg-gray-800" />
+        <Separator className="my-10 bg-border" />
 
         <div className="space-y-8">
           <div className="flex justify-between items-center">
             <h3 className="text-xl font-semibold">{t("relatedArticles")}</h3>
             <Link href="/blog">
-              <Button variant="outline" className="border-gray-700 hover:bg-gray-800">
+              <Button variant="outline" className="border-border hover:bg-accent">
                 {t("viewAllArticles")}
               </Button>
             </Link>
@@ -229,16 +229,16 @@ export default function BlogPostDetail({ slug, post: initialPost }: BlogPostDeta
             {[1, 2, 3].map((index) => (
               <Card
                 key={index}
-                className="bg-gray-900/60 border-gray-800 overflow-hidden hover:border-primary/30 hover:shadow-md hover:shadow-primary/5 transition-all duration-300 group"
+                className="bg-card/60 border-border overflow-hidden hover:border-primary/30 hover:shadow-md hover:shadow-primary/5 transition-all duration-300 group"
               >
-                <div className="relative h-40 bg-gray-800 overflow-hidden">
-                  <div className="absolute inset-0 flex items-center justify-center text-gray-600 group-hover:scale-110 transition-transform duration-700">
+                <div className="relative h-40 bg-muted overflow-hidden">
+                  <div className="absolute inset-0 flex items-center justify-center text-muted-foreground group-hover:scale-110 transition-transform duration-700">
                     {t("imagePlaceholder")}
                   </div>
                 </div>
                 <CardContent className="p-5">
                   <h4 className="font-medium mb-2 group-hover:text-primary transition-colors">{t("relatedArticleTitle")} {index}</h4>
-                  <p className="text-gray-400 text-sm">{formatDate(new Date().toISOString())}</p>
+                  <p className="text-muted-foreground text-sm">{formatDate(new Date().toISOString())}</p>
                 </CardContent>
               </Card>
             ))}

@@ -52,11 +52,11 @@ export default function Testimonials() {
   }
 
   return (
-    <section className="py-20 bg-gradient-to-b from-gray-900 to-black">
+    <section className="py-20 bg-gradient-to-b from-background/80 to-background">
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">{t("testimonialsTitle")}</h2>
-          <p className="text-gray-400">
+          <p className="text-muted-foreground">
             {t("testimonialsDescription")}
           </p>
         </div>
@@ -69,7 +69,7 @@ export default function Testimonials() {
             >
               {reviews.map((review, index) => (
                 <div key={index} className="w-full flex-shrink-0 px-4">
-                  <Card className="bg-gray-900/50 border-gray-800 h-full">
+                  <Card className="bg-card/50 border-border h-full">
                     <CardContent className="p-8 h-full flex flex-col">
                       <div className="flex flex-col md:flex-row gap-6 items-center md:items-start h-full">
                         {review.profil && review.profil !== "" ? (
@@ -92,15 +92,15 @@ export default function Testimonials() {
                               <Star
                                 key={i}
                                 className={`h-5 w-5 ${
-                                  i < review.rating ? "text-yellow-500 fill-yellow-500" : "text-gray-600"
+                                  i < review.rating ? "text-yellow-500 fill-yellow-500" : "text-muted"
                                 }`}
                               />
                             ))}
                           </div>
-                          <p className="text-gray-300 mb-4 italic flex-grow min-h-[100px] overflow-y-auto">"{review["isi ulasan"]}"</p>
+                          <p className="text-foreground/80 mb-4 italic flex-grow min-h-[100px] overflow-y-auto">"{review["isi ulasan"]}"</p>
                           <div>
                             <h4 className="font-semibold">{review["nama pengulas"]}</h4>
-                            <p className="text-gray-400 text-sm">{review["tgl ulasan"]}</p>
+                            <p className="text-muted-foreground text-sm">{review["tgl ulasan"]}</p>
                           </div>
                         </div>
                       </div>
@@ -137,7 +137,7 @@ export default function Testimonials() {
                 key={index}
                 onClick={() => setActiveIndex(index)}
                 className={`w-2 h-2 rounded-full transition-all ${
-                  index === activeIndex ? "bg-primary w-6" : "bg-gray-600"
+                  index === activeIndex ? "bg-primary w-6" : "bg-muted"
                 }`}
                 aria-label={t("goToTestimonial", { number: index + 1 })}
               />

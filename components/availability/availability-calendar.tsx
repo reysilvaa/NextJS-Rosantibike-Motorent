@@ -232,12 +232,12 @@ export default function AvailabilityCalendar() {
 
   if (!startDate || !endDate) {
     return (
-      <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 md:p-8 text-center">
+      <div className="bg-card/50 border-border rounded-xl p-6 md:p-8 text-center">
         <h2 className="text-2xl font-semibold mb-4">{t("checkMotorcycleAvailability")}</h2>
-        <p className="text-gray-400 mb-6">{t("pleaseSelectRentalDates")}</p>
+        <p className="text-muted-foreground mb-6">{t("pleaseSelectRentalDates")}</p>
         <div className="max-w-md mx-auto">
-          <div className="bg-gray-800/50 rounded-lg p-8 flex items-center justify-center">
-            <CalendarIcon className="h-16 w-16 text-gray-600" />
+          <div className="bg-muted/50 rounded-lg p-8 flex items-center justify-center">
+            <CalendarIcon className="h-16 w-16 text-muted-foreground" />
           </div>
         </div>
       </div>
@@ -245,11 +245,11 @@ export default function AvailabilityCalendar() {
   }
 
   return (
-    <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 md:p-8">
+    <div className="bg-card/50 border-border rounded-xl p-6 md:p-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
           <h2 className="text-2xl font-semibold">{t("availableMotorcycles")}</h2>
-          <p className="text-gray-400">
+          <p className="text-muted-foreground">
             {startDate && endDate ? (
               <>
                 {format(startDate, "MMM d, yyyy")} - {format(endDate, "MMM d, yyyy")} (
@@ -263,8 +263,8 @@ export default function AvailabilityCalendar() {
 
         <div className="flex gap-3 items-center">
           <div className="flex items-center">
-            <span className={`h-2 w-2 rounded-full mr-1.5 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
-            <span className="text-xs text-gray-400">{isConnected ? t("realtimeActive") : t("offline")}</span>
+            <span className={`h-2 w-2 rounded-full mr-1.5 ${isConnected ? 'bg-success' : 'bg-destructive'}`} />
+            <span className="text-xs text-muted-foreground">{isConnected ? t("realtimeActive") : t("offline")}</span>
           </div>
           
           <Tabs
@@ -286,7 +286,7 @@ export default function AvailabilityCalendar() {
         </div>
       ) : error ? (
         <div className="text-center py-10">
-          <p className="text-red-500 mb-4">{error}</p>
+          <p className="text-destructive mb-4">{error}</p>
           <Button onClick={() => fetchAvailabilityData()}>{t("tryAgain")}</Button>
         </div>
       ) : (
@@ -295,12 +295,12 @@ export default function AvailabilityCalendar() {
             <div className="overflow-x-auto">
               <div className="min-w-[800px]">
                 <div className="grid grid-cols-[200px_1fr] gap-4">
-                  <div className="bg-gray-800/50 rounded-lg p-4">
+                  <div className="bg-muted/50 rounded-lg p-4">
                     <h3 className="font-semibold mb-2">{t("motorcycle")}</h3>
                   </div>
                   <div className="grid grid-cols-7 gap-1">
                     {days.map((day) => (
-                      <div key={day.toISOString()} className="bg-gray-800/50 rounded-lg p-2 text-center">
+                      <div key={day.toISOString()} className="bg-muted/50 rounded-lg p-2 text-center">
                         <div className="text-xs font-medium">{format(day, "EEE")}</div>
                         <div className="text-sm">{format(day, "d")}</div>
                       </div>
@@ -315,21 +315,21 @@ export default function AvailabilityCalendar() {
                       transition={{ duration: 0.3 }}
                       className="contents"
                     >
-                      <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+                      <div className="bg-card border-border rounded-lg p-4">
                         <div className="font-medium">
                           {motorcycle.jenis?.merk || t("motor")} {motorcycle.jenis?.model || ''}
                         </div>
-                        <div className="text-sm text-gray-400">{motorcycle.platNomor}</div>
-                        <div className="text-sm text-gray-400">{motorcycle.warna}</div>
+                        <div className="text-sm text-muted-foreground">{motorcycle.platNomor}</div>
+                        <div className="text-sm text-muted-foreground">{motorcycle.warna}</div>
                         <div className="font-medium text-primary mt-2">Rp {motorcycle.hargaSewa?.toLocaleString() || 0}/{t("day")}</div>
                       </div>
                       <div className="grid grid-cols-7 gap-1">
                         {days.map((day) => (
                           <div
                             key={`${motorcycle.id}-${day.toISOString()}`}
-                            className="bg-green-900/20 border border-green-900/30 rounded-lg p-2 text-center"
+                            className="bg-success/20 border border-success/30 rounded-lg p-2 text-center"
                           >
-                            <div className="text-green-500 text-xs">{t("available")}</div>
+                            <div className="text-success text-xs">{t("available")}</div>
                           </div>
                         ))}
                       </div>

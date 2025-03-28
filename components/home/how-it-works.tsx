@@ -31,11 +31,11 @@ export default function HowItWorks() {
   ]
 
   return (
-    <section className="py-20 bg-black">
+    <section className="py-20 bg-background">
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">{t("howItWorks")}</h2>
-          <p className="text-gray-400">
+          <p className="text-muted-foreground">
             {t("howItWorksDescription")}
           </p>
         </div>
@@ -50,10 +50,10 @@ export default function HowItWorks() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className="relative"
             >
-              <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 h-full">
+              <div className="bg-card border border-border rounded-lg p-6 h-full">
                 <div className="flex justify-center mb-6">{step.icon}</div>
                 <h3 className="text-xl font-semibold mb-3 text-center">{step.title}</h3>
-                <p className="text-gray-400 text-center">{step.description}</p>
+                <p className="text-muted-foreground text-center">{step.description}</p>
               </div>
 
               {index < steps.length - 1 && (

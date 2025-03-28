@@ -14,7 +14,7 @@ export default function ContactMap() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
     >
-      <Card className="bg-gray-900/50 border-gray-800 overflow-hidden">
+      <Card className="bg-card/50 border-border overflow-hidden">
         <div className="h-[400px]" aria-label={t("ourLocation")}>
           <GoogleMapComponent />
         </div>

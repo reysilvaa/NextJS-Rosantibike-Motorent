@@ -42,36 +42,36 @@ export default function BookingSuccessPage() {
   return (
     <div className="container mx-auto py-12 px-4">
       <div className="max-w-2xl mx-auto">
-        <Card className="border-gray-800 bg-gray-900">
+        <Card className="border-border bg-card">
           <CardContent className="pt-8 pb-6 px-6 text-center">
-            <div className="mb-6 inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-100 text-green-600">
+            <div className="mb-6 inline-flex items-center justify-center w-20 h-20 rounded-full bg-success/20 text-success">
               <CheckCircle2 className="h-12 w-12" />
             </div>
             <h1 className="text-2xl font-bold mb-4">Pemesanan Berhasil!</h1>
-            <p className="text-gray-300 mb-6">
+            <p className="text-foreground/80 mb-6">
               Terima kasih <span className="font-semibold">{name}</span> telah memesan motor di layanan kami. Detail pemesanan Anda telah kami terima dan sedang diproses.
             </p>
             
-            <div className="bg-gray-800/50 rounded-lg p-4 mb-6 text-left">
+            <div className="bg-secondary/40 rounded-lg p-4 mb-6 text-left">
               <h3 className="font-medium mb-3 text-primary">Detail Pemesanan:</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-400">Motor:</span>
+                  <span className="text-muted-foreground">Motor:</span>
                   <span className="font-medium">{motor}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-400">Plat Nomor:</span>
+                  <span className="text-muted-foreground">Plat Nomor:</span>
                   <span className="font-medium">{plate}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-400">Tanggal Mulai:</span>
+                  <span className="text-muted-foreground">Tanggal Mulai:</span>
                   <span className="font-medium">{startDate}</span>
                 </div>
               </div>
             </div>
             
-            <div className="bg-gray-800/50 rounded-lg p-4 mb-6 text-left">
-              <h3 className="font-medium mb-3 text-green-400">Langkah Selanjutnya:</h3>
+            <div className="bg-secondary/40 rounded-lg p-4 mb-6 text-left">
+              <h3 className="font-medium mb-3 text-success">Langkah Selanjutnya:</h3>
               <ul className="space-y-2 text-sm list-disc list-inside">
                 <li>Kami akan mengirimkan konfirmasi melalui WhatsApp ke nomor yang Anda daftarkan</li>
                 <li>Silakan datang ke lokasi rental pada tanggal dan jam mulai yang telah Anda pilih</li>
@@ -79,20 +79,20 @@ export default function BookingSuccessPage() {
                 <li>Pembayaran dapat dilakukan saat pengambilan motor</li>
               </ul>
             </div>
-            <p className="text-sm text-gray-400 mt-4">
+            <p className="text-sm text-muted-foreground mt-4">
               Halaman ini akan otomatis dialihkan dalam {countdown} detik
             </p>
           </CardContent>
           <CardFooter className="flex flex-col sm:flex-row gap-3 justify-center pb-8 px-6">
             <Button
               variant="outline"
-              className="w-full sm:w-auto border-gray-700 hover:bg-gray-800"
+              className="w-full sm:w-auto"
               asChild
             >
               <Link href="/">Kembali ke Beranda</Link>
             </Button>
             <Button
-              className="w-full sm:w-auto bg-primary hover:bg-primary/90"
+              className="w-full sm:w-auto"
               asChild
             >
               <Link href="/availability">Cari Motor Lainnya</Link>

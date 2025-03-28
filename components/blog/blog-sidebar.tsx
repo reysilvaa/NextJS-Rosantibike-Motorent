@@ -74,7 +74,7 @@ export default function BlogSidebar() {
 
   return (
     <div className="space-y-6">
-      <Card className="bg-gray-900/50 border-gray-800">
+      <Card className="bg-card/50 border-border">
         <CardHeader>
           <CardTitle>{t("search")}</CardTitle>
         </CardHeader>
@@ -84,7 +84,7 @@ export default function BlogSidebar() {
               placeholder={t("searchArticles")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-gray-800/50 border-gray-700"
+              className="bg-background/50 border-input"
             />
             <Button type="submit" size="icon">
               <Search className="h-4 w-4" />
@@ -94,7 +94,7 @@ export default function BlogSidebar() {
         </CardContent>
       </Card>
 
-      <Card className="bg-gray-900/50 border-gray-800">
+      <Card className="bg-card/50 border-border">
         <CardHeader>
           <CardTitle>{t("categories")}</CardTitle>
         </CardHeader>
@@ -115,7 +115,7 @@ export default function BlogSidebar() {
         </CardContent>
       </Card>
 
-      <Card className="bg-gray-900/50 border-gray-800">
+      <Card className="bg-card/50 border-border">
         <CardHeader>
           <CardTitle>{t("recentPosts")}</CardTitle>
         </CardHeader>
@@ -125,7 +125,7 @@ export default function BlogSidebar() {
               <li key={post.id}>
                 <Link href={`/blog/${post.slug}`} className="block hover:text-primary transition-colors">
                   <h4 className="font-medium line-clamp-2">{post.title}</h4>
-                  <p className="text-sm text-gray-400 mt-1">{post.date}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{post.date}</p>
                 </Link>
               </li>
             ))}
@@ -133,7 +133,7 @@ export default function BlogSidebar() {
         </CardContent>
       </Card>
 
-      <Card className="bg-gray-900/50 border-gray-800">
+      <Card className="bg-card/50 border-border">
         <CardHeader>
           <CardTitle>{t("tags")}</CardTitle>
         </CardHeader>
@@ -141,7 +141,7 @@ export default function BlogSidebar() {
           <div className="flex flex-wrap gap-2">
             {tags.map((tag) => (
               <Link key={tag} href={`/blog/tag/${tag.toLowerCase()}`}>
-                <Badge variant="secondary" className="bg-gray-800 hover:bg-gray-700 cursor-pointer">
+                <Badge variant="secondary" className="bg-muted hover:bg-muted/80 cursor-pointer">
                   <Tag className="h-3 w-3 mr-1" />
                   {tag}
                 </Badge>

@@ -85,29 +85,29 @@ export default function AvailabilityResults({ motorcycles, startDate, endDate }:
 
   if (motorcycles.length === 0) {
     return (
-      <Card className="bg-gray-900/50 border-gray-800 p-6 text-center">
+      <Card className="bg-card/50 border-border p-6 text-center">
         <h3 className="text-xl font-semibold mb-2">{t("noMotorcyclesAvailable")}</h3>
-        <p className="text-gray-400 mb-4">
+        <p className="text-muted-foreground mb-4">
           {t("noMotorcyclesAvailableDesc")}
         </p>
-        <p className="text-sm text-gray-500 mb-6">{t("tryDifferentDates")}</p>
+        <p className="text-sm text-muted-foreground mb-6">{t("tryDifferentDates")}</p>
       </Card>
     )
   }
 
   return (
     <div className="space-y-6 w-full">
-      <div className="flex flex-col sm:flex-row justify-between items-center bg-gray-900/70 border border-gray-800 rounded-lg p-4 mb-6 w-full">
+      <div className="flex flex-col sm:flex-row justify-between items-center bg-card/70 border border-border rounded-lg p-4 mb-6 w-full">
         <div>
           <h2 className="text-xl font-bold mb-1">Hasil Pencarian</h2>
-          <p className="text-gray-400">
-            <span className="font-medium text-white">{motorcycles.length}</span> {t("motorcyclesAvailable")}
+          <p className="text-muted-foreground">
+            <span className="font-medium text-foreground">{motorcycles.length}</span> {t("motorcyclesAvailable")}
           </p>
         </div>
         <div className="flex items-center gap-2 mt-4 sm:mt-0">
-          <span className="text-sm text-gray-400">{t("sortBy")}:</span>
+          <span className="text-sm text-muted-foreground">{t("sortBy")}:</span>
           <Select value={sortOption} onValueChange={setSortOption}>
-            <SelectTrigger className="w-[180px] bg-gray-950/50 border-gray-800">
+            <SelectTrigger className="w-[180px] bg-background/50 border-border">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -124,10 +124,10 @@ export default function AvailabilityResults({ motorcycles, startDate, endDate }:
 
       <div className="grid grid-cols-1 gap-6 w-full">
         {sortedMotorcycles.map((motorcycle) => (
-          <Card key={motorcycle.id} className="bg-gray-900/70 border-gray-800 overflow-hidden hover:border-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl">
+          <Card key={motorcycle.id} className="bg-card/70 border-border overflow-hidden hover:border-border/70 transition-all duration-300 shadow-lg hover:shadow-xl">
             <div className="flex flex-col md:flex-row">
               <div className="md:w-1/3 lg:w-1/4 relative h-56 md:h-auto">
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-800 text-gray-600">
+                <div className="absolute inset-0 flex items-center justify-center bg-muted text-muted-foreground">
                   <Image
                     src={motorcycle.jenis?.gambar && motorcycle.jenis.gambar !== "" 
                       ? motorcycle.jenis.gambar 
@@ -154,28 +154,28 @@ export default function AvailabilityResults({ motorcycles, startDate, endDate }:
                       "Detail motor tidak tersedia"}
                   </h3>
                   <div className="flex items-center gap-2 mb-4">
-                    <span key={`plat-${motorcycle.id}`} className="inline-flex items-center rounded-md bg-blue-400/10 px-2 py-1 text-xs font-medium text-blue-400 ring-1 ring-inset ring-blue-400/20">
+                    <span key={`plat-${motorcycle.id}`} className="inline-flex items-center rounded-md bg-accent/50 px-2 py-1 text-xs font-medium text-accent-foreground ring-1 ring-inset ring-accent/80">
                       {motorcycle.platNomor || "-"}
                     </span>
-                    <span key={`warna-${motorcycle.id}`} className="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/20">
+                    <span key={`warna-${motorcycle.id}`} className="inline-flex items-center rounded-md bg-secondary/80 px-2 py-1 text-xs font-medium text-secondary-foreground ring-1 ring-inset ring-secondary">
                       {motorcycle.warna || "-"}
                     </span>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div className="bg-gray-950/40 rounded-lg p-3">
-                      <p className="text-sm text-gray-500">{t("pricePerDay")}</p>
+                    <div className="bg-background/40 rounded-lg p-3">
+                      <p className="text-sm text-muted-foreground">{t("pricePerDay")}</p>
                       <p className="font-bold text-lg text-primary">{formatCurrency(motorcycle.hargaSewa)}</p>
                     </div>
-                    <div className="bg-gray-950/40 rounded-lg p-3">
-                      <p className="text-sm text-gray-500">{t("total")} ({rentalDays} {t("days")})</p>
+                    <div className="bg-background/40 rounded-lg p-3">
+                      <p className="text-sm text-muted-foreground">{t("total")} ({rentalDays} {t("days")})</p>
                       <p className="font-bold text-lg">{formatCurrency(motorcycle.hargaSewa * rentalDays)}</p>
                     </div>
                   </div>
                 </div>
                 <div className="mt-4 md:mt-0 flex flex-col justify-center items-center md:ml-6">
                   <Button 
-                    className="min-w-40 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105" 
+                    className="min-w-40 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-bold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105" 
                     onClick={() => handleBookNow(motorcycle.id)}
                   >
                     {t("bookNow")}

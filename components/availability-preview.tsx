@@ -112,5 +112,4 @@ export default function AvailabilityPreview() {
       </div>
     </section>
   )
-}
-
+} 

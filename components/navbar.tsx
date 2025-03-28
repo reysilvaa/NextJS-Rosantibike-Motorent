@@ -47,7 +47,7 @@ export default function Navbar() {
       className={cn(
         "fixed top-0 w-full z-50 transition-all duration-300",
         isScrolled 
-          ? "bg-black/80 backdrop-blur-md py-2 border-b border-gray-800/50" 
+          ? "bg-background/80 backdrop-blur-md py-2 border-b border-border/50" 
           : "bg-transparent py-4"
       )}
     >
@@ -126,7 +126,7 @@ export default function Navbar() {
               <span className="sr-only">{t("mobileMenuTitle")}</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="right" className="border-l border-gray-800 bg-background/95 backdrop-blur-md">
+          <SheetContent side="right" className="border-l border-border bg-background/95 backdrop-blur-md">
             <div className="flex flex-col h-full">
               <nav className="flex flex-col space-y-6 mt-10">
                 {navLinks.map((link) => (
@@ -143,7 +143,7 @@ export default function Navbar() {
                 ))}
               </nav>
               
-              <div className="mt-auto space-y-6 py-6 border-t border-gray-800 mt-8">
+              <div className="mt-auto space-y-6 py-6 border-t border-border mt-8">
                 <div className="flex items-center justify-between py-2">
                   <span className="text-sm font-medium">{t("theme")}:</span>
                   <ThemeToggle />

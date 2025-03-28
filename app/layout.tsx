@@ -21,9 +21,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" suppressHydrationWarning>
-      <body className={`${inter.className} bg-black text-white min-h-screen flex flex-col`}>
+      <body className={`${inter.className} min-h-screen flex flex-col`}>
         <Providers>
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem={true}>
             <Navbar />
             <main className="flex-grow">{children}</main>
             <Footer />

@@ -78,12 +78,12 @@ export default function BlogPreview() {
   }
 
   return (
-    <section className="py-20 bg-black">
+    <section className="py-20 bg-background">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">{t("latestBlogTitle")}</h2>
-            <p className="text-gray-400 max-w-2xl">
+            <p className="text-muted-foreground max-w-2xl">
               {t("latestBlogDescription")}
             </p>
           </div>
@@ -98,12 +98,12 @@ export default function BlogPreview() {
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[1, 2, 3].map((i) => (
-              <Card key={i} className="bg-gray-900/50 border-gray-800 overflow-hidden">
-                <div className="h-48 bg-gray-800 animate-pulse" />
+              <Card key={i} className="bg-card/50 border-border overflow-hidden">
+                <div className="h-48 bg-muted animate-pulse" />
                 <CardContent className="p-5">
-                  <div className="h-6 bg-gray-800 rounded animate-pulse mb-2" />
-                  <div className="h-4 bg-gray-800 rounded animate-pulse w-3/4 mb-4" />
-                  <div className="h-16 bg-gray-800 rounded animate-pulse" />
+                  <div className="h-6 bg-muted rounded animate-pulse mb-2" />
+                  <div className="h-4 bg-muted rounded animate-pulse w-3/4 mb-4" />
+                  <div className="h-16 bg-muted rounded animate-pulse" />
                 </CardContent>
               </Card>
             ))}
@@ -123,7 +123,7 @@ export default function BlogPreview() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
                 <Link href={`/blog/${post.slug}`}>
-                  <Card className="bg-gray-900/50 border-gray-800 overflow-hidden hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/10 h-full">
+                  <Card className="bg-card/50 border-border overflow-hidden hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/10 h-full">
                     <div className="relative h-48 overflow-hidden">
                       <Image
                         src={post.featuredImage || "/placeholder.svg?height=400&width=600"}
@@ -134,12 +134,12 @@ export default function BlogPreview() {
                       <Badge className="absolute top-2 right-2 bg-primary">{post.kategori}</Badge>
                     </div>
                     <CardContent className="p-5">
-                      <div className="flex items-center text-gray-400 text-sm mb-3">
+                      <div className="flex items-center text-muted-foreground text-sm mb-3">
                         <Calendar className="h-4 w-4 mr-1" />
                         {formatDate(post.createdAt)}
                       </div>
                       <h3 className="text-xl font-bold mb-2">{post.judul}</h3>
-                      <p className="text-gray-300 line-clamp-3">{post.konten}</p>
+                      <p className="text-foreground/80 line-clamp-3">{post.konten}</p>
                     </CardContent>
                   </Card>
                 </Link>

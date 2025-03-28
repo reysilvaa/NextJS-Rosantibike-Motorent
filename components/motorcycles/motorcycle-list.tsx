@@ -95,12 +95,12 @@ export default function MotorcycleList() {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <Card key={i} className="bg-gray-900/50 border-gray-800 overflow-hidden">
-            <div className="h-48 bg-gray-800 animate-pulse" />
+          <Card key={i} className="bg-card/50 border-border overflow-hidden">
+            <div className="h-48 bg-muted animate-pulse" />
             <CardContent className="p-5">
-              <div className="h-6 bg-gray-800 rounded animate-pulse mb-2" />
-              <div className="h-4 bg-gray-800 rounded animate-pulse w-3/4 mb-4" />
-              <div className="h-16 bg-gray-800 rounded animate-pulse" />
+              <div className="h-6 bg-muted rounded animate-pulse mb-2" />
+              <div className="h-4 bg-muted rounded animate-pulse w-3/4 mb-4" />
+              <div className="h-16 bg-muted rounded animate-pulse" />
             </CardContent>
           </Card>
         ))}
@@ -120,17 +120,17 @@ export default function MotorcycleList() {
   if (hasNewMotor) {
     return (
       <div className="space-y-6">
-        <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-4 flex justify-between items-center">
+        <div className="bg-accent/30 border border-accent rounded-lg p-4 flex justify-between items-center">
           <div>
-            <p className="text-blue-400">{t("newMotorcycleData")}</p>
-            <p className="text-sm text-blue-200/70">{t("reloadToSeeLatest")}</p>
+            <p className="text-accent-foreground">{t("newMotorcycleData")}</p>
+            <p className="text-sm text-accent-foreground/80">{t("reloadToSeeLatest")}</p>
           </div>
           <Button
             onClick={() => {
               refetch();
               setHasNewMotor(false);
             }}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-primary hover:bg-primary/90"
           >
             {t("reload")}
           </Button>
@@ -170,7 +170,7 @@ function MotorcycleCard({ motorcycle, index }: MotorcycleCardProps) {
       transition={{ duration: 0.5, delay: index * 0.1 }}
     >
       <Link href={`/motorcycles/${motorcycle.id}`}>
-        <Card className="bg-gray-900/50 border-gray-800 overflow-hidden hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/10 h-full">
+        <Card className="bg-card/50 border-border overflow-hidden hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/10 h-full">
           <div className="relative h-48 overflow-hidden">
             <Image
               src={motorcycle.gambar || MOTORCYCLE_PLACEHOLDER}
@@ -189,8 +189,8 @@ function MotorcycleCard({ motorcycle, index }: MotorcycleCardProps) {
             <h3 className="text-xl font-bold mb-1">
               {motorcycle.merk} {motorcycle.model}
             </h3>
-            <p className="text-gray-400 text-sm mb-3">{t("year")}: {motorcycle.tahun}</p>
-            <p className="text-gray-300 line-clamp-3">{motorcycle.deskripsi}</p>
+            <p className="text-muted-foreground text-sm mb-3">{t("year")}: {motorcycle.tahun}</p>
+            <p className="text-foreground/80 line-clamp-3">{motorcycle.deskripsi}</p>
           </CardContent>
         </Card>
       </Link>

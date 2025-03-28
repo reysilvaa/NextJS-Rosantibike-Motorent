@@ -57,15 +57,15 @@ export default function ContactForm() {
 
   return (
     <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
-      <Card className="bg-gray-900/50 border-gray-800">
+      <Card className="bg-card/50 border-border">
         <CardHeader>
           <CardTitle className="text-2xl">{t("sendUsMessage")}</CardTitle>
         </CardHeader>
         <CardContent>
           {submitSuccess ? (
-            <div className="bg-green-900/30 border border-green-800 rounded-lg p-6 text-center">
-              <h4 className="font-semibold text-green-400 text-lg mb-2">{t("messageSentSuccess")}</h4>
-              <p className="text-gray-300 mb-4">{t("thankYouContactUs")}</p>
+            <div className="bg-success/30 border border-success/70 rounded-lg p-6 text-center">
+              <h4 className="font-semibold text-success text-lg mb-2">{t("messageSentSuccess")}</h4>
+              <p className="text-foreground/80 mb-4">{t("thankYouContactUs")}</p>
               <Button variant="outline" onClick={() => setSubmitSuccess(false)}>
                 {t("sendAnotherMessage")}
               </Button>
@@ -74,7 +74,7 @@ export default function ContactForm() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-400 mb-1">
+                  <label htmlFor="name" className="block text-sm font-medium text-muted-foreground mb-1">
                     {t("name")}
                   </label>
                   <Input
@@ -83,12 +83,12 @@ export default function ContactForm() {
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className="bg-gray-800/50 border-gray-700"
+                    className="bg-background/50 border-input"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-400 mb-1">
+                  <label htmlFor="email" className="block text-sm font-medium text-muted-foreground mb-1">
                     {t("email")}
                   </label>
                   <Input
@@ -98,14 +98,14 @@ export default function ContactForm() {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="bg-gray-800/50 border-gray-700"
+                    className="bg-background/50 border-input"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-400 mb-1">
+                  <label htmlFor="phone" className="block text-sm font-medium text-muted-foreground mb-1">
                     {t("phoneOptional")}
                   </label>
                   <Input
@@ -113,12 +113,12 @@ export default function ContactForm() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    className="bg-gray-800/50 border-gray-700"
+                    className="bg-background/50 border-input"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="subject" className="block text-sm font-medium text-gray-400 mb-1">
+                  <label htmlFor="subject" className="block text-sm font-medium text-muted-foreground mb-1">
                     {t("subject")}
                   </label>
                   <Input
@@ -127,13 +127,13 @@ export default function ContactForm() {
                     value={formData.subject}
                     onChange={handleChange}
                     required
-                    className="bg-gray-800/50 border-gray-700"
+                    className="bg-background/50 border-input"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-400 mb-1">
+                <label htmlFor="message" className="block text-sm font-medium text-muted-foreground mb-1">
                   {t("message")}
                 </label>
                 <Textarea
@@ -143,12 +143,12 @@ export default function ContactForm() {
                   onChange={handleChange}
                   required
                   rows={6}
-                  className="bg-gray-800/50 border-gray-700"
+                  className="bg-background/50 border-input"
                 />
               </div>
 
               {submitError && (
-                <div className="bg-red-900/30 border border-red-800 rounded-lg p-3 text-red-400 text-sm">
+                <div className="bg-destructive/30 border border-destructive rounded-lg p-3 text-destructive text-sm">
                   {submitError}
                 </div>
               )}

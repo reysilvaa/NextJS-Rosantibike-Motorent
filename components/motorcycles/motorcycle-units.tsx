@@ -72,16 +72,16 @@ export default function MotorcycleUnits({ typeId, startDate, endDate }: Motorcyc
       <div className="space-y-4 mt-8">
         <h2 className="text-2xl font-bold mb-4">{t("availableMotorcycleUnits")}</h2>
         {[1, 2, 3].map((i) => (
-          <Card key={i} className="bg-gray-900/50 border-gray-800">
+          <Card key={i} className="bg-card/50 border-border">
             <CardHeader>
-              <div className="bg-gray-800 h-6 w-36 rounded animate-pulse" />
+              <div className="bg-muted h-6 w-36 rounded animate-pulse" />
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <div className="bg-gray-800 h-4 w-1/2 rounded animate-pulse" />
-                <div className="bg-gray-800 h-4 w-3/4 rounded animate-pulse" />
+                <div className="bg-muted h-4 w-1/2 rounded animate-pulse" />
+                <div className="bg-muted h-4 w-3/4 rounded animate-pulse" />
               </div>
-              <div className="bg-gray-800 h-10 w-full mt-4 rounded animate-pulse" />
+              <div className="bg-muted h-10 w-full mt-4 rounded animate-pulse" />
             </CardContent>
           </Card>
         ))}
@@ -93,9 +93,9 @@ export default function MotorcycleUnits({ typeId, startDate, endDate }: Motorcyc
     return (
       <div className="mt-8">
         <h2 className="text-2xl font-bold mb-4">{t("availableMotorcycleUnits")}</h2>
-        <Card className="bg-red-900/20 border-red-800">
+        <Card className="bg-destructive/20 border-destructive/50">
           <CardContent className="pt-6">
-            <p className="text-red-400">{error}</p>
+            <p className="text-destructive">{error}</p>
           </CardContent>
         </Card>
       </div>
@@ -106,9 +106,9 @@ export default function MotorcycleUnits({ typeId, startDate, endDate }: Motorcyc
     return (
       <div className="mt-8">
         <h2 className="text-2xl font-bold mb-4">{t("availableMotorcycleUnits")}</h2>
-        <Card className="bg-gray-900/50 border-gray-800">
+        <Card className="bg-card/50 border-border">
           <CardContent className="pt-6">
-            <p className="text-gray-400">
+            <p className="text-muted-foreground">
               {startDate && endDate
                 ? t("noUnitsAvailableForSelectedDates")
                 : t("noUnitsAvailableNow")
@@ -125,7 +125,7 @@ export default function MotorcycleUnits({ typeId, startDate, endDate }: Motorcyc
       <h2 className="text-2xl font-bold mb-4">
         {t("availableMotorcycleUnits")}
         {startDate && endDate && (
-          <span className="ml-2 text-sm font-normal text-gray-400">
+          <span className="ml-2 text-sm font-normal text-muted-foreground">
             ({format(new Date(startDate), "dd/MM/yyyy")} - {format(new Date(endDate), "dd/MM/yyyy")})
           </span>
         )}
@@ -139,19 +139,19 @@ export default function MotorcycleUnits({ typeId, startDate, endDate }: Motorcyc
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.1 }}
           >
-            <Card className="bg-gray-900/50 border-gray-800 hover:border-primary/30 transition-all">
+            <Card className="bg-card/50 border-border hover:border-primary/30 transition-all">
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-xl">
                     {unit.platNomor}
-                    {unit.warna && <span className="ml-2 text-gray-400">({unit.warna})</span>}
+                    {unit.warna && <span className="ml-2 text-muted-foreground">({unit.warna})</span>}
                   </CardTitle>
                   <Badge 
                     className={
                       unit.status === "TERSEDIA" ? "bg-green-500/20 text-green-300 hover:bg-green-500/30" :
-                      unit.status === "DISEWA" ? "bg-blue-500/20 text-blue-300 hover:bg-blue-500/30" :
+                      unit.status === "DISEWA" ? "bg-accent/50 text-accent-foreground hover:bg-accent/70" :
                       unit.status === "SERVIS" ? "bg-orange-500/20 text-orange-300 hover:bg-orange-500/30" :
-                      "bg-red-500/20 text-red-300 hover:bg-red-500/30"
+                      "bg-destructive/20 text-destructive hover:bg-destructive/30"
                     }
                   >
                     {unit.status === "TERSEDIA" ? t("available") : 
@@ -161,7 +161,7 @@ export default function MotorcycleUnits({ typeId, startDate, endDate }: Motorcyc
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-300 mb-2">
+                <p className="text-foreground/80 mb-2">
                   Rp {unit.hargaSewa.toLocaleString("id-ID")} / {t("day")}
                 </p>
                 
@@ -170,7 +170,7 @@ export default function MotorcycleUnits({ typeId, startDate, endDate }: Motorcyc
                     <Separator className="my-4" />
                     <div className="flex justify-between items-center">
                       <div>
-                        <p className="text-gray-400 text-sm">{t("totalFor")} {
+                        <p className="text-muted-foreground text-sm">{t("totalFor")} {
                           Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24))
                         } {t("days")}:</p>
                         <p className="text-xl font-bold">

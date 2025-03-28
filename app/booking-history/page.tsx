@@ -71,34 +71,34 @@ export default function BookingHistoryPage() {
     const statusMap: Record<string, { label: string, className: string, icon: React.ReactNode }> = {
       "PENDING": { 
         label: "Menunggu Konfirmasi", 
-        className: "bg-yellow-900/30 text-yellow-400 border-yellow-800",
+        className: "bg-warning/20 text-warning border-warning/30",
         icon: <Clock className="h-3 w-3 mr-1" />
       },
       "AKTIF": { 
         label: "Aktif", 
-        className: "bg-blue-900/30 text-blue-400 border-blue-800",
+        className: "bg-primary/20 text-primary border-primary/30",
         icon: <Tag className="h-3 w-3 mr-1" />
       },
       "SELESAI": { 
         label: "Selesai", 
-        className: "bg-green-900/30 text-green-400 border-green-800",
+        className: "bg-success/20 text-success border-success/30",
         icon: <CalendarIcon className="h-3 w-3 mr-1" />
       },
       "DIBATALKAN": { 
         label: "Dibatalkan", 
-        className: "bg-red-900/30 text-red-400 border-red-800",
+        className: "bg-destructive/20 text-destructive border-destructive/30",
         icon: <AlertCircle className="h-3 w-3 mr-1" />
       },
       "OVERDUE": { 
         label: "Terlambat", 
-        className: "bg-orange-900/30 text-orange-400 border-orange-800",
+        className: "bg-warning/20 text-warning border-warning/30",
         icon: <Clock className="h-3 w-3 mr-1" />
       }
     };
     
     const defaultStatus = { 
       label: status, 
-      className: "bg-gray-800/50 text-gray-400 border-gray-700",
+      className: "bg-secondary/50 text-muted-foreground border-border",
       icon: <Tag className="h-3 w-3 mr-1" />
     };
     
@@ -117,18 +117,18 @@ export default function BookingHistoryPage() {
       <div className="max-w-6xl mx-auto">
         <div className="mb-10">
           <h1 className="text-4xl font-bold mb-6">Riwayat Booking</h1>
-          <p className="text-gray-400 max-w-3xl">
+          <p className="text-muted-foreground max-w-3xl">
             Lacak dan lihat semua riwayat pemesanan motor Anda dengan mudah. Masukkan nomor telepon yang digunakan saat pemesanan.
           </p>
         </div>
         
-        <Card className="bg-gray-900 border-gray-800 mb-10">
-          <CardHeader className="border-b border-gray-800 pb-4">
+        <Card className="bg-card border-border mb-10">
+          <CardHeader className="border-b border-border pb-4">
             <CardTitle className="text-2xl flex items-center gap-2">
               <Calendar className="h-6 w-6" /> 
               Cek Riwayat Booking
             </CardTitle>
-            <CardDescription className="text-gray-400">
+            <CardDescription>
               Masukkan nomor telepon/WhatsApp yang digunakan saat booking untuk melihat riwayat
             </CardDescription>
           </CardHeader>
@@ -136,20 +136,20 @@ export default function BookingHistoryPage() {
             <form onSubmit={handleSearch} className="space-y-4">
               <div className="flex flex-col md:flex-row gap-3">
                 <div className="flex-1">
-                  <Label htmlFor="phoneNumber" className="text-gray-300">Nomor Telepon/WhatsApp</Label>
+                  <Label htmlFor="phoneNumber">Nomor Telepon/WhatsApp</Label>
                   <Input
                     id="phoneNumber"
                     type="text"
                     placeholder="08xxxxxxxxxx"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
-                    className="bg-gray-800/50 border-gray-700 mt-1"
+                    className="bg-background/50 border-input mt-1"
                   />
                 </div>
                 <div className="flex items-end">
                   <Button 
                     type="submit" 
-                    className="bg-primary hover:bg-primary/90 w-full md:w-auto"
+                    className="w-full md:w-auto"
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -176,12 +176,12 @@ export default function BookingHistoryPage() {
             {isLoading ? (
               <div className="text-center py-20">
                 <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-                <p className="text-gray-400">Memuat riwayat booking...</p>
+                <p className="text-muted-foreground">Memuat riwayat booking...</p>
               </div>
             ) : transactions.length > 0 ? (
               <div className="space-y-4">
                 {transactions.map((transaction) => (
-                  <Card key={transaction.id} className="bg-gray-800/50 border-gray-700">
+                  <Card key={transaction.id} className="bg-card/80 border-border">
                     <CardContent className="p-4">
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div className="flex-1">
@@ -191,14 +191,14 @@ export default function BookingHistoryPage() {
                             </h3>
                             {getStatusBadge(transaction.status)}
                           </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-4 text-sm text-gray-400">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-4 text-sm text-muted-foreground">
                             <div>
                               <span className="inline-block w-32">Plat Nomor:</span>
-                              <span className="font-medium text-gray-300">{transaction.unitMotor?.platNomor}</span>
+                              <span className="font-medium text-foreground/80">{transaction.unitMotor?.platNomor}</span>
                             </div>
                             <div>
                               <span className="inline-block w-32">Periode:</span>
-                              <span className="font-medium text-gray-300">
+                              <span className="font-medium text-foreground/80">
                                 {format(new Date(transaction.tanggalMulai), "dd MMM yyyy", { locale: id })} - 
                                 {format(new Date(transaction.tanggalSelesai), "dd MMM yyyy", { locale: id })}
                               </span>
@@ -211,7 +211,7 @@ export default function BookingHistoryPage() {
                             </div>
                             <div>
                               <span className="inline-block w-32">Tanggal Booking:</span>
-                              <span className="font-medium text-gray-300">
+                              <span className="font-medium text-foreground/80">
                                 {transaction.createdAt && format(new Date(transaction.createdAt), "dd MMM yyyy", { locale: id })}
                               </span>
                             </div>
@@ -221,7 +221,6 @@ export default function BookingHistoryPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="border-gray-700 hover:bg-gray-700"
                           >
                             Detail
                           </Button>
@@ -233,10 +232,10 @@ export default function BookingHistoryPage() {
               </div>
             ) : (
               <div className="text-center py-16 flex flex-col items-center">
-                <AlertCircle className="h-10 w-10 text-gray-500 mb-3" />
-                <p className="text-gray-400 mb-2">Tidak ditemukan riwayat booking</p>
-                <p className="text-sm text-gray-500 max-w-md mb-4">Pastikan nomor telepon/WhatsApp yang Anda masukkan sama dengan yang digunakan saat melakukan pemesanan.</p>
-                <Button className="bg-primary hover:bg-primary/90" asChild>
+                <AlertCircle className="h-10 w-10 text-muted-foreground/50 mb-3" />
+                <p className="text-muted-foreground mb-2">Tidak ditemukan riwayat booking</p>
+                <p className="text-sm text-muted-foreground/70 max-w-md mb-4">Pastikan nomor telepon/WhatsApp yang Anda masukkan sama dengan yang digunakan saat melakukan pemesanan.</p>
+                <Button asChild>
                   <a href="/availability">Cari Motor Tersedia</a>
                 </Button>
               </div>

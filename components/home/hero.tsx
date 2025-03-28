@@ -49,7 +49,7 @@ export default function Hero() {
           }`}
         >
           <Image src={slide.image || "/placeholder.svg"} alt={slide.title} fill priority className="object-cover" />
-          <div className="absolute inset-0 bg-black/50" />
+          <div className="absolute inset-0 bg-background/50" />
         </div>
       ))}
 
@@ -62,20 +62,20 @@ export default function Hero() {
           className="max-w-3xl"
         >
           <h1 className="text-4xl md:text-6xl font-bold mb-4">{slides[currentSlide].title}</h1>
-          <p className="text-xl md:text-2xl text-gray-300 mb-8">{slides[currentSlide].subtitle}</p>
+          <p className="text-xl md:text-2xl text-foreground/80 mb-8">{slides[currentSlide].subtitle}</p>
 
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/motorcycles">
               <Button
                 size="lg"
-                className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600"
+                className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground"
               >
                 {t("motorcycles")}
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
             <Link href="/availability">
-              <Button size="lg" variant="outline" className="border-white/20 hover:bg-white/10">
+              <Button size="lg" variant="outline" className="border-border/20 hover:bg-background/10">
                 <Calendar className="mr-2 h-4 w-4" />
                 {t("availability")}
               </Button>
@@ -91,7 +91,7 @@ export default function Hero() {
             key={index}
             onClick={() => setCurrentSlide(index)}
             className={`w-3 h-3 rounded-full transition-all ${
-              index === currentSlide ? "bg-primary w-8" : "bg-white/50 hover:bg-white/80"
+              index === currentSlide ? "bg-primary w-8" : "bg-foreground/50 hover:bg-foreground/80"
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />

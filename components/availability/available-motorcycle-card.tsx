@@ -165,7 +165,7 @@ export default function AvailableMotorcycleCard({ motorcycle, startDate, endDate
   const totalPrice = basePrice + jasHujanPrice + helmPrice
 
   return (
-    <Card className={`bg-gray-900 border-gray-800 overflow-hidden transition-all ${isAvailable ? 'hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10' : 'opacity-70'}`}>
+    <Card className={`bg-card border-border overflow-hidden transition-all ${isAvailable ? 'hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10' : 'opacity-70'}`}>
       <div className="relative h-48 overflow-hidden">
         <Image
           src={localMotorcycle.jenis?.gambar || `/motorcycle-placeholder.svg`}
@@ -173,7 +173,7 @@ export default function AvailableMotorcycleCard({ motorcycle, startDate, endDate
           fill
           className="object-cover"
         />
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background to-transparent p-4">
           <h3 className="text-lg font-bold">
             {localMotorcycle.jenis?.merk || t("motorcycle")} {localMotorcycle.jenis?.model || ''}
           </h3>
@@ -182,7 +182,7 @@ export default function AvailableMotorcycleCard({ motorcycle, startDate, endDate
         {/* Socket status indicator */}
         {isConnected && (
           <div className="absolute top-2 right-2">
-            <Badge variant="outline" className="bg-black/50 text-xs">
+            <Badge variant="outline" className="bg-background/50 text-xs">
               {t("live")}
             </Badge>
           </div>
@@ -191,29 +191,29 @@ export default function AvailableMotorcycleCard({ motorcycle, startDate, endDate
       <CardContent className="p-4">
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
-            <p className="text-sm text-gray-400">{t("licensePlate")}</p>
+            <p className="text-sm text-muted-foreground">{t("licensePlate")}</p>
             <p className="font-medium">{localMotorcycle.platNomor}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-400">{t("color")}</p>
+            <p className="text-sm text-muted-foreground">{t("color")}</p>
             <p className="font-medium">{localMotorcycle.warna}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-400">{t("dailyRate")}</p>
+            <p className="text-sm text-muted-foreground">{t("dailyRate")}</p>
             <p className="font-medium">Rp {localMotorcycle.hargaSewa.toLocaleString()}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-400">{t("status")}</p>
-            <p className={`font-medium ${isAvailable ? 'text-green-500' : 'text-red-500'}`}>
+            <p className="text-sm text-muted-foreground">{t("status")}</p>
+            <p className={`font-medium ${isAvailable ? 'text-green-500' : 'text-destructive'}`}>
               {isAvailable ? t("available") : localMotorcycle.status === 'DISEWA' ? t("rented") : 
                localMotorcycle.status === 'SERVIS' ? t("inService") : t("unavailable")}
             </p>
           </div>
         </div>
 
-        <div className="bg-gray-800/50 rounded-lg p-3">
+        <div className="bg-muted/50 rounded-lg p-3">
           <div className="flex justify-between mb-2">
-            <span className="text-sm text-gray-400">{t("rentalPeriod")}:</span>
+            <span className="text-sm text-muted-foreground">{t("rentalPeriod")}:</span>
             <span className="text-sm font-medium">{totalDays} {t("days")}</span>
           </div>
           <div className="flex justify-between font-medium">
@@ -353,36 +353,36 @@ export default function AvailableMotorcycleCard({ motorcycle, startDate, endDate
                 </div>
               </div>
 
-              <div className="bg-gray-800/50 rounded-lg p-3 space-y-2">
+              <div className="bg-muted/50 rounded-lg p-3 space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-400">{t("motorcycle")}:</span>
+                  <span className="text-sm text-muted-foreground">{t("motorcycle")}:</span>
                   <span className="text-sm">
                     {localMotorcycle.jenis?.merk || t("motorcycle")} {localMotorcycle.jenis?.model || ''}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-400">{t("licensePlate")}:</span>
+                  <span className="text-sm text-muted-foreground">{t("licensePlate")}:</span>
                   <span className="text-sm">{localMotorcycle.platNomor}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-400">{t("rentalPeriod")}:</span>
+                  <span className="text-sm text-muted-foreground">{t("rentalPeriod")}:</span>
                   <span className="text-sm">
                     {format(startDate, "d MMM yyyy")} - {format(endDate, "d MMM yyyy")}
                   </span>
                 </div>
                 {formData.jasHujan > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-400">{t("raincoat")}:</span>
+                    <span className="text-sm text-muted-foreground">{t("raincoat")}:</span>
                     <span className="text-sm">{formData.jasHujan} {t("unit")} (Rp {(5000 * Number(formData.jasHujan)).toLocaleString()})</span>
                   </div>
                 )}
                 {formData.helm > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-400">{t("helmet")}:</span>
+                    <span className="text-sm text-muted-foreground">{t("helmet")}:</span>
                     <span className="text-sm">{formData.helm} {t("unit")} (Rp {(5000 * Number(formData.helm)).toLocaleString()})</span>
                   </div>
                 )}
-                <div className="flex justify-between font-medium pt-1 border-t border-gray-700">
+                <div className="flex justify-between font-medium pt-1 border-t border-border">
                   <span>{t("totalPrice")}:</span>
                   <span className="text-primary">Rp {totalPrice.toLocaleString()}</span>
                 </div>

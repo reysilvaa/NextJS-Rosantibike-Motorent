@@ -74,11 +74,11 @@ export default function ContactSection() {
   ]
 
   return (
-    <section className="py-20 bg-gradient-to-b from-gray-900 to-black">
+    <section className="py-20 bg-gradient-to-b from-accent to-background">
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">{t("contactUs")}</h2>
-          <p className="text-gray-400">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">{t("contactUs")}</h2>
+          <p className="text-foreground/75">
             {t("contactDescription")}
           </p>
         </div>
@@ -90,20 +90,20 @@ export default function ContactSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden h-full">
+            <div className="bg-card border border-border rounded-xl overflow-hidden h-full shadow-md">
               <div className="h-[300px] lg:h-[400px]">
                 <GoogleMapComponent />
               </div>
 
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-4">{t("ourLocation")}</h3>
+                <h3 className="text-xl font-semibold mb-4 text-foreground">{t("ourLocation")}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {contactInfo.map((item, index) => (
-                    <Card key={index} className="bg-black/30 border-gray-800">
+                    <Card key={index} className="bg-card border-border shadow-sm">
                       <CardContent className="p-4 flex flex-col items-center text-center">
                         <div className="mb-2 mt-2">{item.icon}</div>
-                        <h4 className="font-medium mb-1">{item.title}</h4>
-                        <p className="text-gray-400 text-sm">{item.details}</p>
+                        <h4 className="font-medium mb-1 text-foreground">{item.title}</h4>
+                        <p className="text-foreground/70 text-sm">{item.details}</p>
                       </CardContent>
                     </Card>
                   ))}
@@ -118,13 +118,13 @@ export default function ContactSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 lg:p-8 h-full">
-              <h3 className="text-xl font-semibold mb-6">{t("contactFormTitle")}</h3>
+            <div className="bg-card border border-border rounded-xl p-6 lg:p-8 h-full shadow-md">
+              <h3 className="text-xl font-semibold mb-6 text-foreground">{t("contactFormTitle")}</h3>
 
               {submitSuccess ? (
-                <div className="bg-green-900/30 border border-green-800 rounded-lg p-4 text-center">
-                  <h4 className="font-semibold text-green-400 mb-2">{t("messageSentSuccess")}</h4>
-                  <p className="text-gray-300">{t("messageSentSuccessDesc")}</p>
+                <div className="bg-success/20 border border-success/30 rounded-lg p-4 text-center">
+                  <h4 className="font-semibold text-success mb-2">{t("messageSentSuccess")}</h4>
+                  <p className="text-foreground/80">{t("messageSentSuccessDesc")}</p>
                   <Button className="mt-4" variant="outline" onClick={() => setSubmitSuccess(false)}>
                     {t("sendAnotherMessage")}
                   </Button>
@@ -132,7 +132,7 @@ export default function ContactSection() {
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-400 mb-1">
+                    <label htmlFor="name" className="block text-sm font-medium text-foreground/80 mb-1">
                       {t("fullName")}
                     </label>
                     <Input
@@ -141,13 +141,13 @@ export default function ContactSection() {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="bg-gray-800/50 border-gray-700"
+                      className="bg-background border-input"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-400 mb-1">
+                      <label htmlFor="email" className="block text-sm font-medium text-foreground/80 mb-1">
                         {t("email")}
                       </label>
                       <Input
@@ -157,12 +157,12 @@ export default function ContactSection() {
                         value={formData.email}
                         onChange={handleChange}
                         required
-                        className="bg-gray-800/50 border-gray-700"
+                        className="bg-background border-input"
                       />
                     </div>
 
                     <div>
-                      <label htmlFor="phone" className="block text-sm font-medium text-gray-400 mb-1">
+                      <label htmlFor="phone" className="block text-sm font-medium text-foreground/80 mb-1">
                         {t("phone")}
                       </label>
                       <Input
@@ -170,13 +170,13 @@ export default function ContactSection() {
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
-                        className="bg-gray-800/50 border-gray-700"
+                        className="bg-background border-input"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label htmlFor="message" className="block text-sm font-medium text-gray-400 mb-1">
+                    <label htmlFor="message" className="block text-sm font-medium text-foreground/80 mb-1">
                       {t("message")}
                     </label>
                     <Textarea
@@ -186,21 +186,21 @@ export default function ContactSection() {
                       onChange={handleChange}
                       required
                       rows={5}
-                      className="bg-gray-800/50 border-gray-700"
+                      className="bg-background border-input"
                     />
                   </div>
 
                   {submitError && (
-                    <div className="bg-red-900/30 border border-red-800 rounded-lg p-3 text-red-400 text-sm">
+                    <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-destructive text-sm">
                       {submitError}
                     </div>
                   )}
 
-                  <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={isSubmitting}>
+                  <Button type="submit" className="w-full" disabled={isSubmitting}>
                     {isSubmitting ? (
                       <span className="flex items-center">
                         <svg
-                          className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                          className="animate-spin -ml-1 mr-2 h-4 w-4 text-primary-foreground"
                           xmlns="http://www.w3.org/2000/svg"
                           fill="none"
                           viewBox="0 0 24 24"

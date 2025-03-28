@@ -33,7 +33,7 @@ export default function ContactInfo() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-      <Card className="bg-gray-900/50 border-gray-800">
+      <Card className="bg-card/50 border-border">
         <CardContent className="p-6">
           <h2 className="text-2xl font-semibold mb-6">{t("contactInfo")}</h2>
 
@@ -43,7 +43,7 @@ export default function ContactInfo() {
                 <div className="flex-shrink-0 mt-1">{item.icon}</div>
                 <div>
                   <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
-                  <ul className="space-y-1 text-gray-400">
+                  <ul className="space-y-1 text-muted-foreground">
                     {item.details.map((detail, i) => (
                       <li key={i}>{detail}</li>
                     ))}

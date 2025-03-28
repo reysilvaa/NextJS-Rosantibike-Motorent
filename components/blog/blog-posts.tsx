@@ -32,11 +32,11 @@ export function BlogPosts() {
       <div className="mb-8">
         <form onSubmit={handleSearch} className="flex gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="search"
               placeholder={t("searchArticles")}
-              className="pl-10 bg-gray-950/50 border-gray-800"
+              className="pl-10 bg-background/50 border-input"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -49,7 +49,7 @@ export function BlogPosts() {
       {isLoading && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map((index) => (
-            <Card key={index} className="bg-gray-900/50 border-gray-800 overflow-hidden">
+            <Card key={index} className="bg-card/50 border-border overflow-hidden">
               <div className="h-48 relative">
                 <Skeleton className="h-full w-full rounded-none" />
               </div>
@@ -74,7 +74,7 @@ export function BlogPosts() {
             <Tag className="h-8 w-8 text-primary" />
           </div>
           <h3 className="text-xl font-medium mb-2">{t("noArticlesFound")}</h3>
-          <p className="text-gray-400 mb-6">{t("tryAnotherSearch")}</p>
+          <p className="text-muted-foreground mb-6">{t("tryAnotherSearch")}</p>
           <Button onClick={() => setSearch("")}>{t("clearSearch")}</Button>
         </div>
       )}
@@ -89,8 +89,8 @@ export function BlogPosts() {
                 href={`/blog/${post.slug}`}
                 className="h-full"
               >
-                <Card className="bg-gray-900/60 border-gray-800 overflow-hidden hover:border-primary/30 hover:bg-gray-900/80 transition-all h-full hover:shadow-md hover:shadow-primary/5 group">
-                  <div className="h-48 relative bg-gray-800 overflow-hidden">
+                <Card className="bg-card/60 border-border overflow-hidden hover:border-primary/30 hover:bg-card/80 transition-all h-full hover:shadow-md hover:shadow-primary/5 group">
+                  <div className="h-48 relative bg-muted overflow-hidden">
                     {(post.thumbnail || post.featuredImage) ? (
                       <Image
                         src={post.thumbnail || post.featuredImage || "/placeholder.svg"}
@@ -99,7 +99,7 @@ export function BlogPosts() {
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     ) : (
-                      <div className="absolute inset-0 flex items-center justify-center text-gray-600">
+                      <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
                         {t("noImage")}
                       </div>
                     )}
@@ -115,11 +115,11 @@ export function BlogPosts() {
                       {post.judul}
                     </h3>
                     {post.meta_description && (
-                      <p className="text-gray-400 text-sm line-clamp-2">
+                      <p className="text-muted-foreground text-sm line-clamp-2">
                         {post.meta_description}
                       </p>
                     )}
-                    <div className="flex items-center text-gray-500 text-sm pt-2">
+                    <div className="flex items-center text-muted-foreground text-sm pt-2">
                       <Calendar className="h-3.5 w-3.5 mr-1" />
                       <span>{formatDate(post.createdAt)}</span>
                     </div>
@@ -137,7 +137,7 @@ export function BlogPosts() {
                   variant="outline"
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage(currentPage - 1)}
-                  className="border-gray-800 bg-gray-900/50"
+                  className="border-border bg-card/50"
                 >
                   {t("previous")}
                 </Button>
@@ -150,7 +150,7 @@ export function BlogPosts() {
                       className={
                         currentPage === page
                           ? ""
-                          : "border-gray-800 bg-gray-900/50"
+                          : "border-border bg-card/50"
                       }
                       size="sm"
                     >
@@ -162,7 +162,7 @@ export function BlogPosts() {
                   variant="outline"
                   disabled={currentPage === meta.totalPages}
                   onClick={() => setCurrentPage(currentPage + 1)}
-                  className="border-gray-800 bg-gray-900/50"
+                  className="border-border bg-card/50"
                 >
                   {t("next")}
                 </Button>

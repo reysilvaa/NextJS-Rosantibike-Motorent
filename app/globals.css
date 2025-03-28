@@ -4,25 +4,25 @@
 
 @layer base {
   :root {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 5%;
+    --card: 0 0% 98%;
+    --card-foreground: 0 0% 5%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 5%;
+    --primary: 0 0% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 95%;
+    --secondary-foreground: 0 0% 10%;
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 0 0% 90%;
+    --accent-foreground: 0 0% 10%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 85%;
+    --input: 0 0% 85%;
+    --ring: 0 0% 70%;
     --radius: 0.5rem;
   }
 
@@ -65,16 +65,15 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #1a1a1a;
+  @apply bg-secondary;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 5px;
+  @apply bg-muted-foreground rounded-md;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #444;
+  @apply bg-border;
 }
 
 /* Smooth Scrolling */
@@ -107,11 +106,11 @@ html {
 
 /* Kustom prose style untuk konten blog */
 .prose {
-  @apply text-gray-200;
+  @apply text-foreground;
 }
 
 .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
-  @apply text-white font-bold mb-4 mt-8;
+  @apply font-bold mb-4 mt-8;
 }
 
 .prose h1 {
@@ -151,7 +150,7 @@ html {
 }
 
 .prose blockquote {
-  @apply border-l-4 border-primary px-4 py-2 my-6 text-gray-400 italic;
+  @apply border-l-4 border-primary px-4 py-2 my-6 italic;
 }
 
 .prose img {
@@ -159,7 +158,8 @@ html {
 }
 
 .prose code {
-  @apply bg-gray-800 px-1 py-0.5 rounded text-sm;
+  @apply px-1 py-0.5 rounded text-sm;
+  @apply bg-muted text-foreground;
 }
 
 @keyframes fadeIn {

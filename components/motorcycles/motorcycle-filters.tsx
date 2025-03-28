@@ -43,7 +43,7 @@ export default function MotorcycleFilters() {
       <div className="lg:hidden mb-6">
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
           <div className="flex items-center gap-2 mb-4">
-            <Input placeholder={t("searchMotorcycles")} className="bg-gray-900/50 border-gray-800" />
+            <Input placeholder={t("searchMotorcycles")} className="bg-card/50 border-border" />
             <CollapsibleTrigger asChild>
               <Button variant="outline" size="icon">
                 <Filter className="h-4 w-4" />
@@ -52,7 +52,7 @@ export default function MotorcycleFilters() {
           </div>
 
           <CollapsibleContent>
-            <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-4 space-y-6">
+            <div className="bg-card/50 border border-border rounded-lg p-4 space-y-6">
               <div>
                 <h3 className="font-medium mb-3">{t("engineSizeCC")}</h3>
                 <Slider
@@ -63,7 +63,7 @@ export default function MotorcycleFilters() {
                   onValueChange={setCcRange}
                   className="mb-2"
                 />
-                <div className="flex justify-between text-sm text-gray-400">
+                <div className="flex justify-between text-sm text-muted-foreground">
                   <span>{ccRange[0]} CC</span>
                   <span>{ccRange[1]} CC</span>
                 </div>
@@ -79,14 +79,14 @@ export default function MotorcycleFilters() {
                   onValueChange={setYearRange}
                   className="mb-2"
                 />
-                <div className="flex justify-between text-sm text-gray-400">
+                <div className="flex justify-between text-sm text-muted-foreground">
                   <span>{yearRange[0]}</span>
                   <span>{yearRange[1]}</span>
                 </div>
               </div>
 
               <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value="brands" className="border-gray-800">
+                <AccordionItem value="brands" className="border-border">
                   <AccordionTrigger className="py-2">{t("brands")}</AccordionTrigger>
                   <AccordionContent>
                     <div className="space-y-2">
@@ -102,7 +102,7 @@ export default function MotorcycleFilters() {
                   </AccordionContent>
                 </AccordionItem>
 
-                <AccordionItem value="categories" className="border-gray-800">
+                <AccordionItem value="categories" className="border-border">
                   <AccordionTrigger className="py-2">{t("categories")}</AccordionTrigger>
                   <AccordionContent>
                     <div className="space-y-2">
@@ -132,19 +132,19 @@ export default function MotorcycleFilters() {
 
       {/* Desktop Filters */}
       <div className="hidden lg:block sticky top-24">
-        <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-6 space-y-6">
+        <div className="bg-card/50 border border-border rounded-lg p-6 space-y-6">
           <div>
             <h3 className="font-medium mb-3">{t("search")}</h3>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-              <Input placeholder={t("searchMotorcycles")} className="pl-9 bg-gray-800/50 border-gray-700" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input placeholder={t("searchMotorcycles")} className="pl-9 bg-background/50 border-input" />
             </div>
           </div>
 
           <div>
             <h3 className="font-medium mb-3">{t("engineSizeCC")}</h3>
             <Slider defaultValue={ccRange} min={0} max={1500} step={50} onValueChange={setCcRange} className="mb-2" />
-            <div className="flex justify-between text-sm text-gray-400">
+            <div className="flex justify-between text-sm text-muted-foreground">
               <span>{ccRange[0]} CC</span>
               <span>{ccRange[1]} CC</span>
             </div>
@@ -160,7 +160,7 @@ export default function MotorcycleFilters() {
               onValueChange={setYearRange}
               className="mb-2"
             />
-            <div className="flex justify-between text-sm text-gray-400">
+            <div className="flex justify-between text-sm text-muted-foreground">
               <span>{yearRange[0]}</span>
               <span>{yearRange[1]}</span>
             </div>

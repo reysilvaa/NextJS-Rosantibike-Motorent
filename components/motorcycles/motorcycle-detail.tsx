@@ -328,7 +328,7 @@ export default function MotorcycleDetail({ id }: { id: string }) {
     return (
       <div className="py-8 text-center">
         <h2 className="text-2xl font-bold mb-4">Error</h2>
-        <p className="text-red-500 mb-4">{error || "Motor tidak ditemukan"}</p>
+        <p className="text-destructive mb-4">{error || "Motor tidak ditemukan"}</p>
         <Button onClick={() => router.back()}>Kembali</Button>
       </div>
     )
@@ -367,7 +367,7 @@ export default function MotorcycleDetail({ id }: { id: string }) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="relative aspect-video rounded-lg overflow-hidden border border-gray-800">
+        <div className="relative aspect-video rounded-lg overflow-hidden border border-border">
           <Image
             src={imageSrc}
             alt={`${motorcycle.merk} ${motorcycle.model}`}
@@ -383,18 +383,18 @@ export default function MotorcycleDetail({ id }: { id: string }) {
           <h1 className="text-3xl font-bold mb-2">
             {motorcycle.merk} {motorcycle.model}
           </h1>
-          {motorcycle.tahun && <p className="text-gray-400 mb-4">Tahun: {motorcycle.tahun}</p>}
+          {motorcycle.tahun && <p className="text-muted-foreground mb-4">Tahun: {motorcycle.tahun}</p>}
 
           <Separator className="my-4" />
 
           {motorcycle.deskripsi && (
             <>
               <h2 className="text-xl font-semibold mb-2">Deskripsi</h2>
-              <p className="text-gray-300 mb-6">{motorcycle.deskripsi}</p>
+              <p className="text-foreground/80 mb-6">{motorcycle.deskripsi}</p>
             </>
           )}
 
-          <Card className="bg-gray-900/50 border-gray-800">
+          <Card className="bg-card/50 border-border">
             <CardHeader>
               <CardTitle>Cek Ketersediaan</CardTitle>
               <CardDescription>
@@ -410,7 +410,7 @@ export default function MotorcycleDetail({ id }: { id: string }) {
                     selected={startDate}
                     onSelect={setStartDate}
                     disabled={(date) => date < new Date()}
-                    className="border border-gray-800 rounded-md p-3"
+                    className="border border-border rounded-md p-3"
                   />
                 </div>
                 <div>
@@ -420,7 +420,7 @@ export default function MotorcycleDetail({ id }: { id: string }) {
                     selected={endDate}
                     onSelect={setEndDate}
                     disabled={(date) => !startDate || date < startDate}
-                    className="border border-gray-800 rounded-md p-3"
+                    className="border border-border rounded-md p-3"
                   />
                 </div>
               </div>
@@ -441,7 +441,7 @@ export default function MotorcycleDetail({ id }: { id: string }) {
       <div className="mt-12">
         <h2 className="text-2xl font-bold mb-6">Spesifikasi</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          <Card className="bg-gray-900/50 border-gray-800">
+          <Card className="bg-card/50 border-border">
             <CardHeader>
               <CardTitle className="text-lg">Merk</CardTitle>
             </CardHeader>
@@ -449,7 +449,7 @@ export default function MotorcycleDetail({ id }: { id: string }) {
               <p className="text-xl">{motorcycle.merk}</p>
             </CardContent>
           </Card>
-          <Card className="bg-gray-900/50 border-gray-800">
+          <Card className="bg-card/50 border-border">
             <CardHeader>
               <CardTitle className="text-lg">Model</CardTitle>
             </CardHeader>
@@ -457,7 +457,7 @@ export default function MotorcycleDetail({ id }: { id: string }) {
               <p className="text-xl">{motorcycle.model}</p>
             </CardContent>
           </Card>
-          <Card className="bg-gray-900/50 border-gray-800">
+          <Card className="bg-card/50 border-border">
             <CardHeader>
               <CardTitle className="text-lg">CC</CardTitle>
             </CardHeader>
@@ -466,7 +466,7 @@ export default function MotorcycleDetail({ id }: { id: string }) {
             </CardContent>
           </Card>
           {motorcycle.tahun && (
-            <Card className="bg-gray-900/50 border-gray-800">
+            <Card className="bg-card/50 border-border">
               <CardHeader>
                 <CardTitle className="text-lg">Tahun</CardTitle>
               </CardHeader>
@@ -483,16 +483,16 @@ export default function MotorcycleDetail({ id }: { id: string }) {
         <h2 className="text-2xl font-bold mb-4">
           Unit Motor Tersedia
           {startDate && endDate && (
-            <span className="ml-2 text-sm font-normal text-gray-400">
+            <span className="ml-2 text-sm font-normal text-muted-foreground">
               ({format(startDate, "dd/MM/yyyy")} - {format(endDate, "dd/MM/yyyy")})
             </span>
           )}
         </h2>
         
         {units.length === 0 ? (
-          <Card className="bg-gray-900/50 border-gray-800">
+          <Card className="bg-card/50 border-border">
             <CardContent className="pt-6">
-              <p className="text-gray-400">
+              <p className="text-muted-foreground">
                 Tidak ada unit tersedia saat ini
               </p>
             </CardContent>
@@ -506,19 +506,19 @@ export default function MotorcycleDetail({ id }: { id: string }) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}
               >
-                <Card className="bg-gray-900/50 border-gray-800 hover:border-primary/30 transition-all">
+                <Card className="bg-card/50 border-border hover:border-primary/30 transition-all">
                   <CardHeader>
                     <div className="flex justify-between items-center">
                       <CardTitle className="text-xl">
                         {unit.platNomor}
-                        {unit.warna && <span className="ml-2 text-gray-400">({unit.warna})</span>}
+                        {unit.warna && <span className="ml-2 text-muted-foreground">({unit.warna})</span>}
                       </CardTitle>
                       <Badge 
                         className={
-                          unit.status === "TERSEDIA" ? "bg-green-500/20 text-green-300 hover:bg-green-500/30" :
-                          unit.status === "DISEWA" ? "bg-blue-500/20 text-blue-300 hover:bg-blue-500/30" :
-                          unit.status === "SERVIS" ? "bg-orange-500/20 text-orange-300 hover:bg-orange-500/30" :
-                          "bg-red-500/20 text-red-300 hover:bg-red-500/30"
+                          unit.status === "TERSEDIA" ? "bg-success/20 text-success hover:bg-success/30" :
+                          unit.status === "DISEWA" ? "bg-accent/20 text-accent hover:bg-accent/30" :
+                          unit.status === "SERVIS" ? "bg-warning/20 text-warning hover:bg-warning/30" :
+                          "bg-destructive/20 text-destructive hover:bg-destructive/30"
                         }
                       >
                         {unit.status}
@@ -526,7 +526,7 @@ export default function MotorcycleDetail({ id }: { id: string }) {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-300 mb-2">
+                    <p className="text-foreground/80 mb-2">
                       Rp {Number(unit.hargaSewa).toLocaleString("id-ID")} / hari
                     </p>
                     
@@ -535,7 +535,7 @@ export default function MotorcycleDetail({ id }: { id: string }) {
                         <Separator className="my-4" />
                         <div className="flex justify-between items-center">
                           <div>
-                            <p className="text-gray-400 text-sm">Total untuk {calculateDays()} hari:</p>
+                            <p className="text-muted-foreground text-sm">Total untuk {calculateDays()} hari:</p>
                             <p className="text-xl font-bold">
                               Rp {(Number(unit.hargaSewa) * calculateDays()).toLocaleString("id-ID")}
                             </p>

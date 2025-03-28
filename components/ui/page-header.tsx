@@ -14,16 +14,18 @@ export function PageHeader({
   descriptionClassName,
 }: PageHeaderProps) {
   return (
-    <div className="container mx-auto px-4 py-20">
+    <div className="bg-gradient-to-b from-accent to-background">
+      <div className="container mx-auto px-4 py-20">
         <div className={cn("py-10", className)}>
-        <h1 className="text-4xl font-bold mb-6 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-          {title}
-        </h1>
-        {description && (
-          <p className={cn("text-gray-400 max-w-3xl", descriptionClassName)}>
-            {description}
-          </p>
-        )}
+          <h1 className="text-4xl font-bold mb-6 text-foreground">
+            {title}
+          </h1>
+          {description && (
+            <p className={cn("text-foreground/75 max-w-3xl", descriptionClassName)}>
+              {description}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

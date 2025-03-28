@@ -23,7 +23,7 @@ export default async function MotorcycleDetailPage({ params }: MotorcycleDetailP
   }
 
   return (
-    <div className="pt-20 pb-20">
+    <div className="py-20">
       <div className="container mx-auto px-4">
         <MotorcycleDetail id={id} />
       </div>

@@ -89,7 +89,7 @@ export default function AvailabilitySearch({
   }
 
   return (
-    <Card className="bg-gradient-to-br from-gray-900 to-gray-950 border-gray-800 shadow-lg">
+    <Card className="bg-gradient-to-br from-card to-card/90 border-border shadow-lg">
       <CardHeader className="relative pb-2">
         <CardTitle className="text-2xl font-bold">{t("checkMotorcycleAvailability")}</CardTitle>
         {/* Socket Connection Indicator */}
@@ -98,7 +98,7 @@ export default function AvailabilitySearch({
             variant={isConnected ? "outline" : "destructive"} 
             className={cn(
               "text-xs",
-              isConnected && "bg-green-500/10 text-green-400 hover:bg-green-500/20 hover:text-green-300"
+              isConnected && "bg-primary/10 text-primary hover:bg-primary/20"
             )}
           >
             {isConnected ? t("realtimeUpdate") : t("offline")}
@@ -116,10 +116,10 @@ export default function AvailabilitySearch({
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className="w-full justify-start text-left font-normal bg-gray-950/50 border-gray-800 hover:bg-gray-900 hover:border-gray-700"
+                  className="w-full justify-start text-left font-normal bg-background/50 border-border hover:bg-background hover:border-border/70"
                 >
                   <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
-                  {startDate ? format(startDate, "PPP") : <span className="text-gray-500">{t("selectDate")}</span>}
+                  {startDate ? format(startDate, "PPP") : <span className="text-muted-foreground">{t("selectDate")}</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -129,7 +129,7 @@ export default function AvailabilitySearch({
                   onSelect={setStartDate}
                   disabled={(date) => date < new Date()}
                   initialFocus
-                  className="rounded-lg border border-gray-800"
+                  className="rounded-lg border border-border"
                 />
               </PopoverContent>
             </Popover>
@@ -143,10 +143,10 @@ export default function AvailabilitySearch({
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className="w-full justify-start text-left font-normal bg-gray-950/50 border-gray-800 hover:bg-gray-900 hover:border-gray-700"
+                  className="w-full justify-start text-left font-normal bg-background/50 border-border hover:bg-background hover:border-border/70"
                 >
                   <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
-                  {endDate ? format(endDate, "PPP") : <span className="text-gray-500">{t("selectDate")}</span>}
+                  {endDate ? format(endDate, "PPP") : <span className="text-muted-foreground">{t("selectDate")}</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -156,7 +156,7 @@ export default function AvailabilitySearch({
                   onSelect={setEndDate}
                   disabled={(date) => !startDate || date <= startDate}
                   initialFocus
-                  className="rounded-lg border border-gray-800"
+                  className="rounded-lg border border-border"
                 />
               </PopoverContent>
             </Popover>
@@ -179,7 +179,7 @@ export default function AvailabilitySearch({
             {t("motorcycleTypeOptional")}
           </label>
           <Select value={motorcycleType} onValueChange={setMotorcycleType}>
-            <SelectTrigger className="bg-gray-950/50 border-gray-800 hover:bg-gray-900 hover:border-gray-700">
+            <SelectTrigger className="bg-background/50 border-border hover:bg-background hover:border-border/70">
               <SelectValue placeholder={t("allMotorcycleTypes")} />
             </SelectTrigger>
             <SelectContent>

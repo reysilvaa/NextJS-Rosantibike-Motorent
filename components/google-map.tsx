@@ -3,6 +3,13 @@
 import { useEffect, useRef } from "react"
 import { Loader } from "@googlemaps/js-api-loader"
 
+// Deklarasi tipe untuk Google Maps API
+declare global {
+  interface Window {
+    google: any;
+  }
+}
+
 export default function GoogleMapComponent() {
   const mapRef = useRef<HTMLDivElement>(null)
 
@@ -99,7 +106,7 @@ export default function GoogleMapComponent() {
     if (!apiKey || apiKey === "YOUR_GOOGLE_MAPS_API_KEY") {
       if (mapRef.current) {
         mapRef.current.innerHTML = `
-          <div style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: #242f3e; color: white; text-align: center; padding: 20px;">
+          <div style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: var(--background); color: var(--foreground); text-align: center; padding: 20px;">
             <div style="font-weight: bold; margin-bottom: 10px;">Google Maps</div>
             <div style="font-size: 12px;">Add your Google Maps API key to enable the interactive map</div>
           </div>
