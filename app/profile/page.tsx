@@ -62,7 +62,7 @@ export default function ProfilePage() {
   }
 
   const getStatusBadge = (status: string) => {
-    const statusClasses = {
+    const statusClasses: Record<string, string> = {
       pending: "bg-yellow-900/30 text-yellow-400 border-yellow-800",
       confirmed: "bg-green-900/30 text-green-400 border-green-800",
       active: "bg-blue-900/30 text-blue-400 border-blue-800",
@@ -85,14 +85,14 @@ export default function ProfilePage() {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="flex items-center gap-4">
                 <Avatar className="h-20 w-20 border-2 border-primary">
-                  <AvatarImage src={user.avatar || undefined} alt={user.name || "User"} />
+                  <AvatarImage src={(user as any).avatar || undefined} alt={user.name || "User"} />
                   <AvatarFallback className="text-2xl bg-primary/20">
                     {user.name?.charAt(0) || "U"}
                   </AvatarFallback>
                 </Avatar>
                 <div>
                   <CardTitle className="text-2xl">{user.name || "Pengguna"}</CardTitle>
-                  <CardDescription className="text-gray-400">{user.email}</CardDescription>
+                  <CardDescription className="text-gray-400">{(user as any).email}</CardDescription>
                 </div>
               </div>
               <Button className="bg-primary hover:bg-primary/90">Edit Profil</Button>
@@ -160,7 +160,7 @@ export default function ProfilePage() {
                                 <div>
                                   <span className="inline-block w-32">Tanggal Booking:</span>
                                   <span className="font-medium text-gray-300">
-                                    {format(new Date(transaction.createdAt), "dd MMM yyyy")}
+                                    {transaction.createdAt ? format(new Date(transaction.createdAt), "dd MMM yyyy") : "-"}
                                   </span>
                                 </div>
                               </div>
@@ -173,7 +173,7 @@ export default function ProfilePage() {
                               >
                                 Detail
                               </Button>
-                              {transaction.status === "PENDING" && (
+                              {((transaction.status as string) === "PENDING" || (transaction.status as string) === "DIBUAT") && (
                                 <Button
                                   variant="destructive"
                                   size="sm"
