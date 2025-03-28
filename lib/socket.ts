@@ -48,15 +48,20 @@ export const getSocket = (): Socket => {
   
   if (!socketInstance) {
     try {
-      socketInstance = io(API_CONFIG.BASE_URL, {
-        transports: ['polling', 'websocket'], // Gunakan polling dulu, lalu coba websocket
+      const wsUrl = process.env.NEXT_PUBLIC_WS_URL || API_CONFIG.BASE_URL;
+      socketInstance = io(wsUrl, {
+        transports: ['websocket', 'polling'], // Mengutamakan websocket
         path: '/socket.io/',
         autoConnect: true,
         reconnection: true,
         reconnectionAttempts: MAX_RECONNECT_ATTEMPTS,
         reconnectionDelay: 1000,
-        timeout: 10000,
-        forceNew: false
+        timeout: 20000, // Meningkatkan timeout
+        forceNew: false,
+        withCredentials: true, // Aktifkan credentials untuk CORS
+        extraHeaders: {
+          "Access-Control-Allow-Origin": "*"
+        }
       });
 
       // Setup default handlers
@@ -78,8 +83,9 @@ export const getSocket = (): Socket => {
 
       socketInstance.on('connect_error', (error) => {
         console.error('Error koneksi socket:', error.message);
-        // Jika error CORS atau handshake gagal, coba fallback ke polling
-        if (error.message.includes('CORS') || error.message.includes('websocket error')) {
+        // Jika error CORS atau handshake gagal, coba fallback ke polling saja
+        if (error.message.includes('CORS') || error.message.includes('websocket error') || error.message.includes('xhr poll error')) {
+          console.log('Trying to fallback to polling transport only');
           if (socketInstance && socketInstance.io && socketInstance.io.opts) {
             socketInstance.io.opts.transports = ['polling'];
           }
