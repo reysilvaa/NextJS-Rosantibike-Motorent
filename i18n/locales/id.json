@@ -284,5 +284,9 @@
   "failedToCheckAvailability": "Gagal memeriksa ketersediaan",
   "bookingHistory": "Riwayat Pemesanan",
   "sendUsMessage": "Kirim Pesan Kepada Kami",
-  "testimonialsDescription": "Jangan hanya mengandalkan kata kami. Berikut adalah apa yang pelanggan kami katakan tentang pengalaman sewa motor mereka."
+  "testimonialsDescription": "Jangan hanya mengandalkan kata kami. Berikut adalah apa yang pelanggan kami katakan tentang pengalaman sewa motor mereka.",
+  "pageNotFound": "Halaman tidak ditemukan",
+  "pageNotFoundDesc": "Maaf, halaman yang Anda cari tidak dapat ditemukan. Halaman mungkin telah dipindahkan atau dihapus.",
+  "backToHome": "Kembali ke Beranda",
+  "goBack": "Kembali ke Halaman Sebelumnya"
 } 

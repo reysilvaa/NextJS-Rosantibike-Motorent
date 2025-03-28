@@ -200,6 +200,9 @@
     "satHours": "Saturday: 10AM - 4PM",
     "sunClosed": "Sunday: Closed",
     "businessHours": "Business Hours",
-    "bookingHistory": "Booking History"
-    
+    "bookingHistory": "Booking History",
+    "pageNotFound": "Page Not Found",
+    "pageNotFoundDesc": "The page you are looking for does not exist. It might have been moved or deleted.",
+    "backToHome": "Back to Home",
+    "goBack": "Go Back"
   }
