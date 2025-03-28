@@ -288,5 +288,7 @@
   "pageNotFound": "Halaman tidak ditemukan",
   "pageNotFoundDesc": "Maaf, halaman yang Anda cari tidak dapat ditemukan. Halaman mungkin telah dipindahkan atau dihapus.",
   "backToHome": "Kembali ke Beranda",
-  "goBack": "Kembali ke Halaman Sebelumnya"
+  "goBack": "Kembali ke Halaman Sebelumnya",
+  "language": "Bahasa",
+  "theme": "Tema"
 } 

@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Menu, User, ChevronDown, Bike } from 'lucide-react'
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/hooks/use-auth"
 import { ThemeToggle } from "./theme-toggle"
@@ -38,7 +38,7 @@ export default function Navbar() {
     { href: "/", label: t("home") },
     { href: "/motorcycles", label: t("motorcycles") },
     { href: "/availability", label: t("availability") },
-    { href: "/booking-history", label: t("booking_history") },
+    { href: "/booking-history", label: t("bookingHistory") },
     { href: "/blog", label: t("blog") },
     { href: "/contact", label: t("contact") },
   ]
@@ -180,6 +180,7 @@ export default function Navbar() {
             side="right" 
             className="border-l border-border/30 bg-background/95 backdrop-blur-xl w-[280px] p-0"
           >
+            <SheetTitle className="sr-only">{t("mobileMenuTitle")}</SheetTitle>
             <div className="flex flex-col h-full">
               <div className="p-4 border-b border-border/30">
                 <Link href="/" className="flex items-center group">
