@@ -6,6 +6,7 @@ import { DatePickerWithRange } from '@/components/shared/date-range-picker';
 import { formatCurrency } from '@/lib/utils';
 import { useToast } from '@/components/ui/use-toast';
 import { API_CONFIG } from '@/lib/api-config';
+import { DateRange } from 'react-day-picker';
 
 interface FasilitasReportItem {
   id: string;
@@ -29,10 +30,7 @@ interface FasilitasReportResponse {
 export const FasilitasReport = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [reportData, setReportData] = useState<FasilitasReportResponse | null>(null);
-  const [dateRange, setDateRange] = useState<{
-    from: Date;
-    to: Date;
-  }>({
+  const [dateRange, setDateRange] = useState<DateRange>({
     from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
     to: new Date(),
   });
