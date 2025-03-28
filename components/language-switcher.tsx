@@ -11,7 +11,11 @@ import {
 import { Check, Globe } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
-export default function LanguageSwitcher() {
+interface LanguageSwitcherProps {
+  useWhiteStyle?: boolean;
+}
+
+export default function LanguageSwitcher({ useWhiteStyle = false }: LanguageSwitcherProps) {
   const { language, changeLanguage, languages, t } = useTranslation();
 
   // Label bahasa untuk UI
@@ -32,10 +36,25 @@ export default function LanguageSwitcher() {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="flex items-center gap-1.5 px-2 h-8 w-[42px] hover:bg-primary/10 transition-colors duration-300"
+          className={cn(
+            "flex items-center gap-1.5 px-2 h-8 w-[42px] transition-colors duration-300",
+            useWhiteStyle
+              ? "hover:bg-white/10"
+              : "hover:bg-primary/10"
+          )}
         >
-          <div className="size-6 rounded-full bg-primary/10 flex items-center justify-center">
-            <Globe className="h-3.5 w-3.5 text-primary" />
+          <div className={cn(
+            "size-6 rounded-full flex items-center justify-center",
+            useWhiteStyle
+              ? "bg-white/20"
+              : "bg-primary/10"
+          )}>
+            <Globe className={cn(
+              "h-3.5 w-3.5",
+              useWhiteStyle
+                ? "text-white"
+                : "text-primary"
+            )} />
           </div>
         </Button>
       </DropdownMenuTrigger>

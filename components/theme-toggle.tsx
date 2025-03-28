@@ -7,7 +7,11 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
-export function ThemeToggle() {
+interface ThemeToggleProps {
+  useWhiteStyle?: boolean;
+}
+
+export function ThemeToggle({ useWhiteStyle = false }: ThemeToggleProps) {
   const { setTheme, theme } = useTheme()
   const { t } = useTranslation()
 
@@ -17,9 +21,17 @@ export function ThemeToggle() {
         <Button
           variant="outline"
           size="icon"
-          className="h-8 w-8 rounded-full border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300"
+          className={cn(
+            "h-8 w-8 rounded-full transition-all duration-300 group",
+            useWhiteStyle
+              ? "border-white hover:border-white/80 hover:bg-white/10"
+              : "border-primary/20 hover:border-primary/40 hover:bg-primary/5"
+          )}
         >
-          <Sun className="h-4 w-4 rotate-0 scale-100 transition-all duration-500 dark:-rotate-90 dark:scale-0" />
+          <Sun className={cn(
+            "h-4 w-4 rotate-0 scale-100 transition-all duration-500 dark:-rotate-90 dark:scale-0",
+            useWhiteStyle ? "text-black group-hover:text-white" : ""
+          )} />
           <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all duration-500 dark:rotate-0 dark:scale-100" />
           <span className="sr-only">{t("toggleTheme")}</span>
         </Button>
