@@ -13,6 +13,7 @@ import type { Transaction } from "@/lib/types";
 import { searchTransactionsByPhone } from "@/lib/api";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "@/i18n/hooks";
 
 export default function BookingHistoryPage() {
   const { toast } = useToast();
@@ -20,14 +21,15 @@ export default function BookingHistoryPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isSearched, setIsSearched] = useState(false);
+  const { t } = useTranslation();
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!phoneNumber) {
       toast({
-        title: "Nomor telepon diperlukan",
-        description: "Silakan masukkan nomor telepon/WhatsApp untuk mencari riwayat booking",
+        title: t("phoneRequired"),
+        description: t("enterPhoneNumber"),
         variant: "destructive",
       });
       return;
@@ -44,22 +46,22 @@ export default function BookingHistoryPage() {
       // Tampilkan toast jika tidak ditemukan hasil
       if (data.length === 0) {
         toast({
-          title: "Riwayat tidak ditemukan",
-          description: `Tidak ditemukan riwayat booking untuk nomor ${phoneNumber}`,
+          title: t("historyNotFound"),
+          description: `${t("noBookingHistoryFound")} ${phoneNumber}`,
           variant: "default",
         });
       } else {
         toast({
-          title: "Riwayat ditemukan",
-          description: `Ditemukan ${data.length} riwayat booking`,
+          title: t("bookingHistoryFound"),
+          description: `${t("foundBookingHistory")} ${data.length}`,
           variant: "default",
         });
       }
     } catch (error) {
       console.error("Error searching transactions:", error);
       toast({
-        title: "Gagal memuat data",
-        description: "Terjadi kesalahan saat mencari riwayat booking",
+        title: t("failedToLoadData"),
+        description: t("errorSearchingTransactions"),
         variant: "destructive",
       });
     } finally {
@@ -70,27 +72,27 @@ export default function BookingHistoryPage() {
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, { label: string, className: string, icon: React.ReactNode }> = {
       "PENDING": { 
-        label: "Menunggu Konfirmasi", 
+        label: t("waitingConfirmation"), 
         className: "bg-warning/20 text-warning border-warning/30",
         icon: <Clock className="h-3 w-3 mr-1" />
       },
       "AKTIF": { 
-        label: "Aktif", 
+        label: t("active"), 
         className: "bg-primary/20 text-primary border-primary/30",
         icon: <Tag className="h-3 w-3 mr-1" />
       },
       "SELESAI": { 
-        label: "Selesai", 
+        label: t("completed"), 
         className: "bg-success/20 text-success border-success/30",
         icon: <CalendarIcon className="h-3 w-3 mr-1" />
       },
       "DIBATALKAN": { 
-        label: "Dibatalkan", 
+        label: t("cancelled"), 
         className: "bg-destructive/20 text-destructive border-destructive/30",
         icon: <AlertCircle className="h-3 w-3 mr-1" />
       },
       "OVERDUE": { 
-        label: "Terlambat", 
+        label: t("overdue"), 
         className: "bg-warning/20 text-warning border-warning/30",
         icon: <Clock className="h-3 w-3 mr-1" />
       }
@@ -116,9 +118,9 @@ export default function BookingHistoryPage() {
     <div className="container mx-auto px-4 py-20">
       <div className="max-w-6xl mx-auto">
         <div className="mb-10">
-          <h1 className="text-4xl font-bold mb-6">Riwayat Booking</h1>
+          <h1 className="text-4xl font-bold mb-6">{t("bookingHistory")}</h1>
           <p className="text-muted-foreground max-w-3xl">
-            Lacak dan lihat semua riwayat pemesanan motor Anda dengan mudah. Masukkan nomor telepon yang digunakan saat pemesanan.
+            {t("trackYourBookings")}
           </p>
         </div>
         
@@ -126,17 +128,17 @@ export default function BookingHistoryPage() {
           <CardHeader className="border-b border-border pb-4">
             <CardTitle className="text-2xl flex items-center gap-2">
               <Calendar className="h-6 w-6" /> 
-              Cek Riwayat Booking
+              {t("checkBookingHistory")}
             </CardTitle>
             <CardDescription>
-              Masukkan nomor telepon/WhatsApp yang digunakan saat booking untuk melihat riwayat
+              {t("enterPhoneNumber")}
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
             <form onSubmit={handleSearch} className="space-y-4">
               <div className="flex flex-col md:flex-row gap-3">
                 <div className="flex-1">
-                  <Label htmlFor="phoneNumber">Nomor Telepon/WhatsApp</Label>
+                  <Label htmlFor="phoneNumber">{t("phoneNumber")}</Label>
                   <Input
                     id="phoneNumber"
                     type="text"
@@ -155,11 +157,11 @@ export default function BookingHistoryPage() {
                     {isLoading ? (
                       <span className="flex items-center">
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Mencari...
+                        {t("searching")}
                       </span>
                     ) : (
                       <span className="flex items-center">
-                        Cari Booking <ArrowRight className="ml-2 h-4 w-4" />
+                        {t("searchBooking")} <ArrowRight className="ml-2 h-4 w-4" />
                       </span>
                     )}
                   </Button>
@@ -171,12 +173,12 @@ export default function BookingHistoryPage() {
 
         {isSearched && (
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold">Hasil Pencarian</h2>
+            <h2 className="text-xl font-semibold">{t("searchResults")}</h2>
             
             {isLoading ? (
               <div className="text-center py-20">
                 <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-                <p className="text-muted-foreground">Memuat riwayat booking...</p>
+                <p className="text-muted-foreground">{t("loadingBookingHistory")}</p>
               </div>
             ) : transactions.length > 0 ? (
               <div className="space-y-4">
@@ -193,24 +195,24 @@ export default function BookingHistoryPage() {
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-4 text-sm text-muted-foreground">
                             <div>
-                              <span className="inline-block w-32">Plat Nomor:</span>
+                              <span className="inline-block w-32">{t("licensePlate")}:</span>
                               <span className="font-medium text-foreground/80">{transaction.unitMotor?.platNomor}</span>
                             </div>
                             <div>
-                              <span className="inline-block w-32">Periode:</span>
+                              <span className="inline-block w-32">{t("period")}:</span>
                               <span className="font-medium text-foreground/80">
                                 {format(new Date(transaction.tanggalMulai), "dd MMM yyyy", { locale: id })} - 
                                 {format(new Date(transaction.tanggalSelesai), "dd MMM yyyy", { locale: id })}
                               </span>
                             </div>
                             <div>
-                              <span className="inline-block w-32">Total Biaya:</span>
+                              <span className="inline-block w-32">{t("totalCost")}:</span>
                               <span className="font-medium text-primary">
                                 Rp {transaction.totalBiaya?.toLocaleString()}
                               </span>
                             </div>
                             <div>
-                              <span className="inline-block w-32">Tanggal Booking:</span>
+                              <span className="inline-block w-32">{t("bookingDate")}:</span>
                               <span className="font-medium text-foreground/80">
                                 {transaction.createdAt && format(new Date(transaction.createdAt), "dd MMM yyyy", { locale: id })}
                               </span>
@@ -222,7 +224,7 @@ export default function BookingHistoryPage() {
                             variant="outline"
                             size="sm"
                           >
-                            Detail
+                            {t("detail")}
                           </Button>
                         </div>
                       </div>
@@ -233,10 +235,10 @@ export default function BookingHistoryPage() {
             ) : (
               <div className="text-center py-16 flex flex-col items-center">
                 <AlertCircle className="h-10 w-10 text-muted-foreground/50 mb-3" />
-                <p className="text-muted-foreground mb-2">Tidak ditemukan riwayat booking</p>
-                <p className="text-sm text-muted-foreground/70 max-w-md mb-4">Pastikan nomor telepon/WhatsApp yang Anda masukkan sama dengan yang digunakan saat melakukan pemesanan.</p>
+                <p className="text-muted-foreground mb-2">{t("noBookingHistoryFoundMessage")}</p>
+                <p className="text-sm text-muted-foreground/70 max-w-md mb-4">{t("ensurePhoneNumberCorrect")}</p>
                 <Button asChild>
-                  <a href="/availability">Cari Motor Tersedia</a>
+                  <a href="/availability">{t("findAvailableMotorcycles")}</a>
                 </Button>
               </div>
             )}

@@ -64,9 +64,9 @@ export default function AvailabilityPage() {
     <div className="container mx-auto px-4 py-20">
       <div className="max-w-6xl mx-auto">
         <div className="mb-10">
-          <h1 className="text-4xl font-bold mb-6">Ketersediaan Motor</h1>
+          <h1 className="text-4xl font-bold mb-6">{t("motorcycleAvailability")}</h1>
           <p className="text-gray-400 max-w-3xl">
-            Cari dan lihat semua motor yang tersedia untuk tanggal dan waktu yang Anda pilih.
+            {t("searchAndViewAvailableMotorcycles")}
           </p>
         </div>
         

@@ -96,7 +96,7 @@ export default function BlogSidebar() {
 
       <Card className="bg-card/50 border-border">
         <CardHeader>
-          <CardTitle>{t("categories")}</CardTitle>
+          <CardTitle>{t("category")}</CardTitle>
         </CardHeader>
         <CardContent>
           <ul className="space-y-2">
