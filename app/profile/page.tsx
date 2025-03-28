@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Loader2, Calendar, Motorcycle, AlertCircle } from "lucide-react";
+import { Loader2, Calendar, Bike, AlertCircle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { useAuth } from "@/hooks/use-auth";
@@ -133,7 +133,7 @@ export default function ProfilePage() {
                           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div className="flex-1">
                               <div className="flex items-center gap-3 mb-2">
-                                <Motorcycle className="h-5 w-5 text-primary" />
+                                <Bike className="h-5 w-5 text-primary" />
                                 <h3 className="font-medium">
                                   {transaction.unitMotor?.jenis?.merk} {transaction.unitMotor?.jenis?.model}
                                 </h3>
