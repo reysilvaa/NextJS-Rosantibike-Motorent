@@ -97,7 +97,7 @@ export default function Testimonials() {
                               />
                             ))}
                           </div>
-                          <p className="text-foreground/80 mb-4 italic flex-grow min-h-[100px] overflow-y-auto">"{review["isi ulasan"]}"</p>
+                          <p className="text-foreground/80 mb-4 italic flex-grow min-h-[100px] overflow-y-auto">&ldquo;{review["isi ulasan"]}&rdquo;</p>
                           <div>
                             <h4 className="font-semibold">{review["nama pengulas"]}</h4>
                             <p className="text-muted-foreground text-sm">{review["tgl ulasan"]}</p>

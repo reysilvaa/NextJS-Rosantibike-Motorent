@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import Image from "next/image"
 import { Menu, User, ChevronDown, Bike } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
@@ -107,10 +108,12 @@ export default function Navbar() {
                 : "bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70",
             )}
           >
-            <img 
+            <Image 
               src={isHomePage ? isLightTheme ? (isScrolled ? "/logo/logo2.png" : "/logo/logo1.png") : "/logo/logo1.png" : "/logo/logo2.png"} 
               alt="RosantiBike" 
-              className="h-10 w-30" 
+              width={120}
+              height={40}
+              className="h-10 w-auto" 
             />
             <span className={cn(
               "absolute -bottom-1 left-0 w-0 h-0.5 transition-all duration-500 group-hover:w-full",
@@ -271,10 +274,12 @@ export default function Navbar() {
                     <Bike className="h-5 w-5 text-primary" />
                   </div>
                   <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
-                    <img 
+                    <Image 
                       src={isHomePage ? (isScrolled ? "/logo/logo2.png" : "/logo/logo1.png") : "/logo/logo2.png"} 
                       alt="RosantiBike Motorent" 
-                      className="h-8 w-30" 
+                      width={96}
+                      height={32}
+                      className="h-8 w-auto" 
                     />
                   </span>
                 </Link>

@@ -32,6 +32,28 @@ export default function AvailabilityCalendar() {
   const [error, setError] = useState<string | null>(null)
   const [view, setView] = useState<"calendar" | "list">("calendar")
   
+  // Function untuk mengambil data ketersediaan
+  const fetchAvailabilityData = async () => {
+    if (!startDate || !endDate) return;
+    
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const data = await checkAvailability({
+        tanggalMulai: format(startDate, 'yyyy-MM-dd'),
+        tanggalSelesai: format(endDate, 'yyyy-MM-dd'),
+      })
+      
+      setAvailableMotorcycles(data)
+    } catch (err: any) {
+      setError(err?.message || t("failedToFetchAvailabilityData"))
+      console.error(err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+  
   // Menggunakan socket untuk realtime updates
   const { isConnected, socket } = useSocket({
     room: 'availability',
@@ -152,71 +174,11 @@ export default function AvailabilityCalendar() {
         clearTimeout(timeoutId)
       }
     }
-  }, [searchParams])
-  
-  // Function untuk mengambil data ketersediaan
-  const fetchAvailabilityData = async () => {
-    if (!startDate || !endDate) return;
-    
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      const data = await checkAvailability({
-        tanggalMulai: format(startDate, 'yyyy-MM-dd'),
-        tanggalSelesai: format(endDate, 'yyyy-MM-dd'),
-      })
-      
-      setAvailableMotorcycles(data)
-    } catch (err: any) {
-      setError(err?.message || t("failedToFetchAvailabilityData"))
-      console.error(err)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  }, [searchParams, fetchAvailabilityData])
 
   // Placeholder data for when API fails or during development
-  const placeholderMotorcycles = [
-    {
-      id: "1",
-      platNomor: "B 1234 XYZ",
-      warna: "Red",
-      hargaSewa: 150000,
-      status: "TERSEDIA",
-      jenis: {
-        id: "1",
-        merk: "Honda",
-        model: "CBR 250RR",
-      },
-    },
-    {
-      id: "2",
-      platNomor: "B 5678 ABC",
-      warna: "Black",
-      hargaSewa: 200000,
-      status: "TERSEDIA",
-      jenis: {
-        id: "2",
-        merk: "Yamaha",
-        model: "MT-09",
-      },
-    },
-    {
-      id: "3",
-      platNomor: "B 9012 DEF",
-      warna: "Blue",
-      hargaSewa: 180000,
-      status: "TERSEDIA",
-      jenis: {
-        id: "3",
-        merk: "Kawasaki",
-        model: "Ninja ZX-6R",
-      },
-    },
-  ] as MotorcycleUnit[]
 
-  const displayMotorcycles = availableMotorcycles.length > 0 ? availableMotorcycles : placeholderMotorcycles
+  const displayMotorcycles = availableMotorcycles.length > 0 ? availableMotorcycles : []
 
   // Generate days for the calendar view
   const generateDays = () => {
