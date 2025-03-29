@@ -40,6 +40,92 @@ let reconnectAttempts = 0;
 const MAX_RECONNECT_ATTEMPTS = 10;
 
 /**
+ * Fungsi untuk menginisialisasi socket.io secara otomatis
+ * Dipanggil di awal aplikasi untuk memastikan socket tersedia
+ */
+export const initializeSocket = (): Socket | null => {
+  if (typeof window === 'undefined') return null; // guard untuk SSR
+  
+  try {
+    // Jika sudah ada instance, gunakan instance tersebut
+    if (socketInstance) {
+      // Pastikan socket terhubung
+      if (!socketInstance.connected) {
+        socketInstance.connect();
+      }
+      return socketInstance;
+    }
+    
+    // Buat socket baru jika belum ada
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || API_CONFIG.BASE_URL;
+    socketInstance = io(wsUrl, {
+      transports: ['websocket', 'polling'], // Mengutamakan websocket
+      path: '/socket.io/',
+      autoConnect: true,
+      reconnection: true,
+      reconnectionAttempts: MAX_RECONNECT_ATTEMPTS,
+      reconnectionDelay: 1000,
+      timeout: 20000, // Meningkatkan timeout
+      forceNew: false,
+      withCredentials: true, // Aktifkan credentials untuk CORS
+      extraHeaders: {
+        "Access-Control-Allow-Origin": "*"
+      }
+    });
+
+    // Setup default handlers
+    socketInstance.on('connect', () => {
+      console.log('Socket terhubung dengan ID:', socketInstance?.id);
+      reconnectAttempts = 0; // Reset counter saat berhasil terhubung
+    });
+
+    socketInstance.on('disconnect', (reason) => {
+      console.log('Socket terputus karena:', reason);
+      // Jika terputus karena error, coba reconnect secara manual
+      if (reason === 'io server disconnect' || reason === 'transport close' || reason === 'transport error') {
+        if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+          reconnectAttempts++;
+          socketInstance?.connect();
+        }
+      }
+    });
+
+    socketInstance.on('connect_error', (error) => {
+      console.error('Error koneksi socket:', error.message);
+      // Jika error CORS atau handshake gagal, coba fallback ke polling saja
+      if (error.message.includes('CORS') || error.message.includes('websocket error') || error.message.includes('xhr poll error')) {
+        console.log('Trying to fallback to polling transport only');
+        if (socketInstance && socketInstance.io && socketInstance.io.opts) {
+          socketInstance.io.opts.transports = ['polling'];
+        }
+      }
+    });
+
+    socketInstance.io.on('reconnect_attempt', (attempt) => {
+      console.log(`Mencoba reconnect ke socket (percobaan ke-${attempt})`);
+    });
+
+    socketInstance.io.on('reconnect_failed', () => {
+      console.error('Gagal melakukan reconnect setelah beberapa percobaan');
+    });
+
+    socketInstance.io.on('reconnect', (attempt) => {
+      console.log(`Berhasil reconnect ke socket setelah ${attempt} percobaan`);
+    });
+    
+    // Pastikan socket terhubung
+    if (!socketInstance.connected) {
+      socketInstance.connect();
+    }
+    
+    return socketInstance;
+  } catch (error) {
+    console.error('Error saat membuat instance socket:', error);
+    return null;
+  }
+};
+
+/**
  * Mendapatkan instance socket.io yang sudah dikonfigurasi
  * Jika belum ada, fungsi ini akan membuat instance baru
  */
@@ -103,6 +189,11 @@ export const getSocket = (): Socket => {
       socketInstance.io.on('reconnect', (attempt) => {
         console.log(`Berhasil reconnect ke socket setelah ${attempt} percobaan`);
       });
+      
+      // Pastikan socket terhubung
+      if (!socketInstance.connected) {
+        socketInstance.connect();
+      }
     } catch (error) {
       console.error('Error saat membuat instance socket:', error);
       // Kembalikan dummy socket supaya aplikasi tidak crash
@@ -179,4 +270,9 @@ export const disconnect = (): void => {
     socketInstance.disconnect();
     socketInstance = null;
   }
-}; 
+};
+
+// Inisialisasi socket saat modul dimuat jika bukan di server side
+if (typeof window !== 'undefined') {
+  initializeSocket();
+} 

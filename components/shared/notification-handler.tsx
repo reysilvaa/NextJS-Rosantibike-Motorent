@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { toast } from 'sonner';
 import { useSocketContext, SocketEvents } from '../../contexts/socket-context';
+import { initializeSocket } from "@/lib/socket";
 
 // Tipe data untuk notifikasi
 type NotificationType = 'success' | 'error' | 'info' | 'warning';
@@ -13,103 +14,42 @@ interface NotificationHandlerProps {
 }
 
 /**
- * Komponen ini menangani semua notifikasi dari socket.io.
- * Tidak memiliki UI, hanya menampilkan toast notifications.
+ * Komponen untuk menangani notifikasi dan memastikan socket terhubung saat aplikasi dimuat
  */
-export const NotificationHandler: React.FC<NotificationHandlerProps> = ({ 
-  userId, 
-  role = 'user' 
-}) => {
-  const { isConnected, joinRoom, leaveRoom, listen } = useSocketContext();
+const NotificationHandler = () => {
+  const { socket, isConnected } = useSocketContext();
   
-  // Default room berdasarkan role dan userId
-  const room = userId ? `${role}:${userId}` : role;
-
-  // Effect untuk join/leave room dan listen untuk events
+  // Pastikan socket terhubung saat aplikasi dimuat
   useEffect(() => {
-    if (!isConnected) return;
-    
-    // Bergabung dengan room berdasarkan role dan ID
-    joinRoom(room);
-    
-    // Tambahan room yang perlu dimasuki
-    if (role === 'admin') {
-      joinRoom('admin');
-      joinRoom('transaksi');
-      joinRoom('motor');
-    } else {
-      joinRoom('public');
+    // Inisialisasi socket saat komponen dimuat
+    if (typeof window !== 'undefined') {
+      initializeSocket();
     }
     
-    // Cleanup function
-    return () => {
-      leaveRoom(room);
-      
-      if (role === 'admin') {
-        leaveRoom('admin');
-        leaveRoom('transaksi');
-        leaveRoom('motor');
-      } else {
-        leaveRoom('public');
+    // Periksa koneksi setiap 30 detik
+    const intervalId = setInterval(() => {
+      if (socket && !socket.connected) {
+        console.log('Mendeteksi socket tidak terhubung, mencoba menghubungkan kembali...');
+        socket.connect();
       }
+    }, 30000);
+    
+    return () => {
+      clearInterval(intervalId);
     };
-  }, [isConnected, room, role, joinRoom, leaveRoom]);
-
-  // Effect untuk listen untuk notifikasi khusus user
-  useEffect(() => {
-    if (!isConnected || !userId) return;
-    
-    // Handler untuk notifikasi user
-    const handleUserNotification = (data: any) => {
-      showNotification(
-        data.title || 'Notifikasi',
-        data.message || 'Ada pemberitahuan baru untuk Anda.',
-        data.type || 'info',
-        data.action
-      );
-    };
-    
-    // Subscribe ke event
-    const unsub = listen(SocketEvents.USER_NOTIFICATION, handleUserNotification);
-    
-    return unsub;
-  }, [isConnected, userId, listen]);
-
-  // Fungsi untuk menampilkan toast notification
-  const showNotification = (
-    title: string, 
-    message: string, 
-    type: NotificationType = 'info',
-    action?: { label: string; href: string; }
-  ) => {
-    const toastConfig = {
-      description: message,
-      ...(action ? {
-        action: {
-          label: action.label,
-          onClick: () => window.location.href = action.href,
-        }
-      } : {})
-    };
-    
-    switch (type) {
-      case 'success':
-        toast.success(title, toastConfig);
-        break;
-      case 'error':
-        toast.error(title, toastConfig);
-        break;
-      case 'warning':
-        toast.warning(title, toastConfig);
-        break;
-      case 'info':
-      default:
-        toast.info(title, toastConfig);
-        break;
-    }
-  };
-
-  // Komponen ini tidak merender apa pun
+  }, [socket]);
+  
+  // Tampilkan indikator koneksi hanya dalam development mode
+  if (process.env.NODE_ENV === 'development') {
+    return (
+      <div className="fixed bottom-2 right-2 z-50">
+        <div className={`h-3 w-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} 
+             title={isConnected ? 'Socket terhubung' : 'Socket terputus'} />
+      </div>
+    );
+  }
+  
+  // Komponen ini tidak merender apapun di production
   return null;
 };
 

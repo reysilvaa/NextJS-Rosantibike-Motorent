@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Calendar, ChevronRight } from "lucide-react"
 import { useTranslation } from "@/i18n/hooks"
 import { useTheme } from "next-themes"
+import { useVideoContext } from "@/contexts/video-context"
 
 export default function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -15,6 +16,8 @@ export default function Hero() {
   const { t, language } = useTranslation()
   const { theme } = useTheme()
   const videoRefs = useRef<Array<HTMLVideoElement | null>>([])
+  const { isPageVisible } = useVideoContext()
+  const processedRef = useRef(false)
 
   const slides = [
     {
@@ -61,43 +64,112 @@ export default function Hero() {
     },
   ]
 
-  useEffect(() => {
-    const playCurrentVideo = () => {
-      if (useVideoFallback) return;
+  function addSilentAudioTrack(video: HTMLVideoElement) {
+    try {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContext) return;
       
-      slides.forEach((_, index) => {
-        const video = videoRefs.current[index]
-        if (video) {
-          if (index === currentSlide) {
-            video.muted = true
-            
-            const playPromise = video.play()
-            if (playPromise !== undefined) {
-              playPromise.catch(err => {
-                console.error("Video play error:", err)
-                // Jika terjadi error saat memutar video, gunakan fallback ke gambar
-                setUseVideoFallback(true)
-              })
-            }
-          } else {
-            video.pause()
-          }
-        }
-      })
+      const audioCtx = new AudioContext();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      
+      gainNode.gain.value = 0.001;
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      
+      oscillator.frequency.value = 1;
+      oscillator.start(0);
+      
+      setTimeout(() => {
+        oscillator.stop();
+      }, 1000);
+    } catch (error) {
+      console.warn('Tidak bisa menambahkan silent audio track:', error);
     }
+  }
 
-    playCurrentVideo()
+  useEffect(() => {
+    if (processedRef.current) return;
 
+    videoRefs.current.forEach(video => {
+      if (video) {
+        video.muted = true;
+        video.setAttribute('playsinline', '');
+        video.setAttribute('loop', '');
+      }
+    });
+
+    processedRef.current = true;
+  }, []);
+
+  useEffect(() => {
+    if (useVideoFallback) return;
+    
+    const currentVideo = videoRefs.current[currentSlide];
+    
+    if (currentVideo) {
+      addSilentAudioTrack(currentVideo);
+      
+      if (isPageVisible) {
+        try {
+          const playPromise = currentVideo.play();
+          
+          if (playPromise !== undefined) {
+            playPromise.catch(err => {
+              console.error("Video play error:", err);
+              
+              if (err.name === 'NotAllowedError') {
+                currentVideo.muted = true;
+                currentVideo.play().catch(() => {
+                  setUseVideoFallback(true);
+                });
+              } else {
+                setUseVideoFallback(true);
+              }
+            });
+          }
+        } catch (error) {
+          console.error("Error saat memutar video:", error);
+          setUseVideoFallback(true);
+        }
+      }
+    }
+    
+    videoRefs.current.forEach((video, index) => {
+      if (video && index !== currentSlide && !video.paused) {
+        video.pause();
+      }
+    });
+    
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length)
-    }, 5000)
+      setCurrentSlide(prev => (prev + 1) % slides.length);
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [currentSlide, isPageVisible, useVideoFallback, slides.length]);
 
-    return () => clearInterval(interval)
-  }, [currentSlide, slides, useVideoFallback])
+  useEffect(() => {
+    if (useVideoFallback) return;
+
+    const currentVideo = videoRefs.current[currentSlide];
+    if (!currentVideo) return;
+
+    if (isPageVisible) {
+      try {
+        currentVideo.play().catch(err => {
+          console.warn('Error saat memutar video setelah halaman aktif:', err);
+        });
+      } catch (error) {
+        console.warn('Gagal memutar video setelah halaman aktif:', error);
+      }
+    } else {
+      currentVideo.pause();
+    }
+  }, [isPageVisible, currentSlide, useVideoFallback]);
 
   return (
     <section className="relative h-screen w-full overflow-hidden">
-      {/* Background Video/Image Slides */}
       {slides.map((slide, index) => (
         <div
           key={index}
@@ -106,7 +178,6 @@ export default function Hero() {
           }`}
         >
           {useVideoFallback ? (
-            // Fallback ke gambar jika video tidak dapat diputar
             <div className="absolute inset-0">
               <Image 
                 src={slide.imageUrl} 
@@ -118,7 +189,6 @@ export default function Hero() {
               <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/65' : 'bg-black/50'}`} />
             </div>
           ) : (
-            // Gunakan video jika memungkinkan
             <div className="absolute inset-0">
               <video
                 ref={el => { videoRefs.current[index] = el }}
@@ -127,7 +197,6 @@ export default function Hero() {
                 muted
                 playsInline
                 loop
-                autoPlay
                 disablePictureInPicture
                 disableRemotePlayback
               />
@@ -137,7 +206,6 @@ export default function Hero() {
         </div>
       ))}
 
-      {/* Content */}
       <div className="relative z-10 container mx-auto px-4 h-full flex flex-col justify-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -168,7 +236,6 @@ export default function Hero() {
         </motion.div>
       </div>
 
-      {/* Slide Indicators */}
       <div className="absolute bottom-8 left-0 right-0 z-10 flex justify-center gap-2">
         {slides.map((_, index) => (
           <button

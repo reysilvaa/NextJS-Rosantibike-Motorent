@@ -48,9 +48,18 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
   const [isConnected, setIsConnected] = useState(false);
   const socket = getSocket();
 
+  // Segera hubungkan socket saat komponen dimuat
+  useEffect(() => {
+    if (socket && !socket.connected) {
+      console.log('Menginisialisasi koneksi socket.io...');
+      socket.connect();
+    }
+  }, []);
+
   // Handler untuk koneksi socket
   useEffect(() => {
     const handleConnect = () => {
+      console.log('Socket berhasil terhubung!');
       setIsConnected(true);
       
       // Join ke default rooms jika ada
@@ -60,6 +69,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
     };
 
     const handleDisconnect = () => {
+      console.log('Socket terputus!');
       setIsConnected(false);
     };
 
@@ -69,6 +79,11 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
 
     // Inisialisasi status koneksi
     setIsConnected(socket.connected);
+
+    // Coba hubungkan jika belum terhubung
+    if (!socket.connected) {
+      socket.connect();
+    }
 
     // Cleanup listener ketika component unmount
     return () => {
