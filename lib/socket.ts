@@ -76,7 +76,7 @@ export const initializeSocket = (): Socket | null => {
       reconnectionDelay: 1000,
       timeout: 60000, // Timeout yang lebih pendek
       forceNew: true, // Force new connection
-      withCredentials: false, // Matikan credentials untuk menghindari error CORS
+      withCredentials: true, // Aktifkan credentials untuk mengirim cookie
     });
 
     // Setup default handlers
@@ -175,7 +175,7 @@ export const getSocket = (): Socket => {
         reconnectionDelay: 1000,
         timeout: 60000, // Timeout yang lebih pendek
         forceNew: true, // Force new connection
-        withCredentials: false, // Matikan credentials untuk menghindari error CORS
+        withCredentials: true, // Aktifkan credentials untuk mengirim cookie
       });
 
       // Setup default handlers
