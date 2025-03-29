@@ -1,178 +1,99 @@
-name: CI/CD Pipeline
+name: Deploy ke VPS
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
-  lint-test:
-    name: Lint and Test
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Setup ESLint
-      run: |
-        npm install --save-dev eslint eslint-config-next
-        if [ ! -f .eslintrc.json ]; then
-          echo '{
-            "extends": "next/core-web-vitals",
-            "rules": {
-              "react/no-unescaped-entities": "off",
-              "react-hooks/exhaustive-deps": "warn",
-              "@next/next/no-img-element": "warn"
-            }
-          }' > .eslintrc.json
-        else
-          node -e "
-            const fs = require('fs');
-            const config = JSON.parse(fs.readFileSync('.eslintrc.json', 'utf8'));
-            config.rules = config.rules || {};
-            config.rules['react/no-unescaped-entities'] = 'off';
-            config.rules['react-hooks/exhaustive-deps'] = 'warn';
-            config.rules['@next/next/no-img-element'] = 'warn';
-            fs.writeFileSync('.eslintrc.json', JSON.stringify(config, null, 2));
-          "
-        fi
-      
-    - name: Run linting
-      run: npm run lint || true
-      
-    - name: Cache dependencies
-      uses: actions/cache@v3
-      with:
-        path: |
-          node_modules
-          .eslintrc.json
-        key: ${{ runner.os }}-deps-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-deps-
-
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    needs: lint-test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
-        
-    - name: Restore cache
-      uses: actions/cache@v3
-      with:
-        path: |
-          node_modules
-          .eslintrc.json
-        key: ${{ runner.os }}-deps-${{ hashFiles('**/package-lock.json') }}
-        
-    - name: Install dependencies if needed
-      run: test -d node_modules || npm ci
-      
-    - name: Build project
-      run: npm run build
-    
-    - name: Cache build output
-      uses: actions/cache@v3
-      with:
-        path: |
-          .next
-          public
-        key: ${{ runner.os }}-build-${{ github.sha }}
-
   deploy:
-    name: Deploy to VPS
     runs-on: ubuntu-latest
-    needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout kode
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
       
-    - name: Restore build cache
-      uses: actions/cache@v3
-      with:
-        path: |
-          .next
-          public
-        key: ${{ runner.os }}-build-${{ github.sha }}
-        
-    - name: Restore dependency cache
-      uses: actions/cache@v3
-      with:
-        path: |
-          node_modules
-          .eslintrc.json
-        key: ${{ runner.os }}-deps-${{ hashFiles('**/package-lock.json') }}
-        
-    - name: Update package.json
-      run: |
-        node -e "
-          const fs = require('fs');
-          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-          pkg.devDependencies = pkg.devDependencies || {};
-          pkg.devDependencies.eslint = pkg.devDependencies.eslint || '^8.56.0';
-          pkg.devDependencies['eslint-config-next'] = pkg.devDependencies['eslint-config-next'] || '^14.0.4';
-          fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
-        "
-        
-    - name: Install SSH key
-      uses: shimataro/ssh-key-action@v2
-      with:
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        known_hosts: ${{ secrets.KNOWN_HOSTS }}
-        
-    - name: Deploy to VPS
-      run: |
-        # Pastikan .eslintrc.json ada
-        if [ ! -f .eslintrc.json ]; then
-          echo '{
-            "extends": "next/core-web-vitals",
-            "rules": {
-              "react/no-unescaped-entities": "off",
-              "react-hooks/exhaustive-deps": "warn",
-              "@next/next/no-img-element": "warn"
-            }
-          }' > .eslintrc.json
-        fi
-        
-        # Tambahkan host ke known_hosts secara manual untuk memastikan
-        mkdir -p ~/.ssh
-        ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
-        
-        # Compress files before transfer to reduce bandwidth
-        tar -czf deploy.tar.gz .next package.json ecosystem.config.js .eslintrc.json public
-        
-        # Transfer compressed file (faster than individual files)
-        scp -o StrictHostKeyChecking=no deploy.tar.gz root@${{ secrets.SERVER_IP }}:/var/www/rosantibikemotorent/frontend/
-        
-        # Extract and restart on server
-        ssh -o StrictHostKeyChecking=no root@${{ secrets.SERVER_IP }} "cd /var/www/rosantibikemotorent/frontend && tar -xzf deploy.tar.gz && rm deploy.tar.gz && npm ci --omit=dev && pm2 restart ecosystem.config.js || pm2 start ecosystem.config.js"
-    
-    - name: Send notification on success
-      if: success()
-      run: echo "Deployment berhasil!"
-    
-    - name: Send notification on failure
-      if: failure()
-      run: echo "Deployment gagal!" 
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Konfigurasi ESLint
+        run: |
+          if [ ! -f .eslintrc.json ]; then
+            echo '{
+              "extends": "next/core-web-vitals",
+              "rules": {
+                "react/no-unescaped-entities": "off",
+                "react-hooks/exhaustive-deps": "warn",
+                "@next/next/no-img-element": "warn"
+              }
+            }' > .eslintrc.json
+          fi
+      
+      - name: Lint kode
+        run: npm run lint || true
+      
+      - name: Build aplikasi
+        run: npm run build
+      
+      - name: Setup SSH key
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      
+      - name: Tambahkan host ke known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+      
+      - name: Deploy ke VPS
+        env:
+          SSH_USER: root
+          SSH_HOST: ${{ secrets.SERVER_IP }}
+        run: |
+          # Kompres untuk deployment
+          tar -czf deploy.tar.gz .next/ package.json package-lock.json public/ ecosystem.config.js .eslintrc.json
+
+          # Transfer ke VPS
+          scp deploy.tar.gz $SSH_USER@$SSH_HOST:/tmp/
+          
+          # Buat script deployment
+          cat > deploy.sh << 'EOFSCRIPT'
+          #!/bin/bash
+          mkdir -p /var/www/rosantibikemotorent/frontend
+          
+          tar -xzf /tmp/deploy.tar.gz -C /var/www/rosantibikemotorent/frontend
+          
+          cd /var/www/rosantibikemotorent/frontend
+          npm ci --omit=dev
+          
+          if pm2 list | grep -q "rosantibike-frontend"; then
+            pm2 reload ecosystem.config.js
+          else
+            pm2 start ecosystem.config.js
+          fi
+          
+          pm2 save
+          
+          rm /tmp/deploy.tar.gz
+          
+          echo "Frontend deployed at $(date)" >> /var/www/rosantibikemotorent/deploy.log
+          EOFSCRIPT
+          
+          # Transfer script ke VPS
+          scp deploy.sh $SSH_USER@$SSH_HOST:/tmp/
+          
+          # Jalankan script di VPS
+          ssh $SSH_USER@$SSH_HOST "chmod +x /tmp/deploy.sh && /tmp/deploy.sh && rm /tmp/deploy.sh"
+      
+      - name: Notifikasi sukses
+        if: success()
+        run: echo "Deployment berhasil pada $(date)"
+      
+      - name: Notifikasi gagal
+        if: failure()
+        run: echo "Deployment gagal pada $(date)" 
