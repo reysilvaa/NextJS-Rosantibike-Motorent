@@ -57,23 +57,26 @@ export const initializeSocket = (): Socket | null => {
     }
     
     // Buat socket baru jika belum ada
-    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || API_CONFIG.BASE_URL;
+    // Gunakan URL absolut untuk localhost untuk menghindari masalah proxy
+    const wsUrl = typeof window !== 'undefined' 
+      ? window.location.hostname === 'localhost' 
+        ? process.env.NEXT_PUBLIC_WS_URL || API_CONFIG.BASE_URL // URL absolut untuk server backend lokal
+        : (process.env.NEXT_PUBLIC_WS_URL || API_CONFIG.BASE_URL)
+      : (process.env.NEXT_PUBLIC_WS_URL || API_CONFIG.BASE_URL);
+    
     console.log(`Mencoba connect ke socket: ${wsUrl} dengan path /socket.io/`);
     
     // Inisialisasi socket tanpa namespace
     socketInstance = io(wsUrl, {
-      transports: ['polling', 'websocket'], // Mengutamakan polling terlebih dahulu
+      transports: ['polling'], // Gunakan polling saja untuk menghindari masalah WebSocket
       path: '/socket.io/',
       autoConnect: true,
       reconnection: true,
       reconnectionAttempts: MAX_RECONNECT_ATTEMPTS,
       reconnectionDelay: 1000,
-      timeout: 90000, // Meningkatkan timeout menjadi 90 detik
+      timeout: 60000, // Timeout yang lebih pendek
       forceNew: true, // Force new connection
-      withCredentials: true, // Aktifkan credentials untuk CORS
-      extraHeaders: {
-        "Access-Control-Allow-Origin": "*"
-      }
+      withCredentials: false, // Matikan credentials untuk menghindari error CORS
     });
 
     // Setup default handlers
@@ -155,22 +158,24 @@ export const getSocket = (): Socket => {
   
   if (!socketInstance) {
     try {
-      const wsUrl = process.env.NEXT_PUBLIC_WS_URL || API_CONFIG.BASE_URL;
+      const wsUrl = typeof window !== 'undefined' 
+        ? window.location.hostname === 'localhost' 
+          ? 'http://localhost:8000' // URL absolut untuk server backend lokal
+          : (process.env.NEXT_PUBLIC_WS_URL || API_CONFIG.BASE_URL)
+        : (process.env.NEXT_PUBLIC_WS_URL || API_CONFIG.BASE_URL);
+      
       console.log(`getSocket: Mencoba connect ke socket: ${wsUrl} dengan path /socket.io/`);
       
       socketInstance = io(wsUrl, {
-        transports: ['polling', 'websocket'], // Mengutamakan polling terlebih dahulu
+        transports: ['polling'], // Gunakan polling saja untuk menghindari masalah WebSocket
         path: '/socket.io/',
         autoConnect: true,
         reconnection: true,
         reconnectionAttempts: MAX_RECONNECT_ATTEMPTS,
         reconnectionDelay: 1000,
-        timeout: 90000, // Meningkatkan timeout menjadi 90 detik
+        timeout: 60000, // Timeout yang lebih pendek
         forceNew: true, // Force new connection
-        withCredentials: true, // Aktifkan credentials untuk CORS
-        extraHeaders: {
-          "Access-Control-Allow-Origin": "*"
-        }
+        withCredentials: false, // Matikan credentials untuk menghindari error CORS
       });
 
       // Setup default handlers
