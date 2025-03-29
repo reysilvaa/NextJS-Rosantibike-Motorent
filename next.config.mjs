@@ -29,14 +29,24 @@ const nextConfig = {
     parallelServerCompiles: true,
   },
   async rewrites() {
+    // Gunakan URL relatif untuk pengujian localhost dan URL absolut untuk production
+    const isLocalDev = process.env.NODE_ENV === 'development';
+    const apiUrl = isLocalDev 
+      ? 'http://localhost:3030'  // Gunakan port 3030 untuk backend pada development
+      : 'https://api.rosantibikemotorent.com';
+
     return [
       {
         source: '/api/:path*',
-        destination: 'https://api.rosantibikemotorent.com/:path*',
+        destination: `${apiUrl}/api/:path*`,
       },
       {
         source: '/socket.io/:path*',
-        destination: 'https://api.rosantibikemotorent.com/socket.io/:path*',
+        destination: `${apiUrl}/socket.io/:path*`,
+      },
+      {
+        source: '/notifications/:path*',
+        destination: `${apiUrl}/notifications/:path*`, 
       },
     ];
   },

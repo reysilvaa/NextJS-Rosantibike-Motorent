@@ -2,7 +2,6 @@ import type React from "react"
 import type { Metadata } from "next/types"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import { Providers } from "./providers"
@@ -34,11 +33,9 @@ export default function RootLayout({
     <html lang="id" suppressHydrationWarning>
       <body className={`${inter.className} min-h-screen flex flex-col`}>
         <Providers>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem={true}>
-            <Navbar />
-            <main className="flex-grow">{children}</main>
-            <Footer />
-          </ThemeProvider>
+          <Navbar />
+          <main className="flex-grow">{children}</main>
+          <Footer />
         </Providers>
       </body>
     </html>

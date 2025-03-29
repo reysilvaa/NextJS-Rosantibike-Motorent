@@ -8,27 +8,39 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useMotorcycleTypes } from "@/hooks/use-motorcycles"
-import { useSocket, SocketEvents } from "@/hooks/use-socket"
+import { useSocket } from "@/hooks/use-socket"
 import { toast } from "sonner"
 import type { MotorcycleType } from "@/lib/types"
 import { useTranslation } from "@/i18n/hooks"
+import { useMotorcycleFilters } from "@/contexts/motorcycle-filter-context"
 
 // Placeholder statis yang dijamin ada di folder public
 const MOTORCYCLE_PLACEHOLDER = "/motorcycle-placeholder.svg"
 
 export default function MotorcycleList() {
   const { t } = useTranslation()
-  const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined)
-  const { data: motorcycles, isLoading, error, refetch } = useMotorcycleTypes(searchTerm)
+  const { filters } = useMotorcycleFilters()
+  
+  // Gunakan filter dari context langsung ke hook
+  const { data: motorcycles, isLoading, error, refetch } = useMotorcycleTypes(filters)
   const [hasNewMotor, setHasNewMotor] = useState(false)
-  const [localMotorcycles, setLocalMotorcycles] = useState<MotorcycleType[]>([])
-
-  // Setiap kali data dari API berubah, update local state
+  
+  // Debug untuk memastikan filter dan data berfungsi
   useEffect(() => {
-    if (motorcycles) {
-      setLocalMotorcycles(motorcycles);
+    if (typeof window !== 'undefined') {
+      console.log("Filters being applied:", filters);
+      console.log("Motorcycles data received:", motorcycles?.length || 0);
+      
+      if (motorcycles?.length > 0) {
+        console.log("Sample motorcycle data:", motorcycles[0]);
+      }
     }
-  }, [motorcycles]);
+  }, [filters, motorcycles]);
+
+  // Re-fetch data ketika filter berubah
+  useEffect(() => {
+    refetch();
+  }, [filters, refetch]);
 
   // Connect to socket for realtime motorcycle updates
   const { isConnected } = useSocket({
@@ -59,37 +71,25 @@ export default function MotorcycleList() {
   function handleUpdateMotorcycle(data: any) {
     if (!data || !data.id) return;
     
-    // Jika motor ada di list saat ini, update UI dengan data baru
-    if (localMotorcycles?.some(motor => motor.id === data.id)) {
-      setLocalMotorcycles(
-        localMotorcycles.map(motor => 
-          motor.id === data.id ? { ...motor, ...data } : motor
-        )
-      );
-      
-      toast.info(t("motorcycleInfoUpdated"), {
-        description: `${t("dataOf")} ${data.merk || ''} ${data.model || ''} ${t("hasBeenUpdated")}`
-      });
-    }
+    toast.info(t("motorcycleInfoUpdated"), {
+      description: `${t("dataOf")} ${data.merk || ''} ${data.model || ''} ${t("hasBeenUpdated")}`
+    });
+    
+    // Refresh data otomatis setelah update
+    refetch();
   }
   
   // Handler untuk motor dihapus
   function handleDeleteMotorcycle(data: any) {
     if (!data || !data.id) return;
     
-    // Jika motor ada di list saat ini, hapus dari UI
-    if (localMotorcycles?.some(motor => motor.id === data.id)) {
-      setLocalMotorcycles(
-        localMotorcycles.filter(motor => motor.id !== data.id)
-      );
-      
-      toast.warning(t("motorcycleDeleted"), {
-        description: t("motorcycleRemovedFromSystem")
-      });
-    }
+    toast.warning(t("motorcycleDeleted"), {
+      description: t("motorcycleRemovedFromSystem")
+    });
+    
+    // Refresh data otomatis setelah delete
+    refetch();
   }
-
-  const displayMotorcycles = localMotorcycles && localMotorcycles.length > 0 ? localMotorcycles : []
 
   if (isLoading) {
     return (
@@ -137,7 +137,7 @@ export default function MotorcycleList() {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {displayMotorcycles.map((motorcycle, index) => (
+          {motorcycles && motorcycles.map((motorcycle, index) => (
             <MotorcycleCard key={motorcycle.id} motorcycle={motorcycle} index={index} />
           ))}
         </div>
@@ -145,9 +145,20 @@ export default function MotorcycleList() {
     )
   }
 
+  if (!motorcycles || motorcycles.length === 0) {
+    return (
+      <div className="text-center py-10">
+        <p className="text-lg mb-4">{t("noMotorcyclesFound")}</p>
+        <Button onClick={() => refetch()}>
+          {t("resetAndRefresh")}
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {displayMotorcycles.map((motorcycle, index) => (
+      {motorcycles.map((motorcycle, index) => (
         <MotorcycleCard key={motorcycle.id} motorcycle={motorcycle} index={index} />
       ))}
     </div>

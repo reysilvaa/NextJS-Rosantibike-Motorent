@@ -12,11 +12,48 @@ import type {
 } from "./types"
 import { API_CONFIG, getAuthHeader } from "./api-config"
 import { responseInterceptor, errorInterceptor } from "./api-interceptor"
+import axios from 'axios';
+
+// Axios instance
+export const apiClient = axios.create({
+  baseURL: API_CONFIG.BASE_URL,
+  timeout: API_CONFIG.API_TIMEOUT,
+  headers: API_CONFIG.DEFAULT_HEADERS,
+});
+
+// Tambahkan interceptor untuk menangani token
+apiClient.interceptors.request.use(
+  (config) => {
+    const authHeader = getAuthHeader();
+    if (authHeader.Authorization) {
+      // Gunakan cara assign property terpisah untuk menghindari error tipe
+      config.headers.Authorization = authHeader.Authorization;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Interceptor untuk menangani respons
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Tangani error global di sini
+    if (error.response?.status === 401) {
+      // Token tidak valid, redirect ke halaman login
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('auth_token');
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Helper function for API requests
 async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_CONFIG.BASE_URL}${endpoint}`
-
+  
   // Default headers
   const headers: Record<string, string> = {
     ...API_CONFIG.DEFAULT_HEADERS,
@@ -26,64 +63,121 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
 
   console.log(`Requesting ${url} with method ${options.method || 'GET'}`)
 
-  try {
-    const response = await fetch(url, {
-      ...options,
-      headers,
-    })
+  // Implementasi retry logic
+  const maxRetries = 3;
+  let retryCount = 0;
+  let lastError: any = null;
 
-    if (!response.ok) {
-      let errorData;
-      try {
-        errorData = await response.json();
-      } catch (parseError) {
-        errorData = { message: `Respons tidak valid: ${response.statusText}` };
+  while (retryCount < maxRetries) {
+    try {
+      const response = await fetch(url, {
+        ...options,
+        headers,
+      })
+
+      if (!response.ok) {
+        let errorData;
+        try {
+          errorData = await response.json();
+          console.error("API Error Response:", errorData);
+        } catch (parseError) {
+          console.error("Error parsing error response:", parseError);
+          errorData = { 
+            message: `Respons tidak valid: ${response.statusText}`,
+            status: response.status,
+            statusText: response.statusText 
+          };
+        }
+        
+        const errorResponse = {
+          ...errorData,
+          status: response.status,
+          statusText: response.statusText,
+          message: errorData.message || `API request failed with status ${response.status}`
+        }
+        
+        console.error(`API Error [${endpoint}]:`, errorResponse);
+        return errorInterceptor(errorResponse, endpoint)
       }
+
+      const responseData = await response.json().catch(error => {
+        console.error(`Error parsing JSON for ${endpoint}:`, error);
+        throw { message: 'Format respons tidak valid', originalError: error };
+      });
       
-      const errorResponse = {
-        ...errorData,
-        status: response.status,
-        statusText: response.statusText,
-        message: errorData.message || `API request failed with status ${response.status}`
-      }
-      return errorInterceptor(errorResponse, endpoint)
-    }
+      console.log(`API response for ${endpoint}:`, responseData)
 
-    const responseData = await response.json().catch(error => {
-      console.error(`Error parsing JSON for ${endpoint}:`, error);
-      throw { message: 'Format respons tidak valid', originalError: error };
-    });
-    
-    console.log(`API response for ${endpoint}:`, responseData)
-
-    // Handle different response formats
-    let result: any
-    if (responseData && typeof responseData === 'object') {
-      if (Array.isArray(responseData)) {
-        result = responseData
-      } else if ('data' in responseData) {
-        result = responseData.data
+      // Handle different response formats
+      let result: any
+      if (responseData && typeof responseData === 'object') {
+        if (Array.isArray(responseData)) {
+          result = responseData
+        } else if ('data' in responseData) {
+          result = responseData.data
+        } else {
+          result = responseData
+        }
       } else {
         result = responseData
       }
-    } else {
-      result = responseData
+      
+      return responseInterceptor(result, endpoint)
+    } catch (error) {
+      lastError = error;
+      console.error(`Error during API request to ${endpoint} (attempt ${retryCount + 1}/${maxRetries}):`, error)
+      
+      // Tambahkan detail lengkap error untuk debugging
+      try {
+        console.error("Error details:", JSON.stringify(error, null, 2));
+      } catch (e) {
+        console.error("Error tidak dapat di-stringify:", error);
+      }
+      
+      // Hanya retry untuk error network atau timeout
+      const isNetworkError = 
+        error instanceof TypeError && 
+        (error.message.includes('Failed to fetch') || 
+         error.message.includes('Network request failed') ||
+         error.message.includes('network error'));
+
+      // Periksa tipe error dan pastikan memiliki properti message
+      const isTimeoutError = 
+        error && 
+        typeof error === 'object' && 
+        'message' in error && 
+        typeof error.message === 'string' && 
+        error.message.includes('timeout');
+      
+      if (isNetworkError || isTimeoutError) {
+        retryCount++;
+        
+        // Implementasi exponential backoff
+        const delay = Math.min(1000 * (2 ** retryCount) + Math.random() * 1000, 10000);
+        console.log(`Retrying in ${Math.round(delay / 1000)} seconds...`);
+        
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue; // Coba lagi
+      } else {
+        // Non-network errors, tidak perlu retry
+        break;
+      }
     }
-    
-    return responseInterceptor(result, endpoint)
-  } catch (error) {
-    console.error(`Error during API request to ${endpoint}:`, error)
-    
-    // Specific handling for network-related errors
-    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-      return errorInterceptor({
-        message: `Tidak dapat terhubung ke server. Periksa koneksi internet Anda atau coba lagi nanti.`,
-        originalError: error
-      }, endpoint);
-    }
-    
-    return errorInterceptor(error, endpoint)
   }
+  
+  // Jika semua retry gagal
+  if (retryCount === maxRetries) {
+    console.error(`Failed after ${maxRetries} retries for ${endpoint}`);
+  }
+  
+  // Specific handling for network-related errors
+  if (lastError instanceof TypeError && lastError.message.includes('Failed to fetch')) {
+    return errorInterceptor({
+      message: `Tidak dapat terhubung ke server. Periksa koneksi internet Anda atau coba lagi nanti.`,
+      originalError: lastError
+    }, endpoint);
+  }
+  
+  return errorInterceptor(lastError, endpoint)
 }
 
 // Authentication API
@@ -95,12 +189,47 @@ export async function login(username: string, password: string): Promise<AuthRes
 }
 
 // Motorcycle Types API
-export async function fetchMotorcycleTypes(search?: string): Promise<MotorcycleType[]> {
-  const endpoint = search 
-    ? `${API_CONFIG.ENDPOINTS.JENIS_MOTOR}?search=${encodeURIComponent(search)}` 
-    : API_CONFIG.ENDPOINTS.JENIS_MOTOR
-  const response = await apiRequest<ApiResponse<MotorcycleType[]>>(endpoint)
-  return Array.isArray(response) ? response : response.data || []
+export async function fetchMotorcycleTypes(search?: string, filters?: Record<string, any>): Promise<MotorcycleType[]> {
+  // Buat objek URLSearchParams untuk query
+  const queryParams = new URLSearchParams();
+  
+  // Tambahkan parameter search
+  if (search) {
+    queryParams.append('search', search);
+  }
+  
+  // Tambahkan parameter filter tambahan dari filters
+  if (filters && typeof filters === 'object') {
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        // Khusus untuk brands yang berupa array
+        if (key === 'brands' && Array.isArray(value)) {
+          value.forEach((brand) => queryParams.append('brands', brand));
+        } else {
+          queryParams.append(key, String(value));
+        }
+      }
+    });
+  }
+  
+  // Buat endpoint dengan query params
+  const queryString = queryParams.toString();
+  const endpoint = `${API_CONFIG.ENDPOINTS.JENIS_MOTOR}${queryString ? `?${queryString}` : ''}`;
+  
+  // Logging untuk debug
+  console.log("Fetching motorcycle types from endpoint:", endpoint);
+  console.log("Search:", search, "Filters:", filters);
+
+  try {
+    const response = await apiRequest<ApiResponse<MotorcycleType[]>>(endpoint);
+    const result = Array.isArray(response) ? response : response.data || [];
+    
+    console.log(`Fetched ${result.length} motorcycle types`);
+    return result;
+  } catch (error) {
+    console.error("Error fetching motorcycle types:", error);
+    throw error;
+  }
 }
 
 export async function fetchMotorcycleTypeById(id: string): Promise<MotorcycleType | null> {
@@ -130,7 +259,14 @@ export async function fetchMotorcycleUnits(filter?: Record<string, any>): Promis
     const queryParams = new URLSearchParams()
     Object.entries(filter).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
-        queryParams.append(key, String(value))
+        // Khusus untuk brands yang berupa array
+        if (key === 'brands' && Array.isArray(value)) {
+          // Coba cara lain untuk mengirim parameter array:
+          // Menggunakan parameter terpisah untuk setiap nilai array
+          value.forEach((brand) => queryParams.append('brands', brand));
+        } else {
+          queryParams.append(key, String(value))
+        }
       }
     })
     
@@ -140,8 +276,18 @@ export async function fetchMotorcycleUnits(filter?: Record<string, any>): Promis
     }
   }
   
-  const response = await apiRequest<ApiResponse<MotorcycleUnit[]>>(endpoint)
-  return Array.isArray(response) ? response : response.data || []
+  // Log for debugging
+  console.log("Fetching motorcycle units from endpoint:", endpoint);
+  
+  try {
+    const response = await apiRequest<ApiResponse<MotorcycleUnit[]>>(endpoint)
+    return Array.isArray(response) ? response : response.data || []
+  } catch (error) {
+    console.error("Error fetching motorcycle units:", error);
+    // Tambahkan detail lengkap error ke log
+    console.error("Error details:", JSON.stringify(error, null, 2));
+    throw error;
+  }
 }
 
 export async function fetchMotorcycleUnitById(id: string): Promise<MotorcycleUnit> {
@@ -545,7 +691,7 @@ export async function fetchBlogPostById(id: string): Promise<BlogPost> {
 export async function fetchBlogPostBySlug(slug: string): Promise<BlogPost | null> {
   try {
     // Periksa jika kita memiliki URL API valid
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    const apiUrl = process.env.NEXT_PUBLIC_WS_URL;
     if (!apiUrl) {
       console.error('NEXT_PUBLIC_API_URL tidak terdefinisi');
       return null;
