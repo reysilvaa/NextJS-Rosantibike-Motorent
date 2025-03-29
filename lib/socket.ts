@@ -65,7 +65,7 @@ export const initializeSocket = (): Socket | null => {
       reconnection: true,
       reconnectionAttempts: MAX_RECONNECT_ATTEMPTS,
       reconnectionDelay: 1000,
-      timeout: 20000, // Meningkatkan timeout
+      timeout: 30000, // Meningkatkan timeout dari 20000 menjadi 30000
       forceNew: false,
       withCredentials: true, // Aktifkan credentials untuk CORS
       extraHeaders: {
@@ -92,17 +92,34 @@ export const initializeSocket = (): Socket | null => {
 
     socketInstance.on('connect_error', (error) => {
       console.error('Error koneksi socket:', error.message);
-      // Jika error CORS atau handshake gagal, coba fallback ke polling saja
-      if (error.message.includes('CORS') || error.message.includes('websocket error') || error.message.includes('xhr poll error')) {
-        console.log('Trying to fallback to polling transport only');
+      
+      // Automatiskan fallback ke polling jika mengalami timeout atau error koneksi
+      if (error.message.includes('timeout') || error.message.includes('CORS') || 
+          error.message.includes('websocket error') || error.message.includes('xhr poll error')) {
+        console.log('Terjadi timeout, beralih ke polling...');
         if (socketInstance && socketInstance.io && socketInstance.io.opts) {
+          // Ubah transport hanya menggunakan polling
           socketInstance.io.opts.transports = ['polling'];
+          
+          // Set timeout lebih lama untuk polling
+          socketInstance.io.opts.timeout = 45000;
+          
+          // Coba hubungkan ulang
+          setTimeout(() => {
+            if (socketInstance && !socketInstance.connected) {
+              console.log('Mencoba menghubungkan kembali dengan polling...');
+              socketInstance.connect();
+            }
+          }, 1000);
         }
       }
     });
 
     socketInstance.io.on('reconnect_attempt', (attempt) => {
       console.log(`Mencoba reconnect ke socket (percobaan ke-${attempt})`);
+      if (attempt === 1) {
+        console.log('Mendeteksi socket tidak terhubung, mencoba menghubungkan kembali...');
+      }
     });
 
     socketInstance.io.on('reconnect_failed', () => {
@@ -142,7 +159,7 @@ export const getSocket = (): Socket => {
         reconnection: true,
         reconnectionAttempts: MAX_RECONNECT_ATTEMPTS,
         reconnectionDelay: 1000,
-        timeout: 20000, // Meningkatkan timeout
+        timeout: 30000, // Meningkatkan timeout dari 20000 menjadi 30000
         forceNew: false,
         withCredentials: true, // Aktifkan credentials untuk CORS
         extraHeaders: {
@@ -169,17 +186,34 @@ export const getSocket = (): Socket => {
 
       socketInstance.on('connect_error', (error) => {
         console.error('Error koneksi socket:', error.message);
-        // Jika error CORS atau handshake gagal, coba fallback ke polling saja
-        if (error.message.includes('CORS') || error.message.includes('websocket error') || error.message.includes('xhr poll error')) {
-          console.log('Trying to fallback to polling transport only');
+        
+        // Automatiskan fallback ke polling jika mengalami timeout atau error koneksi
+        if (error.message.includes('timeout') || error.message.includes('CORS') || 
+            error.message.includes('websocket error') || error.message.includes('xhr poll error')) {
+          console.log('Terjadi timeout, beralih ke polling...');
           if (socketInstance && socketInstance.io && socketInstance.io.opts) {
+            // Ubah transport hanya menggunakan polling
             socketInstance.io.opts.transports = ['polling'];
+            
+            // Set timeout lebih lama untuk polling
+            socketInstance.io.opts.timeout = 45000;
+            
+            // Coba hubungkan ulang
+            setTimeout(() => {
+              if (socketInstance && !socketInstance.connected) {
+                console.log('Mencoba menghubungkan kembali dengan polling...');
+                socketInstance.connect();
+              }
+            }, 1000);
           }
         }
       });
 
       socketInstance.io.on('reconnect_attempt', (attempt) => {
         console.log(`Mencoba reconnect ke socket (percobaan ke-${attempt})`);
+        if (attempt === 1) {
+          console.log('Mendeteksi socket tidak terhubung, mencoba menghubungkan kembali...');
+        }
       });
 
       socketInstance.io.on('reconnect_failed', () => {

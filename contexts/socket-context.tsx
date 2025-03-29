@@ -20,6 +20,7 @@ interface SocketContextValue {
   leaveRoom: (room: string) => void;
   emit: (event: string, data: any) => void;
   listen: (event: string, callback: (data: any) => void) => () => void;
+  reconnect: () => void;
 }
 
 // Buat context dengan nilai default
@@ -30,6 +31,7 @@ const SocketContext = createContext<SocketContextValue>({
   leaveRoom: () => {},
   emit: () => {},
   listen: () => () => {},
+  reconnect: () => {},
 });
 
 // Props untuk provider
@@ -46,7 +48,33 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
   defaultRooms = []
 }) => {
   const [isConnected, setIsConnected] = useState(false);
+  const [connectionAttempts, setConnectionAttempts] = useState(0);
   const socket = getSocket();
+
+  // Fungsi untuk mencoba koneksi ulang secara manual
+  const manualReconnect = () => {
+    if (socket) {
+      if (enableNotifications) {
+        toast.info('Menghubungkan Kembali', {
+          description: 'Mencoba menghubungkan kembali ke server...',
+        });
+      }
+      
+      // Periksa koneksi internet terlebih dahulu
+      if (!navigator.onLine) {
+        if (enableNotifications) {
+          toast.error('Tidak Ada Koneksi Internet', {
+            description: 'Periksa koneksi internet Anda dan coba lagi.',
+          });
+        }
+        return;
+      }
+      
+      // Reset koneksi socket dan coba hubungkan kembali
+      socket.connect();
+      setConnectionAttempts(prev => prev + 1);
+    }
+  };
 
   // Segera hubungkan socket saat komponen dimuat
   useEffect(() => {
@@ -55,6 +83,40 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
       socket.connect();
     }
   }, []);
+
+  // Pemantauan status koneksi internet
+  useEffect(() => {
+    const handleOnline = () => {
+      console.log('Koneksi internet kembali tersedia, mencoba menghubungkan socket...');
+      if (socket && !socket.connected) {
+        if (enableNotifications) {
+          toast.info('Koneksi Internet Terhubung', {
+            description: 'Mendeteksi koneksi internet, mencoba menghubungkan ke server...',
+          });
+        }
+        socket.connect();
+      }
+    };
+
+    const handleOffline = () => {
+      console.log('Koneksi internet terputus');
+      if (enableNotifications) {
+        toast.warning('Koneksi Internet Terputus', {
+          description: 'Tidak dapat terhubung ke server karena tidak ada koneksi internet.',
+        });
+      }
+    };
+
+    // Tambahkan event listener untuk online/offline status
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    // Cleanup event listener
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [socket, enableNotifications]);
 
   // Handler untuk koneksi socket
   useEffect(() => {
@@ -71,14 +133,57 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
     const handleDisconnect = () => {
       console.log('Socket terputus!');
       setIsConnected(false);
+      
+      if (enableNotifications) {
+        // Tambahkan notifikasi ketika socket terputus
+        toast.warning('Koneksi Terputus', {
+          description: 'Mendeteksi socket tidak terhubung, mencoba menghubungkan kembali...',
+        });
+      }
     };
 
     // Tambahkan listener
     socket.on('connect', handleConnect);
     socket.on('disconnect', handleDisconnect);
 
+    // Tambahkan handler untuk connect_error
+    socket.on('connect_error', (error) => {
+      console.error('Socket connect error:', error.message);
+      
+      if (enableNotifications) {
+        if (error.message.includes('timeout')) {
+          toast.error('Koneksi Timeout', {
+            description: 'Koneksi ke server timeout. Beralih ke mode alternatif...',
+          });
+        } else {
+          toast.error('Kesalahan Koneksi', {
+            description: `Error: ${error.message}. Mencoba menghubungkan kembali...`,
+          });
+        }
+      }
+    });
+
     // Inisialisasi status koneksi
     setIsConnected(socket.connected);
+
+    // Listener untuk upaya menghubungkan kembali
+    socket.io.on('reconnect_attempt', (attempt) => {
+      console.log(`Mencoba reconnect ke socket (percobaan ke-${attempt})`);
+      if (enableNotifications && attempt === 1) {
+        toast.info('Reconnecting', {
+          description: `Mencoba menghubungkan kembali ke server...`,
+        });
+      }
+    });
+
+    socket.io.on('reconnect', (attempt) => {
+      console.log(`Berhasil reconnect ke socket setelah ${attempt} percobaan`);
+      if (enableNotifications) {
+        toast.success('Terhubung Kembali', {
+          description: `Berhasil terhubung kembali ke server setelah ${attempt} percobaan`,
+        });
+      }
+    });
 
     // Coba hubungkan jika belum terhubung
     if (!socket.connected) {
@@ -95,7 +200,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
         defaultRooms.forEach(room => leaveRoom(room));
       }
     };
-  }, [socket, defaultRooms]);
+  }, [socket, defaultRooms, enableNotifications]);
 
   // Setup notification handlers
   useEffect(() => {
@@ -155,6 +260,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
     leaveRoom,
     emit: emitEvent,
     listen: listenEvent,
+    reconnect: manualReconnect,
   };
 
   return (
