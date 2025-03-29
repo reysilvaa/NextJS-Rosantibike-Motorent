@@ -10,8 +10,19 @@ import { Providers } from "./providers"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Aplikasi Rental Motor",
-  description: "Aplikasi untuk manajemen rental motor",
+  title: "Rosantibike Motorent",
+  description: "Rental motor terpercaya dengan harga terjangkau dan layanan terbaik di Malang",
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' }
+    ],
+    apple: { url: '/apple-touch-icon.png', sizes: '180x180' },
+    other: [
+      { rel: 'manifest', url: '/site.webmanifest' }
+    ]
+  }
 }
 
 export default function RootLayout({
