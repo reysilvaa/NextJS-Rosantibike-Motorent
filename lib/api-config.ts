@@ -1,5 +1,8 @@
 export const API_CONFIG = {
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || "https://api.rosantibikemotorent.com/api",
+  BASE_URL: typeof window !== 'undefined' 
+    ? process.env.NEXT_PUBLIC_API_URL
+    : process.env.NEXT_PUBLIC_API_URL,
+  API_TIMEOUT: 30000, // 30 detik timeout
   ENDPOINTS: {
     // Auth
     AUTH_LOGIN: "/auth/login",
@@ -28,4 +31,11 @@ export const API_CONFIG = {
 export const getAuthHeader = (): Record<string, string> => {
   const token = typeof window !== 'undefined' ? localStorage.getItem("auth_token") : null
   return token ? { "Authorization": `Bearer ${token}` } : {}
-} 
+}
+
+// Helper untuk membuat full URL API
+export const getApiUrl = (endpoint: string): string => {
+  return `${API_CONFIG.BASE_URL}${endpoint}`;
+};
+
+export default API_CONFIG; 

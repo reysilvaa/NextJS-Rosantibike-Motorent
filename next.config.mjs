@@ -34,6 +34,10 @@ const nextConfig = {
         source: '/api/:path*',
         destination: 'https://api.rosantibikemotorent.com/:path*',
       },
+      {
+        source: '/socket.io/:path*',
+        destination: 'https://api.rosantibikemotorent.com/socket.io/:path*',
+      },
     ];
   },
   async headers() {

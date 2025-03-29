@@ -58,15 +58,18 @@ export const initializeSocket = (): Socket | null => {
     
     // Buat socket baru jika belum ada
     const wsUrl = process.env.NEXT_PUBLIC_WS_URL || API_CONFIG.BASE_URL;
+    console.log(`Mencoba connect ke socket: ${wsUrl} dengan path /socket.io/`);
+    
+    // Inisialisasi socket tanpa namespace
     socketInstance = io(wsUrl, {
-      transports: ['websocket', 'polling'], // Mengutamakan websocket
+      transports: ['polling', 'websocket'], // Mengutamakan polling terlebih dahulu
       path: '/socket.io/',
       autoConnect: true,
       reconnection: true,
       reconnectionAttempts: MAX_RECONNECT_ATTEMPTS,
       reconnectionDelay: 1000,
-      timeout: 60000, // Meningkatkan timeout dari 30000 menjadi 60000
-      forceNew: false,
+      timeout: 90000, // Meningkatkan timeout menjadi 90 detik
+      forceNew: true, // Force new connection
       withCredentials: true, // Aktifkan credentials untuk CORS
       extraHeaders: {
         "Access-Control-Allow-Origin": "*"
@@ -95,14 +98,15 @@ export const initializeSocket = (): Socket | null => {
       
       // Automatiskan fallback ke polling jika mengalami timeout atau error koneksi
       if (error.message.includes('timeout') || error.message.includes('CORS') || 
-          error.message.includes('websocket error') || error.message.includes('xhr poll error')) {
-        console.log('Terjadi timeout, beralih ke polling...');
+          error.message.includes('websocket error') || error.message.includes('xhr poll error') ||
+          error.message.includes('Invalid namespace')) {
+        console.log('Terjadi error koneksi, beralih ke polling...');
         if (socketInstance && socketInstance.io && socketInstance.io.opts) {
           // Ubah transport hanya menggunakan polling
           socketInstance.io.opts.transports = ['polling'];
           
           // Set timeout lebih lama untuk polling
-          socketInstance.io.opts.timeout = 90000;
+          socketInstance.io.opts.timeout = 120000;
           
           // Coba hubungkan ulang
           setTimeout(() => {
@@ -152,15 +156,17 @@ export const getSocket = (): Socket => {
   if (!socketInstance) {
     try {
       const wsUrl = process.env.NEXT_PUBLIC_WS_URL || API_CONFIG.BASE_URL;
+      console.log(`getSocket: Mencoba connect ke socket: ${wsUrl} dengan path /socket.io/`);
+      
       socketInstance = io(wsUrl, {
-        transports: ['websocket', 'polling'], // Mengutamakan websocket
+        transports: ['polling', 'websocket'], // Mengutamakan polling terlebih dahulu
         path: '/socket.io/',
         autoConnect: true,
         reconnection: true,
         reconnectionAttempts: MAX_RECONNECT_ATTEMPTS,
         reconnectionDelay: 1000,
-        timeout: 60000, // Meningkatkan timeout dari 30000 menjadi 60000
-        forceNew: false,
+        timeout: 90000, // Meningkatkan timeout menjadi 90 detik
+        forceNew: true, // Force new connection
         withCredentials: true, // Aktifkan credentials untuk CORS
         extraHeaders: {
           "Access-Control-Allow-Origin": "*"
@@ -189,14 +195,15 @@ export const getSocket = (): Socket => {
         
         // Automatiskan fallback ke polling jika mengalami timeout atau error koneksi
         if (error.message.includes('timeout') || error.message.includes('CORS') || 
-            error.message.includes('websocket error') || error.message.includes('xhr poll error')) {
-          console.log('Terjadi timeout, beralih ke polling...');
+            error.message.includes('websocket error') || error.message.includes('xhr poll error') ||
+            error.message.includes('Invalid namespace')) {
+          console.log('Terjadi error koneksi, beralih ke polling...');
           if (socketInstance && socketInstance.io && socketInstance.io.opts) {
             // Ubah transport hanya menggunakan polling
             socketInstance.io.opts.transports = ['polling'];
             
             // Set timeout lebih lama untuk polling
-            socketInstance.io.opts.timeout = 90000;
+            socketInstance.io.opts.timeout = 120000;
             
             // Coba hubungkan ulang
             setTimeout(() => {
