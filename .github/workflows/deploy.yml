@@ -24,6 +24,9 @@ jobs:
     - name: Install dependencies
       run: npm ci
       
+    - name: Install ESLint
+      run: npm install --save-dev eslint eslint-config-next
+      
     - name: Setup ESLint config
       run: |
         if [ ! -f .eslintrc.json ]; then
@@ -57,6 +60,9 @@ jobs:
         
     - name: Install dependencies
       run: npm ci
+      
+    - name: Install ESLint
+      run: npm install --save-dev eslint eslint-config-next
       
     - name: Setup ESLint config
       run: |
@@ -105,10 +111,22 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ secrets.KNOWN_HOSTS }}
         
+    - name: Update package.json with devDependencies
+      run: |
+        # Pastikan devDependencies ESLint ada dalam package.json
+        node -e "
+          const fs = require('fs');
+          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          pkg.devDependencies = pkg.devDependencies || {};
+          pkg.devDependencies.eslint = pkg.devDependencies.eslint || '^8.56.0';
+          pkg.devDependencies['eslint-config-next'] = pkg.devDependencies['eslint-config-next'] || '^14.0.4';
+          fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
+        "
+        
     - name: Deploy to VPS
       run: |
-        rsync -avz --delete .next package.json package-lock.json public ecosystem.config.js root@141.11.25.200:/var/www/rosantibike/
-        ssh root@141.11.25.200 "cd /var/www/rosantibike && npm ci --production && pm2 restart ecosystem.config.js || pm2 start ecosystem.config.js" 
+        rsync -avz --delete .next package.json package-lock.json public ecosystem.config.js .eslintrc.json root@141.11.25.200:/var/www/rosantibike/
+        ssh root@141.11.25.200 "cd /var/www/rosantibike && npm ci && pm2 restart ecosystem.config.js || pm2 start ecosystem.config.js" 
     
     - name: Send notification on success
       if: success()
