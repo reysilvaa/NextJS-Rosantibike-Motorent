@@ -24,6 +24,14 @@ jobs:
     - name: Install dependencies
       run: npm ci
       
+    - name: Setup ESLint config
+      run: |
+        if [ ! -f .eslintrc.json ]; then
+          echo '{
+            "extends": "next/core-web-vitals"
+          }' > .eslintrc.json
+        fi
+      
     - name: Run linting
       run: npm run lint
       
@@ -49,6 +57,14 @@ jobs:
         
     - name: Install dependencies
       run: npm ci
+      
+    - name: Setup ESLint config
+      run: |
+        if [ ! -f .eslintrc.json ]; then
+          echo '{
+            "extends": "next/core-web-vitals"
+          }' > .eslintrc.json
+        fi
       
     - name: Build project
       run: npm run build
