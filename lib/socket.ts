@@ -65,7 +65,7 @@ export const initializeSocket = (): Socket | null => {
       reconnection: true,
       reconnectionAttempts: MAX_RECONNECT_ATTEMPTS,
       reconnectionDelay: 1000,
-      timeout: 30000, // Meningkatkan timeout dari 20000 menjadi 30000
+      timeout: 60000, // Meningkatkan timeout dari 30000 menjadi 60000
       forceNew: false,
       withCredentials: true, // Aktifkan credentials untuk CORS
       extraHeaders: {
@@ -102,7 +102,7 @@ export const initializeSocket = (): Socket | null => {
           socketInstance.io.opts.transports = ['polling'];
           
           // Set timeout lebih lama untuk polling
-          socketInstance.io.opts.timeout = 45000;
+          socketInstance.io.opts.timeout = 90000;
           
           // Coba hubungkan ulang
           setTimeout(() => {
@@ -159,7 +159,7 @@ export const getSocket = (): Socket => {
         reconnection: true,
         reconnectionAttempts: MAX_RECONNECT_ATTEMPTS,
         reconnectionDelay: 1000,
-        timeout: 30000, // Meningkatkan timeout dari 20000 menjadi 30000
+        timeout: 60000, // Meningkatkan timeout dari 30000 menjadi 60000
         forceNew: false,
         withCredentials: true, // Aktifkan credentials untuk CORS
         extraHeaders: {
@@ -196,7 +196,7 @@ export const getSocket = (): Socket => {
             socketInstance.io.opts.transports = ['polling'];
             
             // Set timeout lebih lama untuk polling
-            socketInstance.io.opts.timeout = 45000;
+            socketInstance.io.opts.timeout = 90000;
             
             // Coba hubungkan ulang
             setTimeout(() => {

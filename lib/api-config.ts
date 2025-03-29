@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || "https://rosantibikemotorent.com/api",
+  BASE_URL: process.env.NEXT_PUBLIC_API_URL || "https://api.rosantibikemotorent.com/api",
   ENDPOINTS: {
     // Auth
     AUTH_LOGIN: "/auth/login",
