@@ -144,6 +144,18 @@ jobs:
         
     - name: Deploy to VPS
       run: |
+        # Pastikan .eslintrc.json ada
+        if [ ! -f .eslintrc.json ]; then
+          echo '{
+            "extends": "next/core-web-vitals",
+            "rules": {
+              "react/no-unescaped-entities": "off",
+              "react-hooks/exhaustive-deps": "warn",
+              "@next/next/no-img-element": "warn"
+            }
+          }' > .eslintrc.json
+        fi
+        
         # Compress files before transfer to reduce bandwidth
         tar -czf deploy.tar.gz .next package.json ecosystem.config.js .eslintrc.json public
         
