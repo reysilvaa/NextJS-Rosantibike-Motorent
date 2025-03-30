@@ -1,12 +1,17 @@
 import type React from "react"
 import type { Metadata } from "next/types"
 import { Inter } from "next/font/google"
-import "./globals.css"
-import Navbar from "@/components/navbar"
-import Footer from "@/components/footer"
-import { Providers } from "./providers"
+import "./_styles/globals.css"
+import Navbar from "@/components/layout/navbar"
+import Footer from "@/components/layout/footer"
+import { Providers } from "./_lib/providers"
 
-const inter = Inter({ subsets: ["latin"] })
+// Optimize font loading dengan display: swap
+const inter = Inter({ 
+  subsets: ["latin"],
+  display: 'swap', 
+  preload: true
+})
 
 export const metadata: Metadata = {
   title: "Rosantibike Motorent",
@@ -24,17 +29,27 @@ export const metadata: Metadata = {
   }
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+// Tambahkan optimasi dengan prefetch dan preload
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id" suppressHydrationWarning>
-      <body className={`${inter.className} min-h-screen flex flex-col`}>
+    <html lang="id">
+      <head>
+        {/* Preload critical CSS */}
+        <link
+          rel="preload"
+          href="/_next/static/css/app/layout.css"
+          as="style"
+        />
+        {/* Preconnect untuk domain eksternal */}
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+      </head>
+      <body className={inter.className}>
         <Providers>
           <Navbar />
-          <main className="flex-grow">{children}</main>
+          <main className="min-h-screen pt-16">
+            {children}
+          </main>
           <Footer />
         </Providers>
       </body>

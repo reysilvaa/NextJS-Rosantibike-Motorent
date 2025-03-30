@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from 'react';
 import { toast } from 'sonner';
-import { useSocketContext, SocketEvents } from '../../contexts/socket-context';
+import { useSocket, SocketEvents } from '@/hooks/socket/use-socket';
 import { initializeSocket } from "@/lib/socket";
 
 // Tipe data untuk notifikasi
@@ -17,7 +17,7 @@ interface NotificationHandlerProps {
  * Komponen untuk menangani notifikasi dan memastikan socket terhubung saat aplikasi dimuat
  */
 const NotificationHandler = () => {
-  const { socket, isConnected } = useSocketContext();
+    const { socket, isConnected } = useSocket();
   
   // Pastikan socket terhubung saat aplikasi dimuat
   useEffect(() => {

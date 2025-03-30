@@ -7,19 +7,19 @@ import { motion } from "framer-motion"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { useMotorcycleTypes } from "@/hooks/use-motorcycles"
-import { useSocket } from "@/hooks/use-socket"
+import { useMotorcycleTypes } from "@/hooks/api/use-motorcycles-types"
+import { useSocket } from "@/hooks/context/use-socket-provider"
 import { toast } from "sonner"
 import type { MotorcycleType } from "@/lib/types"
-import { useTranslation } from "@/i18n/hooks"
-import { useMotorcycleFilters } from "@/contexts/motorcycle-filter-context"
+import { useTranslation } from "@/i18n/hooks" 
+import { useMotorcycleFilter } from "@/hooks/context/use-motorcycle-filter-provider"
 
 // Placeholder statis yang dijamin ada di folder public
 const MOTORCYCLE_PLACEHOLDER = "/motorcycle-placeholder.svg"
 
 export default function MotorcycleList() {
   const { t } = useTranslation()
-  const { filters } = useMotorcycleFilters()
+  const { filters } = useMotorcycleFilter()
   
   // Gunakan filter dari context langsung ke hook
   const { data: motorcycles, isLoading, error, refetch } = useMotorcycleTypes(filters)
@@ -43,14 +43,7 @@ export default function MotorcycleList() {
   }, [filters, refetch]);
 
   // Connect to socket for realtime motorcycle updates
-  const { isConnected } = useSocket({
-    room: 'motorcycles',
-    events: {
-      'new-motorcycle': handleNewMotorcycle,
-      'update-motorcycle': handleUpdateMotorcycle,
-      'delete-motorcycle': handleDeleteMotorcycle,
-    }
-  });
+  const { isConnected } = useSocket()
 
   // Handler untuk motor baru ditambahkan
   function handleNewMotorcycle(data: any) {

@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation"
 import { format, parse } from "date-fns"
-import { useAvailability } from "@/hooks/use-motorcycles"
+import { useAvailability } from "@/hooks/api/use-motorcycles-availability"
 import AvailabilitySearch from "@/components/availability/availability-search"
 import AvailabilityResults from "@/components/availability/availability-results"
 import { Separator } from "@/components/ui/separator"
@@ -11,8 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 import { useTranslation } from "@/i18n/hooks"
 import { PageHeader } from "@/components/ui/page-header"
-import { useEffect } from "react"
-import { useMotorcycleTypes } from "@/hooks/use-motorcycles"
+import { useMotorcycleTypes } from "@/hooks/api/use-motorcycles-types"
 import { Badge } from "@/components/ui/badge"
 
 export default function AvailabilityPage() {
@@ -47,18 +46,6 @@ export default function AvailabilityPage() {
     : null
   
   const { data: availableMotorcycles, isLoading, error } = useAvailability(searchParamsObj)
-
-  // Log untuk debugging
-  useEffect(() => {
-    if (availableMotorcycles) {
-      console.log(`Rendered ${availableMotorcycles.length} motorcycles in availability page`);
-      if (availableMotorcycles.length > 0) {
-        console.log('Sample motorcycle:', availableMotorcycles[0]);
-      }
-    } else {
-      console.log('No motorcycles data available');
-    }
-  }, [availableMotorcycles]);
 
   return (
     <div className="container mx-auto px-4 py-20">

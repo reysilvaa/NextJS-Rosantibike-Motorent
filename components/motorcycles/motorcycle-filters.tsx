@@ -10,14 +10,14 @@ import { Label } from "@/components/ui/label"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { useTranslation } from "@/i18n/hooks"
-import { useMotorcycleFilters } from "@/contexts/motorcycle-filter-context"
+import { useMotorcycleFilter } from "@/hooks/context/use-motorcycle-filter-provider"
 
 export default function MotorcycleFilters() {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   
   // Menggunakan filter context
-  const { filters, updateFilter, resetFilters, availableBrands, isLoading } = useMotorcycleFilters()
+  const { filters, updateFilter, resetFilters, availableBrands, isLoading } = useMotorcycleFilter()
 
   // Handler untuk checkbox brands
   const handleBrandChange = (brandId: string, checked: boolean) => {

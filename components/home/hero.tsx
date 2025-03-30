@@ -8,61 +8,55 @@ import { Button } from "@/components/ui/button"
 import { Calendar, ChevronRight } from "lucide-react"
 import { useTranslation } from "@/i18n/hooks"
 import { useTheme } from "next-themes"
-import { useVideoContext } from "@/contexts/video-context"
+import { useVideo } from "@/hooks/context/use-video-provider"
 
 export default function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0)
-  const [useVideoFallback, setUseVideoFallback] = useState(false)
+  const [useVideoFallback, setUseVideoFallback] = useState(true)
   const { t, language } = useTranslation()
   const { theme } = useTheme()
   const videoRefs = useRef<Array<HTMLVideoElement | null>>([])
-  const { isPageVisible } = useVideoContext()
+  const { isPageVisible } = useVideo()
   const processedRef = useRef(false)
 
   const slides = [
     {
-      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/q0gtp8z72bayzdwqo7cp.mp4",
-      imageUrl: "/placeholder.svg?height=1080&width=1920",
+      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/q_auto:low,f_auto/rental-motor/video/q0gtp8z72bayzdwqo7cp.mp4",
+      imageUrl: "/placeholder.svg?height=720&width=1280",
       title: t("heroSlide1Title") || "Jelajahi Keindahan dengan Motor Matic",
       subtitle: t("heroSlide1Subtitle") || "Pengalaman wisata nyaman dengan motor matic berkualitas",
     },
     {
-      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/qst0cbu2au5l9qyks1xr.mp4",
-      imageUrl: "/placeholder.svg?height=1080&width=1920",
+      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/q_auto:low,f_auto/rental-motor/video/qst0cbu2au5l9qyks1xr.mp4",
+      imageUrl: "/placeholder.svg?height=720&width=1280",
       title: t("heroSlide2Title") || "Liburan Lebih Fleksibel dengan Motor Sewaan",
       subtitle: t("heroSlide2Subtitle") || "Jangkau tempat wisata tersembunyi dengan bebas dan praktis",
     },
     {
-      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/bykdq8mjfivukkfkujtw.mp4",
-      imageUrl: "/placeholder.svg?height=1080&width=1920",
+      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/q_auto:low,f_auto/rental-motor/video/bykdq8mjfivukkfkujtw.mp4",
+      imageUrl: "/placeholder.svg?height=720&width=1280",
       title: t("heroSlide3Title") || "Harga Terjangkau, Kualitas Terjamin",
       subtitle: t("heroSlide3Subtitle") || "Nikmati tarif sewa kompetitif dengan pelayanan premium",
-    },
-    {
-      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/lyg6nonp8jj1ywzjqggh.mp4",
-      imageUrl: "/placeholder.svg?height=1080&width=1920",
-      title: t("heroSlide4Title") || "Paket Wisata Motor Matic Hemat",
-      subtitle: t("heroSlide4Subtitle") || "Kombinasi sewa motor dan panduan wisata untuk pengalaman terbaik",
-    },
-    {
-      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/cljiyl0dbkokzax2pecf.mp4",
-      imageUrl: "/placeholder.svg?height=1080&width=1920",
-      title: t("heroSlide5Title") || "Berkeliling Kota dengan Nyaman",
-      subtitle: t("heroSlide5Subtitle") || "Motor matic irit dan mudah dikendarai untuk wisata perkotaan",
-    },
-    {
-      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/ojy4yh9urck1pszysvto.mp4",
-      imageUrl: "/placeholder.svg?height=1080&width=1920",
-      title: t("heroSlide6Title") || "Motor Matic untuk Segala Kebutuhan",
-      subtitle: t("heroSlide6Subtitle") || "Tersedia berbagai jenis motor matic sesuai dengan rencana perjalanan Anda",
-    },
-    {
-      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/ysed7qkyskikc36yto80.mp4",
-      imageUrl: "/placeholder.svg?height=1080&width=1920",
-      title: t("heroSlide7Title") || "Bebas Bereksplorasi Tanpa Batas",
-      subtitle: t("heroSlide7Subtitle") || "Temukan sudut-sudut wisata menarik dengan kebebasan berkendara sendiri",
-    },
+    }
   ]
+
+  const [userInteracted, setUserInteracted] = useState(false);
+
+  useEffect(() => {
+    const handleUserInteraction = () => {
+      setUserInteracted(true);
+    };
+
+    window.addEventListener('click', handleUserInteraction);
+    window.addEventListener('scroll', handleUserInteraction);
+    window.addEventListener('keydown', handleUserInteraction);
+
+    return () => {
+      window.removeEventListener('click', handleUserInteraction);
+      window.removeEventListener('scroll', handleUserInteraction);
+      window.removeEventListener('keydown', handleUserInteraction);
+    };
+  }, []);
 
   function addSilentAudioTrack(video: HTMLVideoElement) {
     try {
@@ -104,7 +98,7 @@ export default function Hero() {
   }, []);
 
   useEffect(() => {
-    if (useVideoFallback) return;
+    if (!userInteracted || useVideoFallback) return;
     
     const currentVideo = videoRefs.current[currentSlide];
     
@@ -118,15 +112,7 @@ export default function Hero() {
           if (playPromise !== undefined) {
             playPromise.catch(err => {
               console.error("Video play error:", err);
-              
-              if (err.name === 'NotAllowedError') {
-                currentVideo.muted = true;
-                currentVideo.play().catch(() => {
-                  setUseVideoFallback(true);
-                });
-              } else {
-                setUseVideoFallback(true);
-              }
+              setUseVideoFallback(true);
             });
           }
         } catch (error) {
@@ -147,10 +133,10 @@ export default function Hero() {
     }, 5000);
     
     return () => clearInterval(interval);
-  }, [currentSlide, isPageVisible, useVideoFallback, slides.length]);
+  }, [currentSlide, isPageVisible, useVideoFallback, slides.length, userInteracted]);
 
   useEffect(() => {
-    if (useVideoFallback) return;
+    if (!userInteracted || useVideoFallback) return;
 
     const currentVideo = videoRefs.current[currentSlide];
     if (!currentVideo) return;
@@ -166,7 +152,19 @@ export default function Hero() {
     } else {
       currentVideo.pause();
     }
-  }, [isPageVisible, currentSlide, useVideoFallback]);
+  }, [isPageVisible, currentSlide, useVideoFallback, userInteracted]);
+
+  useEffect(() => {
+    setUseVideoFallback(true);
+    
+    if (userInteracted && isPageVisible) {
+      const videoLoadTimer = setTimeout(() => {
+        setUseVideoFallback(false);
+      }, 2000);
+      
+      return () => clearTimeout(videoLoadTimer);
+    }
+  }, [isPageVisible, userInteracted]);
 
   return (
     <section className="relative h-screen w-full overflow-hidden">
@@ -183,8 +181,9 @@ export default function Hero() {
                 src={slide.imageUrl} 
                 alt={slide.title} 
                 fill 
-                priority 
+                priority={index === 0}
                 className="object-cover" 
+                loading={index === 0 ? "eager" : "lazy"}
               />
               <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/65' : 'bg-black/50'}`} />
             </div>
@@ -197,8 +196,10 @@ export default function Hero() {
                 muted
                 playsInline
                 loop
+                preload="none"
                 disablePictureInPicture
                 disableRemotePlayback
+                data-no-lazy-load="true"
               />
               <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/65' : 'bg-black/50'}`} />
             </div>

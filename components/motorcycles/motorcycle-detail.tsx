@@ -21,7 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { fetchMotorcycleTypeById, checkAvailability } from "@/lib/api"
 import { motion } from "framer-motion"
 import type { MotorcycleType, MotorcycleUnit } from "@/lib/types"
-import { useSocket, SocketEvents } from "@/hooks/use-socket"
+import { useSocket, SocketEvents } from "@/hooks/socket/use-socket"
 import { toast } from "@/components/ui/use-toast"
 import { useTranslation } from "@/i18n/hooks"
 
@@ -47,15 +47,29 @@ export default function MotorcycleDetail({ id }: { id: string }) {
   const [showAvailability, setShowAvailability] = useState(false)
   
   // Socket connection untuk mendapatkan real-time updates
-  const { isConnected } = useSocket({
-    room: `motorcycle-${id}`,
-    events: {
-      [SocketEvents.MOTOR_STATUS_UPDATE]: handleMotorStatusUpdate,
-      'unit-update': handleUnitUpdate,
-      'unit-delete': handleUnitDelete
+  const { isConnected, joinRoom, listenToEvent, stopListeningToEvent, leaveRoom } = useSocket();
+  
+  // Gunakan useEffect untuk menangani room dan events
+  useEffect(() => {
+    if (isConnected) {
+      // Join room spesifik untuk motor ini
+      joinRoom(`motorcycle-${id}`);
+      
+      // Daftarkan event listeners
+      listenToEvent('motor-status-update', handleMotorStatusUpdate);
+      listenToEvent('unit-update', handleUnitUpdate);
+      listenToEvent('unit-delete', handleUnitDelete);
+      
+      // Cleanup saat unmount
+      return () => {
+        leaveRoom(`motorcycle-${id}`);
+        stopListeningToEvent('motor-status-update');
+        stopListeningToEvent('unit-update');
+        stopListeningToEvent('unit-delete');
+      };
     }
-  })
-
+  }, [isConnected, id, joinRoom, listenToEvent, leaveRoom, stopListeningToEvent]);
+  
   // Handler untuk update status motor
   function handleMotorStatusUpdate(data: any) {
     if (data && data.unitId) {
@@ -216,12 +230,13 @@ export default function MotorcycleDetail({ id }: { id: string }) {
         jenisMotorId: id
       };
       
-      // Tambahkan logging untuk membantu debug
-      console.log("Checking availability with params:", searchParams);
+      // Kurangi logging untuk membantu performa
+      // console.log("Checking availability with params:", searchParams);
       
       // Ambil data ketersediaan dari API
       const response = await checkAvailability(searchParams);
-      console.log("API response:", response);
+      // Kurangi logging untuk membantu performa
+      // console.log("API response:", response);
       
       // Siapkan array untuk unit yang tersedia
       let availableMotorcycles: any[] = [];

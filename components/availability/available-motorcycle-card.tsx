@@ -22,7 +22,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import type { MotorcycleUnit } from "@/lib/types"
 import { createTransaction } from "@/lib/api"
-import { useSocket, SocketEvents } from "@/hooks/use-socket"
+import { useSocket, SocketEvents } from "@/hooks/socket/use-socket"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "@/components/ui/use-toast"
 import { useTranslation } from "@/i18n/hooks"
@@ -53,13 +53,25 @@ export default function AvailableMotorcycleCard({ motorcycle, startDate, endDate
   const [isAvailable, setIsAvailable] = useState(motorcycle.status === "TERSEDIA")
 
   // Socket untuk updates real-time pada status motor
-  const { isConnected } = useSocket({
-    room: `motorcycle-${motorcycle.id}`,
-    events: {
-      [SocketEvents.MOTOR_STATUS_UPDATE]: handleMotorStatusUpdate,
-      'booking-created': handleBookingCreated
+  const { isConnected, joinRoom, listenToEvent, stopListeningToEvent } = useSocket();
+  
+  // Gunakan useEffect untuk menangani room dan events
+  useEffect(() => {
+    if (isConnected) {
+      // Join room spesifik untuk motor ini
+      joinRoom(`motorcycle-${motorcycle.id}`);
+      
+      // Daftarkan event listeners
+      listenToEvent('motor-status-update', handleMotorStatusUpdate);
+      listenToEvent('booking-created', handleBookingCreated);
+      
+      // Cleanup saat unmount
+      return () => {
+        stopListeningToEvent('motor-status-update');
+        stopListeningToEvent('booking-created');
+      };
     }
-  })
+  }, [isConnected, motorcycle.id, joinRoom, listenToEvent, stopListeningToEvent]);
 
   // Update lokal ketika prop motorcycle berubah
   useEffect(() => {

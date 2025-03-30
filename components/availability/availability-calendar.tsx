@@ -9,7 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { checkAvailability } from "@/lib/api"
 import type { MotorcycleUnit } from "@/lib/types"
 import AvailableMotorcycleCard from "@/components/availability/available-motorcycle-card"
-import { useSocket, SocketEvents } from "@/hooks/use-socket"
+import { useSocket, SocketEvents } from "@/hooks/socket/use-socket"
 import { toast } from "sonner"
 import { useTranslation } from "@/i18n/hooks"
 
@@ -55,14 +55,27 @@ export default function AvailabilityCalendar() {
   }
   
   // Menggunakan socket untuk realtime updates
-  const { isConnected, socket } = useSocket({
-    room: 'availability',
-    events: {
-      'motor-status-update': handleMotorStatusUpdate,
-      'availability-update': handleAvailabilityUpdate,
-      'booking-created': handleBookingCreated,
+  const { isConnected, socket, joinRoom, listenToEvent, stopListeningToEvent } = useSocket();
+  
+  // Gunakan useEffect untuk menangani room dan events
+  useEffect(() => {
+    if (isConnected) {
+      // Join room availability untuk menerima updates
+      joinRoom('availability');
+      
+      // Daftarkan event listeners
+      listenToEvent('motor-status-update', handleMotorStatusUpdate);
+      listenToEvent('availability-update', handleAvailabilityUpdate);
+      listenToEvent('booking-created', handleBookingCreated);
+      
+      // Cleanup saat unmount
+      return () => {
+        stopListeningToEvent('motor-status-update');
+        stopListeningToEvent('availability-update');
+        stopListeningToEvent('booking-created');
+      };
     }
-  });
+  }, [isConnected, joinRoom, listenToEvent, stopListeningToEvent]);
 
   // Handler untuk update status motor
   function handleMotorStatusUpdate(data: any) {

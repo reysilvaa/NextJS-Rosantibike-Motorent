@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { differenceInDays, parseISO, format } from "date-fns"
@@ -30,16 +30,6 @@ export default function AvailabilityResults({ motorcycles, startDate, endDate }:
   const { t } = useTranslation()
   const router = useRouter()
   const [sortOption, setSortOption] = useState("price-asc")
-  
-  // Log untuk debugging
-  useEffect(() => {
-    console.log("AvailabilityResults received motorcycles:", motorcycles);
-    console.log("Motorcycles array length:", motorcycles.length);
-    
-    if (motorcycles.length > 0) {
-      console.log("Sample motorcycle in AvailabilityResults:", motorcycles[0]);
-    }
-  }, [motorcycles]);
   
   const rentalDays = differenceInDays(parseISO(endDate), parseISO(startDate))
   

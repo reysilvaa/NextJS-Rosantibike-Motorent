@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, Calendar, Bike, AlertCircle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/context/use-auth-provider";
 import { fetchUserTransactions } from "@/lib/api";
 import type { Transaction } from "@/lib/types";
 

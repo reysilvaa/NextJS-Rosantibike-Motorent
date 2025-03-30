@@ -22,17 +22,12 @@ export default function FeaturedMotorcycles() {
     const getMotorcycles = async () => {
       try {
         setIsLoading(true)
-        console.log("Fetching motorcycle types...")
         const data = await fetchMotorcycleTypes()
         
-        console.log("Response from fetchMotorcycleTypes:", data)
-        
         if (data && Array.isArray(data) && data.length > 0) {
-          console.log(`Successfully fetched ${data.length} motorcycle types`)
           const featuredMotorcycles = data.slice(0, 4)
           setMotorcycles(featuredMotorcycles)
         } else {
-          console.warn("Data dari API kosong atau bukan array, menggunakan placeholder")
           setMotorcycles([])
         }
         setIsLoading(false)
@@ -140,6 +135,8 @@ export default function FeaturedMotorcycles() {
                         src={motorcycle.gambar || "/placeholder.svg?height=400&width=600"}
                         alt={`${motorcycle.merk} ${motorcycle.model}`}
                         fill
+                        loading="lazy" 
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
                         className="object-cover transition-transform hover:scale-105"
                       />
                       <Badge className="absolute top-2 right-2 bg-primary">{motorcycle.cc} CC</Badge>
