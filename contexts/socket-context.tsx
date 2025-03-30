@@ -7,6 +7,22 @@ import { useSocket } from '@/hooks/context/use-socket-provider';
 // Reexport socket hooks dari lokasi baru
 export { useSocket } from '@/hooks/context/use-socket-provider';
 
+// Re-export SocketEvents untuk komponen yang menggunakan enum SocketEvents
+export enum SocketEvents {
+  JOIN_ROOM = 'join_room',
+  LEAVE_ROOM = 'leave_room',
+  MOTOR_STATUS_UPDATE = 'motor-status-update',
+  UNIT_UPDATE = 'unit-update',
+  UNIT_DELETE = 'unit-delete',
+  TRANSAKSI_CREATE = 'transaksi-create',
+  TRANSAKSI_UPDATE = 'transaksi-update',
+  TRANSAKSI_DELETE = 'transaksi-delete',
+  NOTIFICATION = 'notification',
+  CONNECTION = 'connection',
+  DISCONNECT = 'disconnect',
+  CONNECT_ERROR = 'connect_error'
+}
+
 // Context untuk kompatibilitas dengan komponen lama
 const SocketContext = createContext<Socket | null>(null);
 
