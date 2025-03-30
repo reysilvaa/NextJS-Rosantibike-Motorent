@@ -29,31 +29,50 @@ const nextConfig = {
     parallelServerCompiles: true,
   },
   async rewrites() {
-    // Gunakan URL relatif untuk pengujian localhost dan URL absolut untuk production
+    // Tentukan mode berdasarkan NODE_ENV
     const isProduction = process.env.NODE_ENV === 'production';
-    const apiUrl = isProduction 
-      ? process.env.NEXT_PUBLIC_WS_URL
-      : 'http://localhost:3030';
-
+    
+    // Gunakan URL dari environment variable
+    const prodApiUrl = process.env.NEXT_PUBLIC_WS_URL;
+    const devApiUrl = 'http://localhost:3030';
+    
+    // Pilih URL berdasarkan mode
+    const apiUrl = isProduction ? prodApiUrl : devApiUrl;
+  
     console.log(`[${isProduction ? 'Production' : 'Development'}] Using API URL: ${apiUrl}`);
 
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${apiUrl}/api/:path*`,
-      },
-      {
-        source: '/socket.io/:path*',
-        destination: `${apiUrl}/socket.io/:path*`,
-      },
-      {
-        source: '/notifications/:path*',
-        destination: `${apiUrl}/notifications/:path*`, 
-      },
-    ];
+    return {
+      beforeFiles: [
+        {
+          source: '/api/:path*',
+          destination: `${apiUrl}/api/:path*`,
+          basePath: false,
+        },
+        {
+          source: '/socket.io/:path*',
+          destination: `${apiUrl}/socket.io/:path*`,
+          basePath: false,
+        },
+        {
+          source: '/notifications/:path*',
+          destination: `${apiUrl}/notifications/:path*`,
+          basePath: false,
+        },
+      ]
+    };
   },
   async headers() {
-    return [];
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Credentials', value: 'true' },
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET,OPTIONS,PATCH,DELETE,POST,PUT' },
+          { key: 'Access-Control-Allow-Headers', value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization' },
+        ],
+      },
+    ];
   },
 }
 
