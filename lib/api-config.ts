@@ -1,7 +1,5 @@
 export const API_CONFIG = {
-  BASE_URL: typeof window !== 'undefined' 
-    ? process.env.NEXT_PUBLIC_API_URL
-    : process.env.NEXT_PUBLIC_API_URL,
+  BASE_URL: process.env.NEXT_PUBLIC_API_URL,
   API_TIMEOUT: 30000, // 30 detik timeout
   ENDPOINTS: {
     // Auth

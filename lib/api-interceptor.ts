@@ -13,11 +13,15 @@ export const responseInterceptor = (response: any, endpoint: string): any => {
 // Interceptor untuk mengelola error API
 export const errorInterceptor = (error: any, endpoint: string): never => {
   // Log error
-  console.error(`API Error [${endpoint}]:`, error)
+  console.error(`API Error [${endpoint}]:`, error);
   
   // Handle empty error object
   if (!error || (typeof error === 'object' && Object.keys(error).length === 0)) {
-    error = { message: `Koneksi ke server gagal atau server tidak merespons untuk ${endpoint}` };
+    console.error(`Empty error object received for ${endpoint}`);
+    error = { 
+      message: `Koneksi ke server gagal atau server tidak merespons untuk ${endpoint}. Coba periksa server backend Anda.`,
+      details: `Coba pastikan server NestJS berjalan dan endpoint ${endpoint} berfungsi dengan benar.`
+    };
   }
   
   // Extract validation errors
@@ -33,26 +37,35 @@ export const errorInterceptor = (error: any, endpoint: string): never => {
     errorMessage = error?.message || error?.error || 'Terjadi kesalahan pada server';
   }
   
+  // Tambahkan informasi endpoint dan status code jika ada
+  if (error?.status) {
+    errorMessage += ` (Status: ${error.status})`;
+  }
+  
+  // Log pesan error final
+  console.error(`Error message to show: ${errorMessage}`);
+  console.error(`Error details: ${JSON.stringify(error, null, 2)}`);
+  
   // Tampilkan toast error
   toast({
-    title: "Error",
+    title: `Error - ${endpoint}`,
     description: errorMessage,
     variant: "destructive",
-  })
+  });
   
   // Tangani error autentikasi
   if (error?.status === 401) {
     // Hapus token
     if (typeof window !== 'undefined') {
-      localStorage.removeItem("auth_token")
-      localStorage.removeItem("admin_data")
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("admin_data");
       
       // Redirect ke halaman login jika tidak di halaman login
       if (!window.location.pathname.includes('/login')) {
-        window.location.href = '/login'
+        window.location.href = '/login';
       }
     }
   }
   
-  throw error
+  throw error;
 } 
