@@ -18,7 +18,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: process.env.NEXT_PUBLIC_WS_URL ? new URL(process.env.NEXT_PUBLIC_WS_URL).hostname : 'api',
+        hostname: process.env.NEXT_PUBLIC_WS_URL,
         pathname: '/**',
       },
     ],
@@ -30,10 +30,12 @@ const nextConfig = {
   },
   async rewrites() {
     // Gunakan URL relatif untuk pengujian localhost dan URL absolut untuk production
-    const isLocalDev = process.env.NODE_ENV === 'development';
-    const apiUrl = isLocalDev 
-      ? process.env.NEXT_PUBLIC_API_URL  // Gunakan port 3030 untuk backend pada development
-      : process.env.NEXT_PUBLIC_WS_URL;
+    const isProduction = process.env.NODE_ENV === 'production';
+    const apiUrl = isProduction 
+      ? process.env.NEXT_PUBLIC_WS_URL
+      : 'http://localhost:3030';
+
+    console.log(`[${isProduction ? 'Production' : 'Development'}] Using API URL: ${apiUrl}`);
 
     return [
       {

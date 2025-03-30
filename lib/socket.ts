@@ -58,11 +58,7 @@ export const initializeSocket = (): Socket | null => {
     
     // Buat socket baru jika belum ada
     // Gunakan URL relatif untuk backend dan port yang sesuai
-    const wsUrl = typeof window !== 'undefined' 
-      ? window.location.hostname === 'localhost' 
-        ? process.env.NEXT_PUBLIC_WS_URL // Gunakan env variable tanpa fallback
-        : process.env.NEXT_PUBLIC_WS_URL
-      : process.env.NEXT_PUBLIC_WS_URL;
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL;
     
     console.log(`Mencoba connect ke socket: ${wsUrl} dengan namespace /notifications`);
     
