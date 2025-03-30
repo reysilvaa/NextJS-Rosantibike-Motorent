@@ -2,10 +2,10 @@ module.exports = {
     apps: [
       {
         name: "rental-frontend",
-        script: "node_modules/next/dist/bin/next",
-        args: "start",
+        script: "npm",
+        args: "run start",
         exec_mode: "cluster",
-        instances: 1,
+        instances: "max",
         env: {
           NODE_ENV: "production",
           PORT: 3001,
