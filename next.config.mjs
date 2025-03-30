@@ -25,9 +25,16 @@ const nextConfig = {
   },
   experimental: {
     webpackBuildWorker: true,
-    parallelServerBuildTraces: true,
-    parallelServerCompiles: true,
+    parallelServerBuildTraces: false,
+    parallelServerCompiles: false,
+    serverMinification: true,
+    forceSwcTransforms: true,
   },
+  reactStrictMode: false,
+  poweredByHeader: false,
+  productionBrowserSourceMaps: false,
+  swcMinify: true,
+  compress: true,
   async rewrites() {
     // Tentukan mode berdasarkan NODE_ENV
     const isProduction = process.env.NODE_ENV === 'production';
@@ -70,6 +77,13 @@ const nextConfig = {
           { key: 'Access-Control-Allow-Origin', value: '*' },
           { key: 'Access-Control-Allow-Methods', value: 'GET,OPTIONS,PATCH,DELETE,POST,PUT' },
           { key: 'Access-Control-Allow-Headers', value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization' },
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      {
+        source: '/images/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
         ],
       },
     ];

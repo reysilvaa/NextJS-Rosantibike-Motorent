@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from "react"
+import React, { createContext, useContext, useEffect, useState, useRef, useCallback, ReactNode } from "react"
 import { Socket, io } from "socket.io-client"
 import { toast } from "../ui/use-toast"
 
@@ -30,6 +30,20 @@ const SocketContext = createContext<SocketContextValue | undefined>(undefined)
 // URL socket.io
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || "https://api.rosantibikemotorent.com"
 
+// Pilihan koneksi socket dengan timeout yang lebih kecil dan polling sederhana
+const socketOptions = {
+  transports: ["websocket", "polling"],
+  reconnectionAttempts: 3,
+  reconnectionDelay: 1000,
+  timeout: 5000, // Lebih cepat timeout
+  autoConnect: false, // Tidak otomatis connect
+  forceNew: true, // Selalu buat koneksi baru
+  reconnection: true,
+  query: {
+    clientType: 'web'
+  }
+}
+
 /**
  * Provider untuk koneksi Socket.io
  * @param children - React children nodes
@@ -39,156 +53,220 @@ export function SocketProvider({ children, defaultRooms }: SocketProviderProps) 
   const [socket, setSocket] = useState<Socket | null>(null)
   const [isConnected, setIsConnected] = useState(false)
   const [currentRoom, setCurrentRoom] = useState<string | null>(null)
-  const [connectionAttempts, setConnectionAttempts] = useState(0)
-  const maxConnectionAttempts = 3
-
-  // Fungsi untuk membuat koneksi socket
-  const connect = () => {
-    if (socket) return // Jangan buat koneksi baru jika sudah ada
+  const connectionAttemptsRef = useRef(0)
+  const maxConnectionAttempts = 2
+  const socketRef = useRef<Socket | null>(null)
+  const hasConnectedBefore = useRef(false)
+  
+  // Gunakan debounce untuk toast notification
+  const [toastDebounce, setToastDebounce] = useState(false)
+  
+  // Fungsi untuk membuat koneksi socket dengan useCallback
+  const connect = useCallback(() => {
+    // Jika sudah ada socket yang terhubung, jangan buat yang baru
+    if (socketRef.current?.connected) return
+    
+    // Bersihkan socket lama jika ada
+    if (socketRef.current) {
+      socketRef.current.removeAllListeners()
+      socketRef.current.disconnect()
+    }
 
     try {
-      console.log("Membuat koneksi socket ke:", SOCKET_URL)
-      const socketInstance = io(SOCKET_URL, {
-        transports: ["websocket", "polling"],
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-        timeout: 10000,
-        autoConnect: true
-      })
-
+      // Buat instance socket baru
+      const socketInstance = io(SOCKET_URL, socketOptions)
+      socketRef.current = socketInstance
+      
+      // Update state saat socket dibuat
       setSocket(socketInstance)
+
+      // Connect secara manual
+      socketInstance.connect()
 
       // Event handlers
       socketInstance.on("connect", () => {
-        console.log("Socket terhubung:", socketInstance.id)
         setIsConnected(true)
-        setConnectionAttempts(0)
+        connectionAttemptsRef.current = 0
+        hasConnectedBefore.current = true
         
-        toast({
-          title: "Terhubung",
-          description: "Koneksi real-time aktif",
-        })
+        // Kurangi notifikasi yang berlebihan
+        if (!toastDebounce) {
+          setToastDebounce(true)
+          toast({
+            title: "Terhubung",
+            description: "Koneksi real-time aktif",
+          })
+          
+          // Reset debounce setelah 10 detik
+          setTimeout(() => setToastDebounce(false), 10000)
+        }
       })
 
       socketInstance.on("disconnect", (reason) => {
-        console.log("Socket terputus:", reason)
         setIsConnected(false)
         
-        if (reason !== "io client disconnect") {
+        // Hanya tampilkan toast untuk disconnect yang tidak diinginkan
+        if (reason !== "io client disconnect" && reason !== "transport close" && hasConnectedBefore.current && !toastDebounce) {
+          setToastDebounce(true)
           toast({
             title: "Terputus",
             description: "Koneksi real-time terputus",
             variant: "destructive"
           })
+          
+          // Reset debounce setelah 10 detik
+          setTimeout(() => setToastDebounce(false), 10000)
         }
       })
 
       socketInstance.on("connect_error", (error) => {
-        console.error("Socket error:", error)
-        setConnectionAttempts(prev => prev + 1)
+        connectionAttemptsRef.current += 1
         
-        if (connectionAttempts >= maxConnectionAttempts) {
-          toast({
-            title: "Masalah Koneksi",
-            description: "Tidak dapat terhubung ke server. Periksa koneksi internet Anda.",
-            variant: "destructive"
-          })
+        // Hanya coba beberapa kali sebelum menyerah
+        if (connectionAttemptsRef.current >= maxConnectionAttempts) {
+          // Matikan koneksi setelah beberapa percobaan gagal
           socketInstance.disconnect()
+          
+          // Hanya tampilkan pesan error jika user sudah terhubung sebelumnya
+          if (hasConnectedBefore.current && !toastDebounce) {
+            setToastDebounce(true)
+            toast({
+              title: "Masalah Koneksi",
+              description: "Tidak dapat terhubung ke server. Periksa koneksi internet Anda.",
+              variant: "destructive"
+            })
+            
+            // Reset debounce setelah 10 detik
+            setTimeout(() => setToastDebounce(false), 10000)
+          }
         }
       })
     } catch (error) {
-      console.error("Error membuat koneksi socket:", error)
-      toast({
-        title: "Error",
-        description: "Gagal membuat koneksi real-time",
-        variant: "destructive"
-      })
-    }
-  }
-
-  // Bersihkan koneksi socket saat komponen unmount
-  useEffect(() => {
-    // Koneksi otomatis saat provider dimuat
-    connect()
-
-    // Gabung ke default rooms jika ada
-    if (defaultRooms && defaultRooms.length > 0 && socket && isConnected) {
-      console.log('Joining default rooms:', defaultRooms);
-      defaultRooms.forEach(room => joinRoom(room));
-    }
-
-    return () => {
-      if (socket) {
-        // Tinggalkan default rooms jika ada
-        if (defaultRooms && defaultRooms.length > 0) {
-          defaultRooms.forEach(room => leaveRoom(room));
-        }
-        socket.disconnect()
-        setSocket(null)
-        setIsConnected(false)
+      // Hanya tampilkan error jika user sudah terhubung sebelumnya
+      if (hasConnectedBefore.current && !toastDebounce) {
+        setToastDebounce(true)
+        toast({
+          title: "Error",
+          description: "Gagal membuat koneksi real-time",
+          variant: "destructive"
+        })
+        
+        // Reset debounce setelah 10 detik
+        setTimeout(() => setToastDebounce(false), 10000)
       }
     }
-  }, [socket, isConnected, defaultRooms]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [toastDebounce])
+
+  // Connect saat komponen mount
+  useEffect(() => {
+    // Delay koneksi untuk mengurangi beban saat halaman di-load
+    const connectTimer = setTimeout(() => {
+      // Hanya connect jika tidak ada koneksi yang aktif
+      if (!socketRef.current?.connected) {
+        connect()
+      }
+    }, 1500) // Delay koneksi untuk 1.5 detik
+    
+    // Cleanup
+    return () => {
+      clearTimeout(connectTimer)
+      
+      // Gunakan ref untuk menghindari memory leak
+      if (socketRef.current) {
+        socketRef.current.removeAllListeners()
+        socketRef.current.disconnect()
+        socketRef.current = null
+      }
+    }
+  }, [connect])
+
+  // Gabung default rooms setelah terhubung
+  useEffect(() => {
+    if (isConnected && socket && defaultRooms && defaultRooms.length > 0) {
+      defaultRooms.forEach(room => joinRoom(room))
+    }
+    
+    // Cleanup - tinggalkan rooms saat unmount
+    return () => {
+      if (isConnected && socket && defaultRooms && defaultRooms.length > 0) {
+        defaultRooms.forEach(room => {
+          if (currentRoom === room) {
+            socket.emit("leaveRoom", { roomId: room })
+          }
+        })
+      }
+    }
+  }, [isConnected, socket, defaultRooms]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fungsi untuk disconnect
-  const disconnect = () => {
-    if (socket) {
-      socket.disconnect()
-      // Tidak perlu setSocket(null) di sini karena event 'disconnect' akan diproses
+  const disconnect = useCallback(() => {
+    if (socketRef.current) {
+      socketRef.current.disconnect()
     }
-  }
+  }, [])
 
   // Fungsi untuk join room
-  const joinRoom = (roomId: string) => {
-    if (socket && isConnected) {
+  const joinRoom = useCallback((roomId: string) => {
+    if (!socketRef.current || !isConnected) return
+    
+    try {
       // Tinggalkan room saat ini jika ada
       if (currentRoom) {
-        socket.emit("leaveRoom", { roomId: currentRoom })
+        socketRef.current.emit("leaveRoom", { roomId: currentRoom })
       }
       
       // Join room baru
-      socket.emit("joinRoom", { roomId })
+      socketRef.current.emit("joinRoom", { roomId })
       setCurrentRoom(roomId)
-      console.log(`Joined room: ${roomId}`)
-    } else {
-      console.warn("Tidak dapat join room: socket tidak terhubung")
+    } catch (error) {
+      // Tangani error dalam diam
     }
-  }
+  }, [isConnected, currentRoom])
 
   // Fungsi untuk leave room
-  const leaveRoom = (roomId: string) => {
-    if (socket && isConnected && currentRoom === roomId) {
-      socket.emit("leaveRoom", { roomId })
+  const leaveRoom = useCallback((roomId: string) => {
+    if (!socketRef.current || !isConnected || currentRoom !== roomId) return
+    
+    try {
+      socketRef.current.emit("leaveRoom", { roomId })
       setCurrentRoom(null)
-      console.log(`Left room: ${roomId}`)
+    } catch (error) {
+      // Tangani error dalam diam
     }
-  }
+  }, [isConnected, currentRoom])
 
   // Fungsi untuk listen event
-  const listenToEvent = <T,>(event: string, callback: (data: T) => void) => {
-    if (socket) {
-      socket.on(event, callback)
-      console.log(`Listening to event: ${event}`)
+  const listenToEvent = useCallback(<T,>(event: string, callback: (data: T) => void) => {
+    if (!socketRef.current) return
+    
+    try {
+      socketRef.current.on(event, callback)
+    } catch (error) {
+      // Tangani error dalam diam
     }
-  }
+  }, [])
 
   // Fungsi untuk stop listening event
-  const stopListeningToEvent = (event: string) => {
-    if (socket) {
-      socket.off(event)
-      console.log(`Stopped listening to event: ${event}`)
+  const stopListeningToEvent = useCallback((event: string) => {
+    if (!socketRef.current) return
+    
+    try {
+      socketRef.current.off(event)
+    } catch (error) {
+      // Tangani error dalam diam
     }
-  }
+  }, [])
 
   // Fungsi untuk emit event
-  const emitEvent = <T,>(event: string, data: T) => {
-    if (socket && isConnected) {
-      socket.emit(event, data)
-      console.log(`Emitted event: ${event}`, data)
-    } else {
-      console.warn(`Tidak dapat emit event ${event}: socket tidak terhubung`)
+  const emitEvent = useCallback(<T,>(event: string, data: T) => {
+    if (!socketRef.current || !isConnected) return
+    
+    try {
+      socketRef.current.emit(event, data)
+    } catch (error) {
+      // Tangani error dalam diam
     }
-  }
+  }, [isConnected])
 
   // Nilai context
   const contextValue: SocketContextValue = {
