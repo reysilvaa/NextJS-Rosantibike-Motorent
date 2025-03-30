@@ -24,14 +24,31 @@ export default function BlogList() {
     const getBlogPosts = async () => {
       try {
         setIsLoading(true)
-        const data = await fetchBlogPosts(currentPage, 6)
-        setPosts(data)
-        setTotalPages(3) // Hardcoded for now, would come from API response in real app
+        const response = await fetchBlogPosts(currentPage, 6)
+        
+        // Ambil data dan meta info dari respons API
+        const blogData = response.data || []
+        const metaInfo = response.meta || { totalPages: 1 }
+        
+        // Pastikan kita mempunyai array
+        if (Array.isArray(blogData)) {
+          setPosts(blogData)
+        } else {
+          // Jika data bukan array, set ke array kosong
+          setPosts([])
+          console.error("Format data blog tidak valid:", blogData)
+        }
+        
+        // Set total halaman dari respons API
+        if (metaInfo.totalPages) {
+          setTotalPages(metaInfo.totalPages)
+        }
+        
         setIsLoading(false)
       } catch (err) {
         setError(t("failedToLoadBlogPosts"))
         setIsLoading(false) 
-        console.error(err)
+        console.error("Error saat memuat blog posts:", err)
       }
     }
 

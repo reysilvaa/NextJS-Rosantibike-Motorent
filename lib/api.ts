@@ -27,10 +27,19 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
   console.log(`Requesting ${url} with method ${options.method || 'GET'}`)
 
   try {
+    if (!API_CONFIG.BASE_URL) {
+      console.error('API_CONFIG.BASE_URL tidak terdefinisi. Periksa konfigurasi .env');
+      throw new Error('URL API tidak terkonfigurasi dengan benar. Harap periksa file .env');
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.API_TIMEOUT || 30000);
+    
     const response = await fetch(url, {
       ...options,
       headers,
-    })
+      signal: controller.signal
+    }).finally(() => clearTimeout(timeoutId));
 
     if (!response.ok) {
       let errorData;
@@ -62,7 +71,7 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
       if (Array.isArray(responseData)) {
         result = responseData
       } else if ('data' in responseData) {
-        result = responseData.data
+        result = responseData
       } else {
         result = responseData
       }
@@ -78,6 +87,14 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
     if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
       return errorInterceptor({
         message: `Tidak dapat terhubung ke server. Periksa koneksi internet Anda atau coba lagi nanti.`,
+        originalError: error
+      }, endpoint);
+    }
+    
+    // Handle timeout/abort errors
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      return errorInterceptor({
+        message: `Permintaan ke server timeout. Server mungkin sedang sibuk atau tidak tersedia.`,
         originalError: error
       }, endpoint);
     }
@@ -525,16 +542,33 @@ export async function fetchBlogPosts(
   search?: string,
   status?: string,
   kategori?: string,
-): Promise<BlogPost[]> {
-  const queryParams = new URLSearchParams()
-  queryParams.append("page", page.toString())
-  queryParams.append("limit", limit.toString())
-  if (search) queryParams.append("search", search)
-  if (status) queryParams.append("status", status)
-  if (kategori) queryParams.append("kategori", kategori)
+): Promise<PaginatedResponse<BlogPost>> {
+  try {
+    const queryParams = new URLSearchParams()
+    queryParams.append("page", page.toString())
+    queryParams.append("limit", limit.toString())
+    if (search) queryParams.append("search", search)
+    if (status) queryParams.append("status", status)
+    if (kategori) queryParams.append("kategori", kategori)
 
-  const response = await apiRequest<PaginatedResponse<BlogPost>>(`${API_CONFIG.ENDPOINTS.BLOG}?${queryParams.toString()}`)
-  return Array.isArray(response) ? response : response.data || []
+    console.log(`Requesting blog posts with params: page=${page}, limit=${limit}`);
+    
+    const endpoint = `${API_CONFIG.ENDPOINTS.BLOG}?${queryParams.toString()}`;
+    const response = await apiRequest<PaginatedResponse<BlogPost>>(endpoint);
+    
+    // Validasi respons
+    if (!response) {
+      console.error('Empty response from blog API');
+      throw new Error('Tidak ada respons dari server');
+    }
+    
+    console.log('Blog posts response:', response);
+    
+    return response;
+  } catch (error) {
+    console.error('Error fetching blog posts:', error);
+    throw error;
+  }
 }
 
 export async function fetchBlogPostById(id: string): Promise<BlogPost> {

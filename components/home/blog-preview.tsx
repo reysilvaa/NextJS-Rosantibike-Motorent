@@ -22,13 +22,25 @@ export default function BlogPreview() {
     const getBlogPosts = async () => {
       try {
         setIsLoading(true)
-        const data = await fetchBlogPosts()
-        setPosts(data.slice(0, 3)) // Get first 3 posts
+        const response = await fetchBlogPosts(1, 10)
+        
+        // Ambil data dari respons
+        const blogData = response.data || []
+        
+        // Pastikan kita mempunyai array
+        if (Array.isArray(blogData)) {
+          setPosts(blogData.slice(0, 3)) // Ambil 3 post pertama
+        } else {
+          // Jika data bukan array, tampilkan pesan error
+          setError(t("invalidDataFormat"))
+          console.error("Format data blog tidak valid:", blogData)
+        }
+        
         setIsLoading(false)
       } catch (err) {
         setError(t("loadingFailed"))
         setIsLoading(false)
-        console.error(err)
+        console.error("Error saat memuat blog posts:", err)
       }
     }
 
