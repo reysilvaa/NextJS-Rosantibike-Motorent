@@ -60,10 +60,20 @@ export function MotorcycleFilterProvider({ children }: { children: ReactNode }) 
         // Ambil merek-merek motor yang tersedia dari endpoint yang benar
         // Gunakan endpoint yang benar dan tambahkan timeout yang lebih panjang
         const brandsResponse = await apiClient.get('/unit-motor/brands', {
-          timeout: 15000,
+          timeout: 30000, // Tingkatkan timeout
           baseURL: typeof window !== 'undefined' && window.location.hostname === 'localhost'
-            ? 'http://localhost:3030'
-            : undefined
+            ? 'https://api.rosantibikemotorent.com'
+            : undefined,
+          headers: { 
+            'Content-Type': 'application/json' 
+          },
+          // Tambahkan konfigurasi untuk mengatasi masalah CORS
+          withCredentials: false,
+          // Tambahkan retry dan timeout untuk axios
+          maxRedirects: 5,
+          maxContentLength: 50 * 1000 * 1000, // 50 MB
+          // Proxy false di lingkungan tertentu
+          proxy: false
         })
         
         console.log('Brands response:', brandsResponse)
@@ -78,7 +88,7 @@ export function MotorcycleFilterProvider({ children }: { children: ReactNode }) 
         console.error('Error fetching brand options:', error)
         
         // Menampilkan pesan error yang lebih informatif
-        if (error.code === 'ERR_NETWORK') {
+        if (error.code === 'ERR_NETWORK' || error.name === 'AxiosError') {
           console.warn('Network error, menggunakan data brands statis')
           // Tambahkan toast notification
           toast({

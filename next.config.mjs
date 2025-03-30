@@ -34,7 +34,7 @@ const nextConfig = {
     
     // Gunakan URL dari environment variable
     const prodApiUrl = process.env.NEXT_PUBLIC_WS_URL || 'https://api.rosantibikemotorent.com';
-    const devApiUrl = 'http://localhost:3030';
+    const devApiUrl = prodApiUrl;
     
     // Pilih URL berdasarkan mode
     const apiUrl = isProduction ? prodApiUrl : devApiUrl;

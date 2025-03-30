@@ -17,8 +17,12 @@ import axios from 'axios';
 // Axios instance
 export const apiClient = axios.create({
   baseURL: API_CONFIG.BASE_URL,
-  timeout: API_CONFIG.API_TIMEOUT,
+  timeout: API_CONFIG.API_TIMEOUT || 30000,
   headers: API_CONFIG.DEFAULT_HEADERS,
+  withCredentials: false, // Matikan withCredentials untuk menghindari masalah CORS
+  maxRedirects: 5, // Batasi jumlah maksimum redirect
+  maxContentLength: 50 * 1000 * 1000, // 50 MB
+  proxy: false // Nonaktifkan proxy
 });
 
 // Tambahkan interceptor untuk menangani token
@@ -29,16 +33,39 @@ apiClient.interceptors.request.use(
       // Gunakan cara assign property terpisah untuk menghindari error tipe
       config.headers.Authorization = authHeader.Authorization;
     }
+    
+    // Log untuk debugging
+    console.log(`[Axios Request] ${config.method?.toUpperCase() || 'GET'} ${config.url}`, { 
+      baseURL: config.baseURL,
+      timeout: config.timeout
+    });
+    
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    console.error('[Axios Request Error]', error);
+    return Promise.reject(error);
+  }
 );
 
 // Interceptor untuk menangani respons
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log(`[Axios Response] ${response.config.method?.toUpperCase() || 'GET'} ${response.config.url}`, { 
+      status: response.status, 
+      data: response.data 
+    });
+    return response;
+  },
   (error) => {
     // Tangani error global di sini
+    console.error('[Axios Response Error]', {
+      message: error.message,
+      code: error.code,
+      config: error.config,
+      response: error.response
+    });
+    
     if (error.response?.status === 401) {
       // Token tidak valid, redirect ke halaman login
       if (typeof window !== 'undefined') {
@@ -708,59 +735,42 @@ export async function fetchBlogPostById(id: string): Promise<BlogPost> {
 
 export async function fetchBlogPostBySlug(slug: string): Promise<BlogPost | null> {
   try {
-    // Gunakan API_CONFIG untuk URL API
-    const apiUrl = API_CONFIG.BASE_URL;
-    if (!apiUrl) {
-      console.error('API URL tidak terdefinisi');
-      return null;
-    }
-
-    console.log(`Mencoba mengambil blog post dari: ${apiUrl}/blog/by-slug/${slug}`);
-
-    // Panggil API untuk mendapatkan data blog post
-    const response = await fetch(`${apiUrl}/blog/by-slug/${slug}`, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        console.error(`Blog post dengan slug '${slug}' tidak ditemukan`);
-        return null;
-      }
-      throw new Error(`Error fetching blog post: ${response.statusText}`);
-    }
-
-    // Periksa jika respons adalah JSON
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      console.error('Respons bukan JSON:', contentType);
-      throw new Error('Respons dari server bukan dalam format JSON');
-    }
-
-    const responseData = await response.json();
+    // Gunakan fungsi apiRequest yang sudah memiliki retry logic dan penanganan error
+    const endpoint = `/blog/by-slug/${slug}`;
+    console.log(`Mencoba mengambil blog post dengan slug: ${slug}`);
+    
+    const responseData = await apiRequest<ApiResponse<BlogPost> | BlogPost>(endpoint);
     console.log('Data yang diterima dari API:', responseData);
     
-    // Periksa apakah data valid dan ambil properti data jika ada
-    let data = responseData;
-    if (responseData && responseData.data && typeof responseData.data === 'object') {
-      data = responseData.data;
+    // Ekstrak data blog jika dalam format ApiResponse
+    let rawData: any;
+    if (responseData && typeof responseData === 'object') {
+      if ('data' in responseData && responseData.data) {
+        rawData = responseData.data;
+      } else {
+        rawData = responseData;
+      }
+    } else {
+      console.error('Format respons tidak valid:', responseData);
+      return null;
     }
     
     // Periksa apakah data valid
-    if (!data || typeof data !== 'object') {
-      console.error('Data tidak valid:', data);
+    if (!rawData || typeof rawData !== 'object') {
+      console.error('Data tidak valid:', rawData);
       return null;
     }
     
-    // Konversi status dari backend ke format frontend
-    if (data && data.status === 'TERBIT') {
-      data.status = 'published';
-    } else if (data && data.status === 'DRAFT') {
-      data.status = 'draft';
-    }
-    return data;
+    // Konversi objek mentah ke format BlogPost
+    const blogPost: BlogPost = {
+      ...rawData,
+      // Pastikan status dalam format yang benar
+      status: rawData.status === 'TERBIT' ? 'published' : 
+              rawData.status === 'DRAFT' ? 'draft' : 
+              rawData.status // gunakan default jika sudah dalam format yang benar
+    };
+    
+    return blogPost;
   } catch (error) {
     console.error('Error fetching blog post by slug:', error);
     // Jika terjadi error, kembalikan null daripada melempar error
