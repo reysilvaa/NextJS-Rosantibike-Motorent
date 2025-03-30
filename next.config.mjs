@@ -18,7 +18,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'api.rosantibikemotorent.com',
+        hostname: process.env.NEXT_PUBLIC_WS_URL ? new URL(process.env.NEXT_PUBLIC_WS_URL).hostname : 'api',
         pathname: '/**',
       },
     ],
@@ -32,8 +32,8 @@ const nextConfig = {
     // Gunakan URL relatif untuk pengujian localhost dan URL absolut untuk production
     const isLocalDev = process.env.NODE_ENV === 'development';
     const apiUrl = isLocalDev 
-      ? 'http://localhost:3030'  // Gunakan port 3030 untuk backend pada development
-      : 'https://api.rosantibikemotorent.com';
+      ? process.env.NEXT_PUBLIC_API_URL  // Gunakan port 3030 untuk backend pada development
+      : process.env.NEXT_PUBLIC_WS_URL;
 
     return [
       {

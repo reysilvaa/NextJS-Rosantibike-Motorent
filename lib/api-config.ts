@@ -1,9 +1,9 @@
 export const API_CONFIG = {
   BASE_URL: typeof window !== 'undefined' 
     ? window.location.hostname === 'localhost'
-      ? 'http://localhost:3030' // Gunakan port 3030 untuk backend lokal
-      : process.env.NEXT_PUBLIC_API_URL || 'https://api.rosantibikemotorent.com'
-    : process.env.NEXT_PUBLIC_API_URL || 'https://api.rosantibikemotorent.com',
+      ? process.env.NEXT_PUBLIC_API_URL
+      : process.env.NEXT_PUBLIC_API_URL
+    : process.env.NEXT_PUBLIC_API_URL,
   API_TIMEOUT: 30000, // 30 detik timeout
   ENDPOINTS: {
     // Auth

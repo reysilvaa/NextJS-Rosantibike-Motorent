@@ -60,9 +60,9 @@ export const initializeSocket = (): Socket | null => {
     // Gunakan URL relatif untuk backend dan port yang sesuai
     const wsUrl = typeof window !== 'undefined' 
       ? window.location.hostname === 'localhost' 
-        ? 'http://localhost:3030' // Pastikan port backend 3030 (port NestJS)
-        : (process.env.NEXT_PUBLIC_WS_URL || API_CONFIG.BASE_URL)
-      : (process.env.NEXT_PUBLIC_WS_URL || API_CONFIG.BASE_URL);
+        ? process.env.NEXT_PUBLIC_WS_URL // Gunakan env variable tanpa fallback
+        : process.env.NEXT_PUBLIC_WS_URL
+      : process.env.NEXT_PUBLIC_WS_URL;
     
     console.log(`Mencoba connect ke socket: ${wsUrl} dengan namespace /notifications`);
     

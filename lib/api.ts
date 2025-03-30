@@ -690,10 +690,10 @@ export async function fetchBlogPostById(id: string): Promise<BlogPost> {
 
 export async function fetchBlogPostBySlug(slug: string): Promise<BlogPost | null> {
   try {
-    // Periksa jika kita memiliki URL API valid
-    const apiUrl = process.env.NEXT_PUBLIC_WS_URL;
+    // Gunakan API_CONFIG untuk URL API
+    const apiUrl = API_CONFIG.BASE_URL;
     if (!apiUrl) {
-      console.error('NEXT_PUBLIC_API_URL tidak terdefinisi');
+      console.error('API URL tidak terdefinisi');
       return null;
     }
 
