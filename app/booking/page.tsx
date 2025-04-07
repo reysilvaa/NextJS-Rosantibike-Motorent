@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
 import type { MotorcycleUnit } from "@/lib/types";
 import { format, addDays, parse } from "date-fns";
-import id from "date-fns/locale/id";
+import { id } from "date-fns/locale";
 
 export default function BookingPage() {
   const searchParams = useSearchParams();
