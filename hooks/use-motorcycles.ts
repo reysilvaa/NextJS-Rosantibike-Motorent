@@ -1,8 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
-import { fetchMotorcycleTypes, fetchMotorcycleUnits, checkAvailability as apiCheckAvailability } from '@/lib/network/api';
+import { 
+  fetchMotorcycleTypes as apiFetchMotorcycleTypes, 
+  fetchMotorcycleUnits as apiFetchMotorcycleUnits,
+  checkAvailability as checkMotorcycleAvailability
+} from '@/lib/network/api';
 import { useLoading } from './common/use-loading';
 import { toast } from './common/use-toast';
-import { MotorcycleType, MotorcycleUnit, AvailabilitySearchParams } from '@/lib/types';
+import type {
+  MotorcycleType,
+  MotorcycleUnit,
+  AvailabilitySearchParams
+} from '@/lib/types';
 import { API_CONFIG } from '@/lib/network/api-config';
 import { MotorcycleFilters } from '@/contexts/motorcycle-filter-context';
 
@@ -76,7 +84,7 @@ export function useMotorcycleTypes(filters?: Partial<MotorcycleFilters>) {
       console.log("Fetching motorcycle units with params:", apiParams);
       
       // Panggil API unit-motor (bukan jenis-motor) dengan parameter filter
-      const result = await withLoading(fetchMotorcycleUnits(apiParams));
+      const result = await withLoading(apiFetchMotorcycleUnits(apiParams));
       
       // Transformasi data unit-motor ke format jenis-motor
       const motorcycleTypes = result.reduce((acc: MotorcycleType[], unit) => {
@@ -156,7 +164,7 @@ export function useMotorcycleUnits(filters?: Record<string, any>) {
 
   const fetchData = useCallback(async () => {
     try {
-      const result = await withLoading(fetchMotorcycleUnits(filters));
+      const result = await withLoading(apiFetchMotorcycleUnits(filters));
       setData(Array.isArray(result) ? result : []);
       setError(null);
     } catch (err: any) {
@@ -308,48 +316,13 @@ export function useAvailability(params: AvailabilitySearchParams | null) {
       // Update timestamp request
       setLastRequestTime(now);
       
-      // Panggil API
-      const result = await withLoading(apiCheckAvailability(params));
+      // Panggil API - Gunakan fungsi dari api.ts untuk memastikan logika filtering di satu tempat
+      const result = await withLoading(checkMotorcycleAvailability(params));
       
-      console.log('Availability result returned:', result);
+      // API sudah mengembalikan array dengan format yang benar dan hanya yang tersedia
+      console.log(`Received ${result.length} available motorcycles`);
       
-      // Handle berbagai format respons
-      if (Array.isArray(result)) {
-        console.log(`Received array of ${result.length} motorcycles from API`);
-        
-        // Log detail untuk debugging
-        if (result.length > 0) {
-          console.log('Sample motor from availability:', result[0]);
-        } else {
-          console.log('No motorcycles returned from availability API');
-        }
-        
-        setData(result);
-      } else if (result && typeof result === 'object') {
-        console.log('Received object result instead of array:', result);
-        
-        // Coba ekstrak data dari berbagai format yang mungkin
-        // Cast result sebagai any untuk menghindari error typing
-        const responseObj = result as any;
-        
-        if (responseObj.data && Array.isArray(responseObj.data)) {
-          console.log(`Found ${responseObj.data.length} motorcycles in data property`);
-          setData(responseObj.data);
-        } else if (responseObj.units && Array.isArray(responseObj.units)) {
-          console.log(`Found ${responseObj.units.length} motorcycles in units property`);
-          setData(responseObj.units);
-        } else if (responseObj.motorcycles && Array.isArray(responseObj.motorcycles)) {
-          console.log(`Found ${responseObj.motorcycles.length} motorcycles in motorcycles property`);
-          setData(responseObj.motorcycles);
-        } else {
-          console.warn('Could not find valid motorcycle array in response');
-          setData([]);
-        }
-      } else {
-        console.warn('API returned unknown result type:', result);
-        setData([]);
-      }
-      
+      setData(result);
       setError(null);
     } catch (err: any) {
       console.error('Error checking availability:', err);

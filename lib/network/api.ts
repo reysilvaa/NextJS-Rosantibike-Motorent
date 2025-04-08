@@ -379,15 +379,15 @@ export async function checkAvailability(params: AvailabilitySearchParams): Promi
     const endDate = new Date(params.tanggalSelesai);
     
     // Format tanggal dalam ISO 8601 (YYYY-MM-DDTHH:mm:ss.sssZ)
-    queryParams.append("startDate", startDate.toISOString());
-    queryParams.append("endDate", endDate.toISOString());
+    queryParams.append("startDate", startDate.toISOString().split('T')[0]); // Hanya ambil bagian tanggal (YYYY-MM-DD)
+    queryParams.append("endDate", endDate.toISOString().split('T')[0]);
     
     if (params.jenisMotorId) {
       queryParams.append("jenisId", params.jenisMotorId)
       console.log("Filtering by motorcycle type ID:", params.jenisMotorId);
     }
     
-    const endpoint = `${API_CONFIG.ENDPOINTS.UNIT_MOTOR_AVAILABILITY}?${queryParams.toString()}`;
+    const endpoint = `${API_CONFIG.ENDPOINTS.UNIT_MOTOR}/availability?${queryParams.toString()}`;
     
     // Cek cache sebelum melakukan request
     const cacheKey = endpoint;
@@ -410,44 +410,61 @@ export async function checkAvailability(params: AvailabilitySearchParams): Promi
         // Extract data dari response format backend
         const units = availabilityResponse.units;
         
+        // Filter motor yang benar-benar tersedia pada semua hari di rentang waktu yang diminta
+        const availableUnits = units.filter((unit: BackendUnitAvailability) => {
+          // Filter berdasarkan status motor
+          if (unit.status !== "TERSEDIA" && unit.status !== "DIPESAN") {
+            return false;
+          }
+          
+          // Periksa ketersediaan pada semua hari dalam rentang
+          if (!unit.availability || !Array.isArray(unit.availability)) {
+            return false;
+          }
+          
+          // Motor hanya tersedia jika semua hari dalam rentang tersedia
+          const allDaysAvailable = unit.availability.every(day => day.isAvailable);
+          return allDaysAvailable;
+        });
+        
+        console.log(`Filtered ${availableUnits.length} available units out of ${units.length} total units`);
+        
         // Transformasi ke format yang diharapkan frontend, dengan memastikan
         // bahwa motor dikembalikan dalam format yang konsisten
-        const result: MotorcycleUnit[] = units
-          .filter((unit: BackendUnitAvailability) => unit.status === "TERSEDIA" || unit.status === "DIPESAN")
-          .map((unit: BackendUnitAvailability) => {
-            // Pastikan semua field yang dibutuhkan ada
-            return {
-              id: unit.unitId,
-              platNomor: unit.platNomor,
-              status: unit.status,
-              hargaSewa: typeof unit.hargaSewa === 'string' ? parseInt(unit.hargaSewa) : unit.hargaSewa,
-              jenis: unit.jenisMotor ? {
-                id: unit.jenisMotor.id,
-                merk: unit.jenisMotor.merk || "",
-                model: unit.jenisMotor.model || "",
-                cc: unit.jenisMotor.cc || 0,
-                gambar: null,
-                slug: (unit.jenisMotor.merk + "-" + unit.jenisMotor.model).toLowerCase().replace(/\s+/g, '-'),
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-              } : {
-                id: "", 
-                merk: "Motor", 
-                model: unit.platNomor,
-                cc: 0,
-                gambar: null,
-                slug: ("generic-motor-" + unit.platNomor).toLowerCase().replace(/\s+/g, '-'),
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-              },
-              jenisId: unit.jenisMotor?.id || "",
+        const result: MotorcycleUnit[] = availableUnits.map((unit: BackendUnitAvailability) => {
+          // Pastikan semua field yang dibutuhkan ada
+          return {
+            id: unit.unitId,
+            platNomor: unit.platNomor,
+            status: unit.status,
+            hargaSewa: typeof unit.hargaSewa === 'string' ? parseInt(unit.hargaSewa) : unit.hargaSewa,
+            jenis: unit.jenisMotor ? {
+              id: unit.jenisMotor.id,
+              merk: unit.jenisMotor.merk || "",
+              model: unit.jenisMotor.model || "",
+              cc: unit.jenisMotor.cc || 0,
+              gambar: null,
+              slug: (unit.jenisMotor.merk + "-" + unit.jenisMotor.model).toLowerCase().replace(/\s+/g, '-'),
               createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-              slug: unit.platNomor.replace(/\s+/g, '-').toLowerCase(),
-              tahunPembuatan: new Date().getFullYear(),
-              warna: "Tidak tersedia"
-            };
-          });
+              updatedAt: new Date().toISOString()
+            } : {
+              id: "", 
+              merk: "Motor", 
+              model: unit.platNomor,
+              cc: 0,
+              gambar: null,
+              slug: ("generic-motor-" + unit.platNomor).toLowerCase().replace(/\s+/g, '-'),
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            },
+            jenisId: unit.jenisMotor?.id || "",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            slug: unit.platNomor.replace(/\s+/g, '-').toLowerCase(),
+            tahunPembuatan: new Date().getFullYear(),
+            warna: "Tidak tersedia"
+          };
+        });
         
         // Simpan ke cache
         availabilityCache[cacheKey] = {
@@ -799,11 +816,27 @@ export async function checkMotorcycleAvailability(data: {
   try {
     // Buat query parameters untuk endpoint availability
     const params = new URLSearchParams();
-    params.append('startDate', data.tanggalMulai);
-    params.append('endDate', data.tanggalSelesai);
+    
+    // Format tanggal yang diterima API (YYYY-MM-DD)
+    // Ubah format tanggal jika perlu
+    const tanggalMulai = data.tanggalMulai.includes('T') 
+      ? data.tanggalMulai.split('T')[0] 
+      : data.tanggalMulai;
+    
+    const tanggalSelesai = data.tanggalSelesai.includes('T') 
+      ? data.tanggalSelesai.split('T')[0] 
+      : data.tanggalSelesai;
+    
+    params.append('startDate', tanggalMulai);
+    params.append('endDate', tanggalSelesai);
+    
+    // Log untuk debugging
+    console.log(`Checking availability for unit ${data.unitId} from ${tanggalMulai} to ${tanggalSelesai}`);
     
     // Gunakan endpoint availability yang sudah ada dengan request GET
     const response = await apiRequest<any>(`${API_CONFIG.ENDPOINTS.UNIT_MOTOR}/availability?${params.toString()}`);
+    
+    console.log("Availability check response:", response);
     
     // Periksa apakah unit yang dicari tersedia pada rentang waktu tersebut
     if (response && response.units && Array.isArray(response.units)) {
@@ -815,14 +848,28 @@ export async function checkMotorcycleAvailability(data: {
         return false;
       }
       
+      console.log(`Found unit in response:`, unit);
+      
       // Periksa apakah unit tersedia pada rentang tanggal tersebut
       if (unit.availability && Array.isArray(unit.availability)) {
         // Periksa apakah semua hari dalam rentang tersedia
         const allDaysAvailable = unit.availability.every((day: any) => day.isAvailable);
+        console.log(`Unit availability check result: ${allDaysAvailable ? 'Available' : 'Not Available'}`);
+        
+        if (!allDaysAvailable) {
+          // Log hari-hari yang tidak tersedia untuk debugging
+          const unavailableDays = unit.availability
+            .filter((day: any) => !day.isAvailable)
+            .map((day: any) => day.date);
+          console.log(`Unit tidak tersedia pada tanggal: ${unavailableDays.join(', ')}`);
+        }
+        
         return allDaysAvailable;
       }
     }
     
+    // Jika response tidak sesuai format yang diharapkan
+    console.log("Invalid response format or unit not found");
     return false;
   } catch (error) {
     console.error("Error checking motorcycle availability:", error);
