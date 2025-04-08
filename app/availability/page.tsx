@@ -14,6 +14,7 @@ import { motion } from "framer-motion"
 import { useEffect } from "react"
 import { useMotorcycleTypes } from "@/hooks/use-motorcycles"
 import { Badge } from "@/components/ui/badge"
+import { useAutoScroll } from "@/hooks/use-auto-scroll"
 
 export default function AvailabilityPage() {
   const { t } = useTranslation()
@@ -48,6 +49,12 @@ export default function AvailabilityPage() {
     : null
   
   const { data: availableMotorcycles, isLoading, error } = useAvailability(searchParamsObj)
+
+  const { resultsRef, showResultIndicator } = useAutoScroll({
+    shouldScroll: Boolean(canSearch),
+    isLoading,
+    hasData: !!availableMotorcycles && availableMotorcycles.length > 0,
+  });
 
   // Log untuk debugging
   useEffect(() => {
@@ -94,7 +101,7 @@ export default function AvailabilityPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/95">
       {/* Hero section with background pattern */}
-      <div className="relative bg-gradient-to-b from-primary/5 to-background pt-20 pb-20 border-b border-border/10 overflow-hidden">
+      <div className="relative bg-gradient-to-b from-primary/5 to-background pt-32 pb-24 border-b border-border/10 overflow-hidden">
         <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] pointer-events-none"></div>
         
         <motion.div 
@@ -141,7 +148,7 @@ export default function AvailabilityPage() {
         </motion.div>
       </div>
       
-      <div className="container mx-auto px-4 py-10">
+      <div className="container mx-auto px-4 py-16">
         <div className="max-w-6xl mx-auto">
           {/* Results section */}
           {canSearch && (
@@ -150,12 +157,23 @@ export default function AvailabilityPage() {
               initial="hidden"
               animate="visible"
               className="space-y-8"
+              ref={resultsRef}
             >
-              <motion.div variants={itemVariants} className="flex items-center justify-between border-b border-border/50 pb-6">
+              <motion.div 
+                variants={itemVariants} 
+                className={`flex items-center justify-between border-b border-border/50 pb-6 relative ${
+                  showResultIndicator ? "after:absolute after:inset-0 after:bg-primary/5 after:animate-pulse after:rounded-lg after:-z-10" : ""
+                }`}
+              >
                 <div>
                   <div className="flex items-center gap-2 mb-2">
                     <Bike className="h-5 w-5 text-primary" />
                     <h2 className="text-2xl font-bold">{t("availableMotorcycles")}</h2>
+                    {showResultIndicator && (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/20 text-primary animate-bounce">
+                        {t("newResults")}
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center flex-wrap gap-2 text-muted-foreground">
                     <span className="bg-primary/5 px-3 py-1 rounded-md text-sm inline-flex items-center">

@@ -1,7 +1,6 @@
 import type {
   ApiResponse,
   PaginatedResponse,
-  AuthResponse,
   MotorcycleType,
   MotorcycleUnit,
   Transaction,
@@ -208,13 +207,6 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
   }
 }
 
-// Authentication API
-export async function login(username: string, password: string): Promise<AuthResponse> {
-  return apiRequest<AuthResponse>(API_CONFIG.ENDPOINTS.AUTH_LOGIN, {
-    method: "POST",
-    body: JSON.stringify({ username, password }),
-  })
-}
 
 // Motorcycle Types API
 export async function fetchMotorcycleTypes(search?: string, filters?: Record<string, any>): Promise<MotorcycleType[]> {
