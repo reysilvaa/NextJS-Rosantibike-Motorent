@@ -6,8 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
 import BookingForm from "@/components/features/booking/booking-form";
-import { fetchMotorcycleUnitById } from "@/lib/api";
-import type { MotorcycleUnit } from "@/lib/types";
+import { fetchMotorcycleUnitById } from "@/lib/network/api";
+import type { MotorcycleUnit } from "@/lib/types/types";
 import { Loader2 } from "lucide-react";
 
 export default function BookingPage() {
