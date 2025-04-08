@@ -169,10 +169,10 @@ export default function Navbar() {
                 "md:hidden h-9 w-9 rounded-full",
                 shouldUseWhiteStyle ? "hover:bg-white/10 text-white" : "hover:bg-primary/10 text-foreground",
               )}
-              aria-label={t("mobileMenuTitle")}
+              aria-label={t("mobileMenuTitle") || "Menu"}
             >
               <Menu className="h-5 w-5" />
-              <span className="sr-only">{t("mobileMenuTitle")}</span>
+              <span className="sr-only">{t("mobileMenuTitle") || "Menu"}</span>
             </Button>
           </SheetTrigger>
           <SheetContent
