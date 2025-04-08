@@ -2,7 +2,6 @@
 
 import { ThemeProvider } from "next-themes"
 import { SocketProvider } from "../contexts/socket-context"
-import { AuthProvider } from "../hooks/use-auth"
 import NotificationHandler from "../components/shared/notification-handler"
 import { Toaster } from "sonner"
 import { I18nProvider } from "../i18n/provider"
@@ -17,17 +16,15 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <>
       <I18nProvider>
         <ThemeProvider attribute="class" defaultTheme="dark">
-          <AuthProvider>
-            <SocketProvider enableNotifications={true} defaultRooms={defaultRooms}>
-              <MotorcycleFilterProvider>
-                <VideoContextProvider>
-                  {children}
-                  <NotificationHandler />
-                  <Toaster richColors closeButton />
-                </VideoContextProvider>
-              </MotorcycleFilterProvider>
-            </SocketProvider>
-          </AuthProvider>
+          <SocketProvider enableNotifications={true} defaultRooms={defaultRooms}>
+            <MotorcycleFilterProvider>
+              <VideoContextProvider>
+                {children}
+                <NotificationHandler />
+                <Toaster richColors closeButton />
+              </VideoContextProvider>
+            </MotorcycleFilterProvider>
+          </SocketProvider>
         </ThemeProvider>
       </I18nProvider>
     </>

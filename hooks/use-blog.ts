@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { fetchBlogPosts, fetchBlogPostById, fetchBlogPostBySlug } from '@/lib/api';
+import { fetchBlogPosts, fetchBlogPostById, fetchBlogPostBySlug } from '@/lib/network/api';
 import { useLoading } from './use-loading';
-import type { BlogPost, PaginatedResponse } from '@/lib/types';
+import type { BlogPost, PaginatedResponse } from '@/lib/types/types';
 
 interface BlogMeta {
   totalItems: number;

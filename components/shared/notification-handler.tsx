@@ -10,7 +10,6 @@ type NotificationType = 'success' | 'error' | 'info' | 'warning';
 // Interface untuk Props
 interface NotificationHandlerProps {
   userId?: string;
-  role?: 'admin' | 'user';
 }
 
 /**

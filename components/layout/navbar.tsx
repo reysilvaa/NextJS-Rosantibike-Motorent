@@ -4,27 +4,18 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import Image from "next/image"
-import { Menu, User, ChevronDown, Bike } from "lucide-react"
+import { Menu, Bike } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils/utils"
-import { useAuth } from "@/hooks/use-auth"
 import { ThemeToggle } from "@/components/shared/theme/theme-toggle"
 import LanguageSwitcher from "@/components/shared/language/language-switcher"
 import { useTranslation } from "@/i18n/hooks"
 import { useTheme } from "next-themes"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu"
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const pathname = usePathname()
-  const { isAuthenticated, logout } = useAuth()
   const { t } = useTranslation()
   const { theme } = useTheme()
   const isLightTheme = theme === "light"
@@ -166,85 +157,6 @@ export default function Navbar() {
           <div className="relative">
             <ThemeToggle useWhiteStyle={shouldUseWhiteStyle} />
           </div>
-
-          {isAuthenticated ? (
-            <div className="relative">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className={cn(
-                      "flex items-center gap-1.5 px-3 h-9 transition-all duration-300",
-                      shouldUseWhiteStyle
-                        ? "border-white text-white hover:bg-white/10"
-                        : "border-primary/20 hover:border-primary/40 hover:bg-primary/5",
-                    )}
-                  >
-                    <div
-                      className={cn(
-                        "size-6 rounded-full flex items-center justify-center",
-                        shouldUseWhiteStyle ? "bg-white/20" : "bg-primary/10",
-                      )}
-                    >
-                      <User className={cn("h-3.5 w-3.5", shouldUseWhiteStyle ? "text-white" : "text-primary")} />
-                    </div>
-                    <span className="font-medium">{t("account")}</span>
-                    <ChevronDown className="h-3 w-3 opacity-50" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="w-56 glass dark:glass-dark border-border/30 shadow-lg rounded-xl p-1 animate-in fade-in-0 zoom-in-95 duration-200"
-                  forceMount
-                >
-                  <div className="px-2 py-1.5 mb-1">
-                    <p className="text-sm font-medium text-foreground">John Doe</p>
-                    <p className="text-xs text-muted-foreground">john@example.com</p>
-                  </div>
-                  <DropdownMenuSeparator className="bg-border/50" />
-                  <DropdownMenuItem asChild className="hover:bg-primary/5 focus:bg-primary/5 rounded-lg cursor-pointer">
-                    <Link href="/admin" className="flex items-center">
-                      <div className="size-7 rounded-md bg-primary/10 flex items-center justify-center mr-2">
-                        <User className="h-3.5 w-3.5 text-primary" />
-                      </div>
-                      {t("dashboard")}
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="hover:bg-primary/5 focus:bg-primary/5 rounded-lg cursor-pointer">
-                    <Link href="/profile">
-                      <div className="size-7 rounded-md bg-primary/10 flex items-center justify-center mr-2">
-                        <User className="h-3.5 w-3.5 text-primary" />
-                      </div>
-                      {t("profile")}
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-border/50" />
-                  <DropdownMenuItem
-                    onClick={logout}
-                    className="text-destructive hover:text-destructive focus:text-destructive hover:bg-destructive/10 focus:bg-destructive/10 rounded-lg cursor-pointer"
-                  >
-                    {t("logout")}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          ) : (
-            <Link href="/login">
-              <Button
-                variant="default"
-                size="sm"
-                className={cn(
-                  "px-4 h-9 rounded-lg shadow-sm hover:shadow transition-all duration-300",
-                  shouldUseWhiteStyle
-                    ? "bg-white text-black hover:bg-white/90"
-                    : "bg-primary hover:bg-primary/90 text-primary-foreground",
-                )}
-              >
-                {t("login")}
-              </Button>
-            </Link>
-          )}
         </div>
 
         {/* Mobile Navigation */}
@@ -316,42 +228,6 @@ export default function Navbar() {
                   <span className="text-sm font-medium">{t("language")}</span>
                   <LanguageSwitcher useWhiteStyle={false} />
                 </div>
-
-                {isAuthenticated ? (
-                  <div className="space-y-3 pt-2">
-                    <Link href="/admin">
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start border-primary/20 hover:border-primary/40 hover:bg-primary/5"
-                      >
-                        <div className="size-7 rounded-md bg-primary/10 flex items-center justify-center mr-2">
-                          <User className="h-3.5 w-3.5 text-primary" />
-                        </div>
-                        {t("dashboard")}
-                      </Button>
-                    </Link>
-                    <Link href="/profile">
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start border-primary/20 hover:border-primary/40 hover:bg-primary/5"
-                      >
-                        <div className="size-7 rounded-md bg-primary/10 flex items-center justify-center mr-2">
-                          <User className="h-3.5 w-3.5 text-primary" />
-                        </div>
-                        {t("profile")}
-                      </Button>
-                    </Link>
-                    <Button variant="destructive" onClick={logout} className="w-full mt-2">
-                      {t("logout")}
-                    </Button>
-                  </div>
-                ) : (
-                  <Link href="/login" className="block pt-2">
-                    <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm hover:shadow transition-all duration-300">
-                      {t("login")}
-                    </Button>
-                  </Link>
-                )}
               </div>
             </div>
           </SheetContent>
