@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Loader2, CreditCard, ArrowLeft, ArrowRight } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
-import type { MotorcycleUnit } from "@/lib/types/types";
+import type { MotorcycleUnit } from "@/lib/types";
 import { createTransaction, calculateRentalPrice as apiCalculateRentalPrice } from "@/lib/network/api";
 import { calculateRentalPrice } from "@/lib/utils/booking-calculations";
 

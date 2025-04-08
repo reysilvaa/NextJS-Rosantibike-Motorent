@@ -4,7 +4,7 @@ import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertTriangle, Clock, Umbrella, HardHat } from "lucide-react";
-import type { MotorcycleUnit } from "@/lib/types/types";
+import type { MotorcycleUnit } from "@/lib/types";
 
 interface BookingDetailsStepProps {
   formData: {

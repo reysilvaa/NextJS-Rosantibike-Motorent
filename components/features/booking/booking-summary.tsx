@@ -3,7 +3,7 @@
 import React from "react";
 import { format } from "date-fns";
 import { Calendar } from "lucide-react";
-import type { MotorcycleUnit } from "@/lib/types/types";
+import type { MotorcycleUnit } from "@/lib/types";
 
 interface BookingSummaryProps {
   motorcycle: MotorcycleUnit;

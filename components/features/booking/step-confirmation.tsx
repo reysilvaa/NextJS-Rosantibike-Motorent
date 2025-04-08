@@ -4,7 +4,7 @@ import React from "react";
 import { format } from "date-fns";
 import { CheckCircle2, Calendar, Umbrella, HardHat } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import type { MotorcycleUnit } from "@/lib/types/types";
+import type { MotorcycleUnit } from "@/lib/types";
 import { formatDuration } from "@/lib/utils/booking-calculations";
 
 interface ConfirmationStepProps {
