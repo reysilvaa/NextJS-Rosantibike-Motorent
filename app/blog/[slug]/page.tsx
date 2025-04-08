@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { fetchBlogPostBySlug } from '@/lib/network/api';
 import BlogPostDetail from '@/components/blog/blog-post-detail';
-import type { BlogPost } from '@/lib/types';
+import type { BlogPost } from '@/lib/types/types';
 
 interface BlogPostPageProps {
   params: {

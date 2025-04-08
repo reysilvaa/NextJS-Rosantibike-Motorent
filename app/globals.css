@@ -1,3 +1,6 @@
+/* Import blog styles */
+@import "../styles/blog.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

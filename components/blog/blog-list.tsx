@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { fetchBlogPosts } from "@/lib/network/api"
 import type { BlogPost } from "@/lib/types/types"
 import { useTranslation } from "@/i18n/hooks"
+import { createBlogExcerpt, calculateReadingTime } from "@/lib/utils/blog-utils"
 
 export default function BlogList() {
   const { t, i18n } = useTranslation()
@@ -24,31 +25,30 @@ export default function BlogList() {
     const getBlogPosts = async () => {
       try {
         setIsLoading(true)
+        setError(null)
+        
         const response = await fetchBlogPosts(currentPage, 6)
         
-        // Ambil data dan meta info dari respons API
-        const blogData = response.data || []
-        const metaInfo = response.meta || { totalPages: 1 }
-        
-        // Pastikan kita mempunyai array
-        if (Array.isArray(blogData)) {
-          setPosts(blogData)
+        // Validasi data blog posts
+        if (response && response.data && Array.isArray(response.data)) {
+          setPosts(response.data)
+          
+          // Set total halaman dari respons API
+          if (response.meta && response.meta.totalPages) {
+            setTotalPages(response.meta.totalPages)
+          }
         } else {
-          // Jika data bukan array, set ke array kosong
+          console.error("Format data blog tidak valid:", response)
+          setError(t("invalidDataFormat"))
+          // Gunakan placeholder data
           setPosts([])
-          console.error("Format data blog tidak valid:", blogData)
-        }
-        
-        // Set total halaman dari respons API
-        if (metaInfo.totalPages) {
-          setTotalPages(metaInfo.totalPages)
         }
         
         setIsLoading(false)
       } catch (err) {
-        setError(t("failedToLoadBlogPosts"))
-        setIsLoading(false) 
         console.error("Error saat memuat blog posts:", err)
+        setError(t("failedToLoadBlogPosts"))
+        setIsLoading(false)
       }
     }
 
@@ -113,6 +113,7 @@ export default function BlogList() {
     },
   ]
 
+  // Use backend data if available, otherwise fallback to placeholder data
   const displayPosts = posts.length > 0 ? posts : placeholderPosts
 
   const formatDate = (dateString: string) => {
@@ -179,12 +180,19 @@ export default function BlogList() {
                       <Badge className="absolute top-2 right-2 bg-primary">{post.kategori}</Badge>
                     </div>
                     <CardContent className="p-5">
-                      <div className="flex items-center text-muted-foreground text-sm mb-3">
-                        <Calendar className="h-4 w-4 mr-1" />
-                        {formatDate(post.createdAt)}
+                      <div className="flex items-center gap-3 text-muted-foreground text-sm mb-3">
+                        <div className="flex items-center">
+                          <Calendar className="h-4 w-4 mr-1" />
+                          {formatDate(post.createdAt)}
+                        </div>
+                        <div className="text-xs bg-accent/30 px-2 py-0.5 rounded-full">
+                          {calculateReadingTime(post.konten)} min read
+                        </div>
                       </div>
                       <h3 className="text-xl font-bold mb-2">{post.judul}</h3>
-                      <p className="text-foreground/80 line-clamp-3">{post.konten}</p>
+                      <p className="text-foreground/80 line-clamp-3">
+                        {createBlogExcerpt(post.konten, 150)}
+                      </p>
                     </CardContent>
                   </Card>
                 </Link>
@@ -199,7 +207,7 @@ export default function BlogList() {
                 <span className="sr-only">{t("previousPage")}</span>
               </Button>
 
-              {[...Array(totalPages)].map((_, i) => (
+              {totalPages > 0 && [...Array(totalPages)].map((_, i) => (
                 <Button
                   key={i}
                   variant={currentPage === i + 1 ? "default" : "outline"}

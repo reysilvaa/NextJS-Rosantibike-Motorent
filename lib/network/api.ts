@@ -9,7 +9,7 @@ import type {
   AvailabilitySearchParams,
   TransactionFormData,
   AvailabilityResponse
-} from "../types"
+} from "../types/types"
 import { API_CONFIG, getAuthHeader } from "./api-config"
 import { responseInterceptor, errorInterceptor } from "./api-interceptor"
 import axios from 'axios';
@@ -711,17 +711,17 @@ export async function fetchBlogPosts(
     console.log(`Requesting blog posts with params: page=${page}, limit=${limit}`);
     
     const endpoint = `${API_CONFIG.ENDPOINTS.BLOG}?${queryParams.toString()}`;
-    const response = await apiRequest<PaginatedResponse<BlogPost>>(endpoint);
+    const response = await apiClient.get<PaginatedResponse<BlogPost>>(endpoint);
     
     // Validasi respons
-    if (!response) {
+    if (!response || !response.data) {
       console.error('Empty response from blog API');
       throw new Error('Tidak ada respons dari server');
     }
     
-    console.log('Blog posts response:', response);
+    console.log('Blog posts response:', response.data);
     
-    return response;
+    return response.data;
   } catch (error) {
     console.error('Error fetching blog posts:', error);
     throw error;
@@ -735,42 +735,46 @@ export async function fetchBlogPostById(id: string): Promise<BlogPost> {
 
 export async function fetchBlogPostBySlug(slug: string): Promise<BlogPost | null> {
   try {
-    // Gunakan fungsi apiRequest yang sudah memiliki retry logic dan penanganan error
-    const endpoint = `/blog/by-slug/${slug}`;
+    const endpoint = `${API_CONFIG.ENDPOINTS.BLOG}/by-slug/${slug}`;
     console.log(`Mencoba mengambil blog post dengan slug: ${slug}`);
     
-    const responseData = await apiRequest<ApiResponse<BlogPost> | BlogPost>(endpoint);
-    console.log('Data yang diterima dari API:', responseData);
+    const response = await apiClient.get(endpoint);
+    console.log('Data yang diterima dari API:', response.data);
     
-    // Ekstrak data blog jika dalam format ApiResponse
-    let rawData: any;
-    if (responseData && typeof responseData === 'object') {
-      if ('data' in responseData && responseData.data) {
-        rawData = responseData.data;
+    // Ekstrak data blog dari respons
+    let blogPost: BlogPost | null = null;
+    
+    if (response.data && response.data.data) {
+      // Jika data dibungkus dalam properti data (format API Response)
+      blogPost = response.data.data;
+    } else if (response.data) {
+      // Jika langsung mendapatkan objek blog post
+      blogPost = response.data;
+    }
+    
+    // Pastikan data yang dikembalikan sesuai format BlogPost
+    if (blogPost) {
+      // Konversi status dari backend ke format frontend
+      let statusMapped: 'draft' | 'published';
+      
+      if ((blogPost as any).status === 'TERBIT') {
+        statusMapped = 'published';
+      } else if ((blogPost as any).status === 'DRAFT') {
+        statusMapped = 'draft';
       } else {
-        rawData = responseData;
+        // Gunakan status yang ada jika sudah sesuai format, atau default ke 'draft'
+        statusMapped = ['draft', 'published'].includes((blogPost as any).status) 
+          ? (blogPost as any).status 
+          : 'draft';
       }
-    } else {
-      console.error('Format respons tidak valid:', responseData);
-      return null;
+      
+      return {
+        ...blogPost,
+        status: statusMapped
+      };
     }
     
-    // Periksa apakah data valid
-    if (!rawData || typeof rawData !== 'object') {
-      console.error('Data tidak valid:', rawData);
-      return null;
-    }
-    
-    // Konversi objek mentah ke format BlogPost
-    const blogPost: BlogPost = {
-      ...rawData,
-      // Pastikan status dalam format yang benar
-      status: rawData.status === 'TERBIT' ? 'published' : 
-              rawData.status === 'DRAFT' ? 'draft' : 
-              rawData.status // gunakan default jika sudah dalam format yang benar
-    };
-    
-    return blogPost;
+    return null;
   } catch (error) {
     console.error('Error fetching blog post by slug:', error);
     // Jika terjadi error, kembalikan null daripada melempar error
