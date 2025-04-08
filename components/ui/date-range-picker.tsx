@@ -13,7 +13,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { useTranslation } from "@/i18n/hooks"
-import { useMediaQuery } from "@/hooks/use-media-query"
+import { useMediaQuery } from "@/hooks/common/use-media-query"
 
 // Core props for all date range pickers
 interface CoreDateRangePickerProps {

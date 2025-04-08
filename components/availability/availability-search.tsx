@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DateRangePicker } from "@/components/ui/date-range-picker"
 import { cn } from "@/lib/utils/utils"
 import { useTranslation } from "@/i18n/hooks"
-import { useAvailabilitySearch } from "@/hooks/use-availability-search"
+import { useAvailabilitySearch } from "@/hooks/availability/use-availability-search"
 
 interface AvailabilitySearchProps {
   onSearch?: (startDate: string, endDate: string, jenisMotorId?: string) => void;

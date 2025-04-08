@@ -15,7 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "@/i18n/hooks";
 import { motion } from "framer-motion";
-import { useAutoScroll } from "@/hooks/use-auto-scroll";
+import { useAutoScroll } from "@/hooks/common/use-auto-scroll";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function BookingHistoryPage() {

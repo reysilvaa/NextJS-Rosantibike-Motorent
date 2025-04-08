@@ -19,7 +19,7 @@ import { useRouter } from "next/navigation"
 import { useTranslation } from "@/i18n/hooks"
 import { toast } from "@/components/ui/use-toast"
 import type { MotorcycleUnit } from "@/lib/types/motorcycle"
-import { useAvailability } from "@/hooks/use-availability"
+import { useAvailability } from "@/hooks/availability/use-availability"
 
 interface AvailabilityResultsProps {
   motorcycles: MotorcycleUnit[]

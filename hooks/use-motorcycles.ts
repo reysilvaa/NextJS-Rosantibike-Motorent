@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { fetchMotorcycleTypes, fetchMotorcycleUnits, checkAvailability as apiCheckAvailability } from '@/lib/network/api';
-import { useLoading } from './use-loading';
-import { toast } from './use-toast';
+import { useLoading } from './common/use-loading';
+import { toast } from './common/use-toast';
 import { MotorcycleType, MotorcycleUnit, AvailabilitySearchParams } from '@/lib/types';
 import { API_CONFIG } from '@/lib/network/api-config';
 import { MotorcycleFilters } from '@/contexts/motorcycle-filter-context';

@@ -1,4 +1,4 @@
-import { toast } from "@/hooks/use-toast"
+import { toast } from "@/hooks/common/use-toast"
 
 // Interceptor untuk mengelola respons API
 export const responseInterceptor = (response: any, endpoint: string): any => {

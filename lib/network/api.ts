@@ -1,14 +1,23 @@
 import type {
   ApiResponse,
   PaginatedResponse,
+} from "../types/api"
+import type {
   MotorcycleType,
-  MotorcycleUnit,
-  Transaction,
-  BlogPost,
+  MotorcycleUnit
+} from "../types/motorcycle"
+import type {
+  Transaction
+} from "../types/transaction"
+import type {
+  BlogPost
+} from "../types/blog"
+import type {
   AvailabilitySearchParams,
   TransactionFormData,
-  AvailabilityResponse
-} from "../types/types"
+  AvailabilityResponse,
+  BackendUnitAvailability
+} from "../types/forms"
 import { API_CONFIG, getAuthHeader } from "./api-config"
 import { responseInterceptor, errorInterceptor } from "./api-interceptor"
 import axios from 'axios';
@@ -404,8 +413,8 @@ export async function checkAvailability(params: AvailabilitySearchParams): Promi
         // Transformasi ke format yang diharapkan frontend, dengan memastikan
         // bahwa motor dikembalikan dalam format yang konsisten
         const result: MotorcycleUnit[] = units
-          .filter(unit => unit.status === "TERSEDIA" || unit.status === "DIPESAN")
-          .map(unit => {
+          .filter((unit: BackendUnitAvailability) => unit.status === "TERSEDIA" || unit.status === "DIPESAN")
+          .map((unit: BackendUnitAvailability) => {
             // Pastikan semua field yang dibutuhkan ada
             return {
               id: unit.unitId,
@@ -417,17 +426,26 @@ export async function checkAvailability(params: AvailabilitySearchParams): Promi
                 merk: unit.jenisMotor.merk || "",
                 model: unit.jenisMotor.model || "",
                 cc: unit.jenisMotor.cc || 0,
-                gambar: null
+                gambar: null,
+                slug: (unit.jenisMotor.merk + "-" + unit.jenisMotor.model).toLowerCase().replace(/\s+/g, '-'),
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
               } : {
                 id: "", 
                 merk: "Motor", 
                 model: unit.platNomor,
                 cc: 0,
-                gambar: null
+                gambar: null,
+                slug: ("generic-motor-" + unit.platNomor).toLowerCase().replace(/\s+/g, '-'),
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
               },
               jenisId: unit.jenisMotor?.id || "",
               createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString()
+              updatedAt: new Date().toISOString(),
+              slug: unit.platNomor.replace(/\s+/g, '-').toLowerCase(),
+              tahunPembuatan: new Date().getFullYear(),
+              warna: "Tidak tersedia"
             };
           });
         
@@ -746,23 +764,19 @@ export async function fetchBlogPostBySlug(slug: string): Promise<BlogPost | null
     
     // Pastikan data yang dikembalikan sesuai format BlogPost
     if (blogPost) {
-      // Konversi status dari backend ke format frontend
-      let statusMapped: 'draft' | 'published';
-      
-      if ((blogPost as any).status === 'TERBIT') {
-        statusMapped = 'published';
-      } else if ((blogPost as any).status === 'DRAFT') {
-        statusMapped = 'draft';
-      } else {
-        // Gunakan status yang ada jika sudah sesuai format, atau default ke 'draft'
-        statusMapped = ['draft', 'published'].includes((blogPost as any).status) 
-          ? (blogPost as any).status 
-          : 'draft';
-      }
-      
       return {
-        ...blogPost,
-        status: statusMapped
+        id: blogPost.id,
+        judul: blogPost.judul,
+        slug: blogPost.slug,
+        konten: blogPost.konten,
+        thumbnail: blogPost.thumbnail,
+        featuredImage: blogPost.featuredImage || null,
+        kategori: blogPost.kategori,
+        status: blogPost.status as 'DRAFT' | 'TERBIT',
+        createdAt: blogPost.createdAt,
+        updatedAt: blogPost.updatedAt,
+        tags: blogPost.tags || [],
+        author: blogPost.author || undefined
       };
     }
     

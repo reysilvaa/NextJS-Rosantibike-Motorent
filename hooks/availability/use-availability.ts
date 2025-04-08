@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { format, parse, differenceInDays } from 'date-fns';
-import { useAvailability as useMotorcycleAvailability } from './use-motorcycles';
-import { useMotorcycleTypes } from './use-motorcycles';
-import { useAutoScroll } from './use-auto-scroll';
+import { useMotorcycleTypes } from '@/hooks/use-motorcycles';
+import { useAutoScroll } from '@/hooks/common/use-auto-scroll';
 import { MotorcycleType, AvailabilitySearchParams, MotorcycleUnit } from '@/lib/types';
+import { useAvailability as useMotorcycleAvailability } from '@/hooks/use-motorcycles';
 
 export function useAvailability() {
   const router = useRouter();
@@ -113,4 +113,4 @@ export function useAvailability() {
     // Handlers
     handleDateRangeSearch
   };
-} 
+}

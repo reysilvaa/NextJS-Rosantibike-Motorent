@@ -1,13 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { fetchBlogPosts, fetchBlogPostById, fetchBlogPostBySlug } from '@/lib/network/api';
-import { useLoading } from './use-loading';
-import type { BlogPost, PaginatedResponse } from '@/lib/types/types';
+import { useLoading } from '../common/use-loading';
+import type { BlogPost, BlogTag } from '@/lib/types/blog';
 
 interface BlogMeta {
   totalItems: number;
   itemsPerPage: number;
   totalPages: number;
   currentPage: number;
+  categories: string[];
+  tags: BlogTag[];
 }
 
 export function useBlogPosts(page = 1, limit = 10, search?: string, status?: string, kategori?: string) {
@@ -18,6 +20,8 @@ export function useBlogPosts(page = 1, limit = 10, search?: string, status?: str
     itemsPerPage: limit,
     totalPages: 0,
     currentPage: page,
+    categories: [],
+    tags: [],
   });
   const { isLoading, withLoading } = useLoading(true);
 
@@ -33,7 +37,9 @@ export function useBlogPosts(page = 1, limit = 10, search?: string, status?: str
             totalItems: responseMeta.totalItems ?? 0,
             itemsPerPage: responseMeta.itemsPerPage ?? limit,
             totalPages: responseMeta.totalPages ?? 0,
-            currentPage: responseMeta.currentPage ?? page
+            currentPage: responseMeta.currentPage ?? page,
+            categories: responseMeta.categories ?? [],
+            tags: responseMeta.tags ?? [],
           });
         }
       } else if (Array.isArray(result)) {

@@ -14,7 +14,7 @@ import { motion } from "framer-motion"
 import { useEffect } from "react"
 import { useMotorcycleTypes } from "@/hooks/use-motorcycles"
 import { Badge } from "@/components/ui/badge"
-import { useAutoScroll } from "@/hooks/use-auto-scroll"
+import { useAutoScroll } from "@/hooks/common/use-auto-scroll"
 import { MotorcycleType, AvailabilitySearchParams } from "@/lib/types"
 
 export default function AvailabilityPage() {

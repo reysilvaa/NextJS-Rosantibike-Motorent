@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { fetchBlogPostBySlug } from "@/lib/network/api"
-import type { BlogPost } from "@/lib/types/types"
+import type { BlogPost } from "@/lib/types/blog"
 import { useTranslation } from "@/i18n/hooks"
 import { formatDate } from "@/lib/utils/utils"
 import { calculateReadingTime } from "@/lib/utils/blog-utils"
@@ -163,7 +163,7 @@ export default function BlogPostDetail({ slug, post: initialPost }: BlogPostDeta
             </div>
             <div className="flex items-center bg-accent/20 px-3 py-1 rounded-full">
               <User className="h-3.5 w-3.5 mr-2 text-primary" />
-              {blogPost.author || t("adminAuthor")}
+              {blogPost.author?.nama || t("adminAuthor")}
             </div>
             <div className="flex items-center bg-accent/20 px-3 py-1 rounded-full">
               <Clock className="h-3.5 w-3.5 mr-2 text-primary" />

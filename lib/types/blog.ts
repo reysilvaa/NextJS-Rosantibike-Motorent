@@ -1,4 +1,5 @@
 import { StatusArtikel } from './enums'
+import { Admin } from './admin'
 
 export interface BlogPost {
   id: string
@@ -6,11 +7,13 @@ export interface BlogPost {
   slug: string
   konten: string
   thumbnail: string | null
+  featuredImage?: string | null
   kategori: string
-  status: StatusArtikel
-  tags: BlogPostTag[]
+  status: 'DRAFT' | 'TERBIT'
   createdAt: string
   updatedAt: string
+  tags: BlogPostTag[]
+  author?: Admin
 }
 
 export interface BlogTag {
@@ -18,13 +21,17 @@ export interface BlogTag {
   nama: string
   createdAt: string
   updatedAt: string
-  posts: BlogPostTag[]
 }
 
 export interface BlogPostTag {
   postId: string
   tagId: string
   createdAt: string
-  post: BlogPost
   tag: BlogTag
+}
+
+export interface Category {
+  id: string
+  name: string
+  slug: string
 } 

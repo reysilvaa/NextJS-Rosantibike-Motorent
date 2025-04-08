@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { fetchTransactions, fetchTransactionById, fetchTransactionHistory, createTransaction, completeTransaction } from '@/lib/api';
-import { useLoading } from './use-loading';
-import { toast } from './use-toast';
+import { useLoading } from './common/use-loading';
+import { toast } from './common/use-toast';
 import type { Transaction, TransactionFormData } from '@/lib/types';
 
 export function useTransactions(filter?: Record<string, any>) {
