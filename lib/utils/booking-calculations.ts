@@ -3,7 +3,7 @@
  */
 
 import { format } from "date-fns";
-import type { MotorcycleUnit } from "@/lib/types/types";
+import type { MotorcycleUnit } from "@/lib/types";
 
 interface RentalParams {
   motorcycle: MotorcycleUnit;

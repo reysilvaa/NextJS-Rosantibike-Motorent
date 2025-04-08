@@ -788,3 +788,45 @@ export async function fetchBlogPostBySlug(slug: string): Promise<BlogPost | null
   }
 }
 
+// Check motorcycle availability
+export async function checkMotorcycleAvailability(data: {
+  unitId: string,
+  tanggalMulai: string,
+  tanggalSelesai: string,
+  jamMulai: string,
+  jamSelesai: string
+}): Promise<boolean> {
+  try {
+    // Buat query parameters untuk endpoint availability
+    const params = new URLSearchParams();
+    params.append('startDate', data.tanggalMulai);
+    params.append('endDate', data.tanggalSelesai);
+    
+    // Gunakan endpoint availability yang sudah ada dengan request GET
+    const response = await apiRequest<any>(`${API_CONFIG.ENDPOINTS.UNIT_MOTOR}/availability?${params.toString()}`);
+    
+    // Periksa apakah unit yang dicari tersedia pada rentang waktu tersebut
+    if (response && response.units && Array.isArray(response.units)) {
+      // Cari unit yang sesuai dengan unitId
+      const unit = response.units.find((u: any) => u.unitId === data.unitId);
+      
+      if (!unit) {
+        console.log(`Unit dengan ID ${data.unitId} tidak ditemukan dalam response`);
+        return false;
+      }
+      
+      // Periksa apakah unit tersedia pada rentang tanggal tersebut
+      if (unit.availability && Array.isArray(unit.availability)) {
+        // Periksa apakah semua hari dalam rentang tersedia
+        const allDaysAvailable = unit.availability.every((day: any) => day.isAvailable);
+        return allDaysAvailable;
+      }
+    }
+    
+    return false;
+  } catch (error) {
+    console.error("Error checking motorcycle availability:", error);
+    return false;
+  }
+}
+
