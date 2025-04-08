@@ -3,19 +3,16 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { format, parse } from "date-fns"
-import { CalendarIcon } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { DateRangePicker } from "@/components/ui/date-range-picker"
 import { useMotorcycleTypes } from "@/hooks/use-motorcycles"
 import { cn } from "@/lib/utils/utils"
-import type { AvailabilitySearchParams } from "@/lib/types"
 import { useSocketContext } from "@/contexts/socket-context"
-import { Badge } from "@/components/ui/badge"
 import { useTranslation } from "@/i18n/hooks"
+import type { DateRange } from "react-day-picker"
 
 interface AvailabilitySearchProps {
   onSearch?: (startDate: string, endDate: string, jenisMotorId?: string) => void;
@@ -31,25 +28,21 @@ export default function AvailabilitySearch({
   const { t } = useTranslation()
   const router = useRouter()
   const { data: motorcycleTypes, isLoading: isLoadingTypes } = useMotorcycleTypes()
-  const [startDate, setStartDate] = useState<Date | undefined>()
-  const [endDate, setEndDate] = useState<Date | undefined>()
+  const [dateRange, setDateRange] = useState<DateRange | undefined>()
   const [motorcycleType, setMotorcycleType] = useState<string | undefined>()
   
   // Inisialisasi tanggal dari props jika tersedia
   useEffect(() => {
-    if (initialStartDate) {
+    if (initialStartDate && initialEndDate) {
       try {
-        setStartDate(parse(initialStartDate, "yyyy-MM-dd", new Date()));
+        const fromDate = parse(initialStartDate, "yyyy-MM-dd", new Date());
+        const toDate = parse(initialEndDate, "yyyy-MM-dd", new Date());
+        setDateRange({
+          from: fromDate,
+          to: toDate
+        });
       } catch (e) {
-        console.error("Error parsing initialStartDate", e);
-      }
-    }
-    
-    if (initialEndDate) {
-      try {
-        setEndDate(parse(initialEndDate, "yyyy-MM-dd", new Date()));
-      } catch (e) {
-        console.error("Error parsing initialEndDate", e);
+        console.error("Error parsing initial dates", e);
       }
     }
   }, [initialStartDate, initialEndDate]);
@@ -64,14 +57,14 @@ export default function AvailabilitySearch({
   }, [isConnected, joinRoom]);
 
   const handleSearch = () => {
-    if (!startDate || !endDate) {
+    if (!dateRange?.from || !dateRange?.to) {
       // Tambahkan validasi error disini jika diperlukan
       console.warn(t("startAndEndDateRequired"))
       return
     }
 
-    const formattedStartDate = format(startDate, "yyyy-MM-dd");
-    const formattedEndDate = format(endDate, "yyyy-MM-dd");
+    const formattedStartDate = format(dateRange.from, "yyyy-MM-dd");
+    const formattedEndDate = format(dateRange.to, "yyyy-MM-dd");
     const selectedMotorcycleType = motorcycleType && motorcycleType !== "all" ? motorcycleType : undefined;
 
     // Jika onSearch prop tersedia, gunakan itu (untuk di-handling parent)
@@ -110,62 +103,10 @@ export default function AvailabilitySearch({
         </div>
       </CardHeader>
       <CardContent className="space-y-5 pt-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div className="space-y-2">
-            <label className="text-sm font-medium flex items-center gap-2">
-              <CalendarIcon className="h-4 w-4 text-primary" />
-              {t("startDate")}
-            </label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start text-left font-normal bg-background/50 border-border hover:bg-background hover:border-border/70"
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
-                  {startDate ? format(startDate, "PPP") : <span className="text-muted-foreground">{t("selectDate")}</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={startDate}
-                  onSelect={setStartDate}
-                  disabled={(date) => date < new Date()}
-                  initialFocus
-                  className="rounded-lg border border-border"
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium flex items-center gap-2">
-              <CalendarIcon className="h-4 w-4 text-primary" />
-              {t("endDate")}
-            </label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start text-left font-normal bg-background/50 border-border hover:bg-background hover:border-border/70"
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
-                  {endDate ? format(endDate, "PPP") : <span className="text-muted-foreground">{t("selectDate")}</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={endDate}
-                  onSelect={setEndDate}
-                  disabled={(date) => !startDate || date <= startDate}
-                  initialFocus
-                  className="rounded-lg border border-border"
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-        </div>
+        <DateRangePicker 
+          dateRange={dateRange}
+          onDateRangeChange={setDateRange}
+        />
         <div className="space-y-2">
           <label className="text-sm font-medium flex items-center gap-2">
             <svg 

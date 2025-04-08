@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { useMotorcycleTypes } from "@/hooks/use-motorcycles"
 import { useSocketContext } from "@/contexts/socket-context"
 import { toast } from "sonner"
-import type { MotorcycleType } from "@/lib/types"
+import type { MotorcycleType } from "@/lib/types/types"
 import { useTranslation } from "@/i18n/hooks"
 import { useMotorcycleFilters } from "@/contexts/motorcycle-filter-context"
 
@@ -178,42 +178,73 @@ function MotorcycleCard({ motorcycle, index }: MotorcycleCardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
     >
-      <Card className="bg-card/50 border-border overflow-hidden hover:shadow-lg transition-shadow">
-        <Link href={`/motorcycles/${motorcycle.id}`}>
-          <div className="relative h-48">
+      <Card className="bg-card/50 border-border overflow-hidden hover:shadow-lg transition-all hover:border-primary/30 h-full flex flex-col">
+        <Link href={`/motorcycles/${motorcycle.id}`} className="flex flex-col h-full">
+          <div className="relative h-48 overflow-hidden">
             <Image
               src={motorcycle.imageUrl || MOTORCYCLE_PLACEHOLDER}
               alt={motorcycle.merk + " " + motorcycle.model}
               fill
-              className="object-cover"
+              className="object-cover transition-transform hover:scale-105"
               priority={index < 3}
             />
-            {motorcycle.status === "available" && (
-              <Badge className="absolute top-2 right-2 bg-green-500">
-                {t("available")}
-              </Badge>
-            )}
-            {motorcycle.status === "rented" && (
-              <Badge className="absolute top-2 right-2 bg-yellow-500">
-                {t("rented")}
-              </Badge>
-            )}
-            {motorcycle.status === "maintenance" && (
-              <Badge className="absolute top-2 right-2 bg-red-500">
-                {t("maintenance")}
-              </Badge>
-            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity" />
           </div>
-          <CardContent className="p-5">
-            <h3 className="font-semibold text-lg mb-1">
-              {motorcycle.merk} {motorcycle.model}
-            </h3>
-            <p className="text-muted-foreground text-sm mb-2">
-              {motorcycle.year} • {motorcycle.cc}cc
-            </p>
-            <p className="text-primary font-semibold">
-              {t("pricePerDay")}: {motorcycle.pricePerDay ? motorcycle.pricePerDay.toLocaleString() : '0'} IDR
-            </p>
+          
+          <CardContent className="p-5 flex-grow flex flex-col">
+            <div className="flex-grow">
+              <h3 className="font-bold text-lg mb-1 line-clamp-1">
+                {motorcycle.merk} {motorcycle.model}
+              </h3>
+              <div className="flex items-center gap-2 text-muted-foreground text-sm mb-3">
+                {motorcycle.year && (
+                  <span className="flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                      <line x1="16" x2="16" y1="2" y2="6" />
+                      <line x1="8" x2="8" y1="2" y2="6" />
+                      <line x1="3" x2="21" y1="10" y2="10" />
+                    </svg>
+                    {motorcycle.year}
+                  </span>
+                )}
+                <span className="w-1 h-1 rounded-full bg-muted-foreground"></span>
+                <span className="flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.6-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C1.4 11.3 1 12.1 1 13v3c0 .6.4 1 1 1h2" />
+                    <circle cx="7" cy="17" r="2" />
+                    <path d="M9 17h6" />
+                    <circle cx="17" cy="17" r="2" />
+                  </svg>
+                  {motorcycle.cc}cc
+                </span>
+              </div>
+              
+              {motorcycle.deskripsi && (
+                <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
+                  {motorcycle.deskripsi}
+                </p>
+              )}
+            </div>
+            
+            <div className="pt-2 border-t border-border">
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-1.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground flex-shrink-0">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  <span className="text-sm text-muted-foreground truncate">{t("pricePerDay")}</span>
+                </div>
+                
+                <div className="flex items-baseline">
+                  <span className="text-lg font-semibold text-primary">
+                    {motorcycle.pricePerDay ? motorcycle.pricePerDay.toLocaleString() : '0'}
+                  </span>
+                  <span className="text-xs font-medium text-primary/80 ml-1">IDR</span>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Link>
       </Card>

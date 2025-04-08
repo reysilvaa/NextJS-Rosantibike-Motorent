@@ -55,10 +55,13 @@ export default function MotorcycleFilters() {
   const handleCCChange = (value: number[]) => {
     // Ensure the value is an array of exactly 2 numbers
     if (Array.isArray(value) && value.length === 2) {
-      updateFilter('ccRange', value as [number, number]);
-      
-      // Tambahkan log untuk debugging filter
-      console.log(`CC range filter updated to: ${value[0]}-${value[1]} CC`);
+      // Only update if values have actually changed
+      if (value[0] !== filters.ccRange[0] || value[1] !== filters.ccRange[1]) {
+        updateFilter('ccRange', value as [number, number]);
+        
+        // Log for debugging
+        console.log(`CC range filter updated to: ${value[0]}-${value[1]} CC`);
+      }
     }
   }
 
@@ -66,10 +69,13 @@ export default function MotorcycleFilters() {
   const handleYearChange = (value: number[]) => {
     // Ensure the value is an array of exactly 2 numbers
     if (Array.isArray(value) && value.length === 2) {
-      updateFilter('yearRange', value as [number, number]);
-      
-      // Tambahkan log untuk debugging filter
-      console.log(`Year range filter updated to: ${value[0]}-${value[1]}`);
+      // Only update if values have actually changed
+      if (value[0] !== filters.yearRange[0] || value[1] !== filters.yearRange[1]) {
+        updateFilter('yearRange', value as [number, number]);
+        
+        // Log for debugging
+        console.log(`Year range filter updated to: ${value[0]}-${value[1]}`);
+      }
     }
   }
 

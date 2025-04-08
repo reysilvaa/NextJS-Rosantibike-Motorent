@@ -11,7 +11,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchUserTransactions } from "@/lib/network/api";
-import type { Transaction } from "@/lib/types";
+import type { Transaction } from "@/lib/types/types";
 
 export default function ProfilePage() {
   const { user, isAuthenticated, isLoading } = useAuth();

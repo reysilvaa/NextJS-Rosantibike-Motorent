@@ -9,7 +9,7 @@ import { Calendar, ArrowRight, AlertCircle, Loader2, Search, Clock, CreditCard, 
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import type { Transaction } from "@/lib/types";
+import type { Transaction } from "@/lib/types/types";
 import { searchTransactionsByPhone } from "@/lib/network/api";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";

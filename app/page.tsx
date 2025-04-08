@@ -5,11 +5,14 @@ import Testimonials from "@/components/home/testimonials"
 import BlogPreview from "@/components/home/blog-preview"
 import ContactSection from "@/components/home/contact-section"
 import AvailabilityPreview from "@/components/home/availability-preview"
+import { VideoContextProvider } from "@/contexts/video-context"
 
 export default function Home() {
   return (
     <div className="flex flex-col w-full">
-      <Hero />
+      <VideoContextProvider>
+        <Hero />
+      </VideoContextProvider>
       <FeaturedMotorcycles />
       <HowItWorks />
       <AvailabilityPreview />

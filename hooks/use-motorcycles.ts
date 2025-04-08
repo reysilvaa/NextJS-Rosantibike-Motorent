@@ -19,25 +19,30 @@ function convertFiltersToApiParams(filters?: Partial<MotorcycleFilters>): Record
   
   // Menangani filter rentang CC - pastikan nilai adalah number
   if (filters.ccRange && filters.ccRange.length === 2) {
-    params.ccMin = Number(filters.ccRange[0]);
-    params.ccMax = Number(filters.ccRange[1]);
+    // Hanya tambahkan filter jika nilai tidak sama dengan default
+    if (filters.ccRange[0] > 0 || filters.ccRange[1] < 1500) {
+      params.ccMin = Number(filters.ccRange[0]);
+      params.ccMax = Number(filters.ccRange[1]);
+      console.log(`CC filter active: ${params.ccMin}-${params.ccMax}`);
+    }
   }
   
   // Menangani filter tahun - pastikan nilai adalah number
   if (filters.yearRange && filters.yearRange.length === 2) {
-    params.yearMin = Number(filters.yearRange[0]);
-    params.yearMax = Number(filters.yearRange[1]);
+    const currentYear = new Date().getFullYear();
+    // Hanya tambahkan filter jika nilai tidak sama dengan default
+    if (filters.yearRange[0] > 2010 || filters.yearRange[1] < currentYear) {
+      params.yearMin = Number(filters.yearRange[0]);
+      params.yearMax = Number(filters.yearRange[1]);
+      console.log(`Year filter active: ${params.yearMin}-${params.yearMax}`);
+    }
   }
   
   // Menangani filter brand/merek - pastikan dikirim sebagai array
   if (filters.brands && filters.brands.length > 0) {
     // Gunakan parameter brands dengan array
     params.brands = filters.brands;
-    
-    // Jika backend mengharapkan format query parameter tertentu untuk array
-    // params.brands = JSON.stringify(filters.brands);
-    // atau
-    // params["brands[]"] = filters.brands;
+    console.log(`Brand filter active: ${params.brands.join(', ')}`);
   }
   
   console.log('Filter params yang dikirim ke API:', params);

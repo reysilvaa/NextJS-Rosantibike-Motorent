@@ -18,10 +18,10 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
-import { fetchMotorcycleTypeById, checkAvailability } from "@/lib/api"
+import { fetchMotorcycleTypeById, checkAvailability } from "@/lib/network/api"
 import { motion } from "framer-motion"
-import type { MotorcycleType, MotorcycleUnit } from "@/lib/types"
-import { useSocket, SocketEvents } from "@/hooks/use-socket"
+import type { MotorcycleType, MotorcycleUnit } from "@/lib/types/types"
+import { useSocketContext, SocketEvents } from "@/contexts/socket-context"
 import { toast } from "@/components/ui/use-toast"
 import { useTranslation } from "@/i18n/hooks"
 
@@ -47,14 +47,26 @@ export default function MotorcycleDetail({ id }: { id: string }) {
   const [showAvailability, setShowAvailability] = useState(false)
   
   // Socket connection untuk mendapatkan real-time updates
-  const { isConnected } = useSocket({
-    room: `motorcycle-${id}`,
-    events: {
-      [SocketEvents.MOTOR_STATUS_UPDATE]: handleMotorStatusUpdate,
-      'unit-update': handleUnitUpdate,
-      'unit-delete': handleUnitDelete
-    }
-  })
+  const { isConnected, joinRoom, listen } = useSocketContext();
+  
+  useEffect(() => {
+    if (!isConnected) return;
+    
+    // Join room untuk motor ini
+    joinRoom(`motorcycle-${id}`);
+    
+    // Setup listeners
+    const unsubStatusUpdate = listen(SocketEvents.MOTOR_STATUS_UPDATE, handleMotorStatusUpdate);
+    const unsubUnitUpdate = listen('unit-update', handleUnitUpdate);
+    const unsubUnitDelete = listen('unit-delete', handleUnitDelete);
+    
+    // Cleanup listeners on unmount
+    return () => {
+      unsubStatusUpdate();
+      unsubUnitUpdate();
+      unsubUnitDelete();
+    };
+  }, [isConnected, id, joinRoom, listen]);
 
   // Handler untuk update status motor
   function handleMotorStatusUpdate(data: any) {
