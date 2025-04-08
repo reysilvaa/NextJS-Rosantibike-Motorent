@@ -9,6 +9,8 @@ export interface MotorcycleFilters {
   ccRange: [number, number]
   yearRange: [number, number]
   brands: string[] // ini sebenarnya adalah field 'merk' di model JenisMotor
+  startDate?: string
+  endDate?: string
 }
 
 // Interface Brand mewakili data dari field 'merk' di model JenisMotor

@@ -20,10 +20,17 @@ import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { fetchMotorcycleTypeById, checkAvailability } from "@/lib/network/api"
 import { motion } from "framer-motion"
-import type { MotorcycleType, MotorcycleUnit } from "@/lib/types/types"
+import type { MotorcycleType, MotorcycleUnit } from "@/lib/types/motorcycle"
+import { StatusMotor } from "@/lib/types/enums"
 import { useSocketContext, SocketEvents } from "@/contexts/socket-context"
 import { toast } from "@/components/ui/use-toast"
 import { useTranslation } from "@/i18n/hooks"
+
+// Extend MotorcycleType for additional properties
+interface ExtendedMotorcycleType extends MotorcycleType {
+  tahun?: number;
+  deskripsi?: string;
+}
 
 // Placeholder statis yang dijamin ada di folder public
 const MOTORCYCLE_PLACEHOLDER = "/motorcycle-placeholder.svg"
@@ -31,7 +38,7 @@ const MOTORCYCLE_PLACEHOLDER = "/motorcycle-placeholder.svg"
 export default function MotorcycleDetail({ id }: { id: string }) {
   const { t } = useTranslation()
   const router = useRouter()
-  const [motorcycle, setMotorcycle] = useState<MotorcycleType | null>(null)
+  const [motorcycle, setMotorcycle] = useState<ExtendedMotorcycleType | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
@@ -75,14 +82,14 @@ export default function MotorcycleDetail({ id }: { id: string }) {
       setUnits(prevUnits => prevUnits.map(unit => {
         if (unit.id === data.unitId) {
           // Toast notification untuk update status
-          const statusText = data.status === "TERSEDIA" ? t("available").toLowerCase() : 
-                            data.status === "DISEWA" ? t("rented").toLowerCase() : 
-                            data.status === "SERVIS" ? t("service").toLowerCase() : t("unavailable").toLowerCase();
+          const statusText = data.status === StatusMotor.TERSEDIA ? t("available").toLowerCase() : 
+                           data.status === StatusMotor.DISEWA ? t("rented").toLowerCase() : 
+                           data.status === StatusMotor.DIPESAN ? t("service").toLowerCase() : t("unavailable").toLowerCase();
           
           toast({
             title: t("motorcycleStatusChanged"),
             description: `${t("unit")} ${unit.platNomor} ${t("isNow")} ${statusText}`,
-            variant: data.status === "TERSEDIA" ? "default" : "destructive"
+            variant: data.status === StatusMotor.TERSEDIA ? "default" : "destructive"
           })
           
           return { ...unit, status: data.status };
@@ -527,9 +534,9 @@ export default function MotorcycleDetail({ id }: { id: string }) {
                       </CardTitle>
                       <Badge 
                         className={
-                          unit.status === "TERSEDIA" ? "bg-success/20 text-success hover:bg-success/30" :
-                          unit.status === "DISEWA" ? "bg-accent/20 text-accent hover:bg-accent/30" :
-                          unit.status === "SERVIS" ? "bg-warning/20 text-warning hover:bg-warning/30" :
+                          unit.status === StatusMotor.TERSEDIA ? "bg-success/20 text-success hover:bg-success/30" :
+                          unit.status === StatusMotor.DISEWA ? "bg-accent/20 text-accent hover:bg-accent/30" :
+                          unit.status === StatusMotor.DIPESAN ? "bg-warning/20 text-warning hover:bg-warning/30" :
                           "bg-destructive/20 text-destructive hover:bg-destructive/30"
                         }
                       >
@@ -555,10 +562,10 @@ export default function MotorcycleDetail({ id }: { id: string }) {
                           
                           <Button 
                             variant="default" 
-                            disabled={unit.status !== "TERSEDIA"}
+                            disabled={unit.status !== StatusMotor.TERSEDIA}
                             onClick={() => handleRent(unit.id)}
                           >
-                            {unit.status === "TERSEDIA" ? "Sewa Sekarang" : "Tidak Tersedia"}
+                            {unit.status === StatusMotor.TERSEDIA ? "Sewa Sekarang" : "Tidak Tersedia"}
                           </Button>
                         </div>
                       </>

@@ -10,9 +10,11 @@ import { Button } from "@/components/ui/button"
 import { useMotorcycleTypes } from "@/hooks/use-motorcycles"
 import { useSocketContext } from "@/contexts/socket-context"
 import { toast } from "sonner"
-import type { MotorcycleType } from "@/lib/types/types"
+import type { MotorcycleType } from "@/lib/types/motorcycle"
 import { useTranslation } from "@/i18n/hooks"
 import { useMotorcycleFilters } from "@/contexts/motorcycle-filter-context"
+import { useAvailability } from "@/hooks/use-motorcycles"
+import type { AvailabilitySearchParams } from "@/lib/types/forms"
 
 // Placeholder statis yang dijamin ada di folder public
 const MOTORCYCLE_PLACEHOLDER = "/motorcycle-placeholder.svg"
@@ -21,11 +23,7 @@ const MOTORCYCLE_PLACEHOLDER = "/motorcycle-placeholder.svg"
 const normalizeMotorcycle = (motorcycle: MotorcycleType): MotorcycleType => {
   return {
     ...motorcycle,
-    imageUrl: motorcycle.imageUrl || motorcycle.gambar,
-    year: motorcycle.year || motorcycle.tahun,
-    pricePerDay: motorcycle.pricePerDay || (motorcycle.unitMotor?.[0]?.hargaSewa || 0),
-    status: motorcycle.status || (motorcycle.unitMotor?.[0]?.status === "TERSEDIA" ? "available" : 
-                               motorcycle.unitMotor?.[0]?.status === "DISEWA" ? "rented" : "maintenance")
+    gambar: motorcycle.gambar || MOTORCYCLE_PLACEHOLDER,
   };
 };
 
@@ -37,17 +35,27 @@ export default function MotorcycleList() {
   const { data: motorcycles, isLoading, error, refetch } = useMotorcycleTypes(filters)
   const [hasNewMotor, setHasNewMotor] = useState(false)
   
+  // Check availability if dates are selected
+  const availabilityParams: AvailabilitySearchParams | null = filters.startDate && filters.endDate ? {
+    tanggalMulai: filters.startDate,
+    tanggalSelesai: filters.endDate,
+    jenisMotorId: undefined // We'll check availability for all motorcycles
+  } : null;
+  
+  const { data: availableUnits } = useAvailability(availabilityParams);
+  
   // Debug untuk memastikan filter dan data berfungsi
   useEffect(() => {
     if (typeof window !== 'undefined') {
       console.log("Filters being applied:", filters);
       console.log("Motorcycles data received:", motorcycles?.length || 0);
+      console.log("Available units:", availableUnits?.length || 0);
       
       if (motorcycles?.length > 0) {
         console.log("Sample motorcycle data:", motorcycles[0]);
       }
     }
-  }, [filters, motorcycles]);
+  }, [filters, motorcycles, availableUnits]);
 
   // Re-fetch data ketika filter berubah
   useEffect(() => {
@@ -153,13 +161,21 @@ export default function MotorcycleList() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {motorcycles.map((motorcycle, index) => (
-        <MotorcycleCard 
-          key={motorcycle.id} 
-          motorcycle={normalizeMotorcycle(motorcycle)} 
-          index={index} 
-        />
-      ))}
+      {motorcycles.map((motorcycle, index) => {
+        // Check if this motorcycle type has available units
+        const isAvailable = availableUnits?.some(unit => unit.jenis.id === motorcycle.id);
+        
+        return (
+          <MotorcycleCard 
+            key={motorcycle.id} 
+            motorcycle={normalizeMotorcycle(motorcycle)} 
+            index={index}
+            isAvailable={isAvailable}
+            startDate={filters.startDate}
+            endDate={filters.endDate}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -167,9 +183,12 @@ export default function MotorcycleList() {
 interface MotorcycleCardProps {
   motorcycle: MotorcycleType;
   index: number;
+  isAvailable?: boolean;
+  startDate?: string;
+  endDate?: string;
 }
 
-function MotorcycleCard({ motorcycle, index }: MotorcycleCardProps) {
+function MotorcycleCard({ motorcycle, index, isAvailable, startDate, endDate }: MotorcycleCardProps) {
   const { t } = useTranslation();
   
   return (
@@ -179,16 +198,27 @@ function MotorcycleCard({ motorcycle, index }: MotorcycleCardProps) {
       transition={{ delay: index * 0.1 }}
     >
       <Card className="bg-card/50 border-border overflow-hidden hover:shadow-lg transition-all hover:border-primary/30 h-full flex flex-col">
-        <Link href={`/motorcycles/${motorcycle.id}`} className="flex flex-col h-full">
+        <Link href={`/motorcycles/${motorcycle.id}${startDate && endDate ? `?startDate=${startDate}&endDate=${endDate}` : ''}`} className="flex flex-col h-full">
           <div className="relative h-48 overflow-hidden">
             <Image
-              src={motorcycle.imageUrl || MOTORCYCLE_PLACEHOLDER}
+              src={motorcycle.gambar || MOTORCYCLE_PLACEHOLDER}
               alt={motorcycle.merk + " " + motorcycle.model}
               fill
               className="object-cover transition-transform hover:scale-105"
               priority={index < 3}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity" />
+            {isAvailable !== undefined && (
+              <Badge 
+                className={`absolute top-2 right-2 ${
+                  isAvailable 
+                    ? "bg-green-500/20 text-green-300 hover:bg-green-500/30" 
+                    : "bg-destructive/20 text-destructive hover:bg-destructive/30"
+                }`}
+              >
+                {isAvailable ? t("available") : t("unavailable")}
+              </Badge>
+            )}
           </div>
           
           <CardContent className="p-5 flex-grow flex flex-col">
@@ -197,18 +227,6 @@ function MotorcycleCard({ motorcycle, index }: MotorcycleCardProps) {
                 {motorcycle.merk} {motorcycle.model}
               </h3>
               <div className="flex items-center gap-2 text-muted-foreground text-sm mb-3">
-                {motorcycle.year && (
-                  <span className="flex items-center gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-                      <line x1="16" x2="16" y1="2" y2="6" />
-                      <line x1="8" x2="8" y1="2" y2="6" />
-                      <line x1="3" x2="21" y1="10" y2="10" />
-                    </svg>
-                    {motorcycle.year}
-                  </span>
-                )}
-                <span className="w-1 h-1 rounded-full bg-muted-foreground"></span>
                 <span className="flex items-center gap-1">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.6-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C1.4 11.3 1 12.1 1 13v3c0 .6.4 1 1 1h2" />
@@ -219,12 +237,6 @@ function MotorcycleCard({ motorcycle, index }: MotorcycleCardProps) {
                   {motorcycle.cc}cc
                 </span>
               </div>
-              
-              {motorcycle.deskripsi && (
-                <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
-                  {motorcycle.deskripsi}
-                </p>
-              )}
             </div>
             
             <div className="pt-2 border-t border-border">
@@ -239,7 +251,7 @@ function MotorcycleCard({ motorcycle, index }: MotorcycleCardProps) {
                 
                 <div className="flex items-baseline">
                   <span className="text-lg font-semibold text-primary">
-                    {motorcycle.pricePerDay ? motorcycle.pricePerDay.toLocaleString() : '0'}
+                    {motorcycle.unitMotor?.[0]?.hargaSewa?.toLocaleString() || '0'}
                   </span>
                   <span className="text-xs font-medium text-primary/80 ml-1">IDR</span>
                 </div>

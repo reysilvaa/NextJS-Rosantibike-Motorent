@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Filter } from "lucide-react"
+import { Search, Filter, Calendar } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
@@ -9,12 +9,18 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Calendar as CalendarComponent } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { format } from "date-fns"
 import { useTranslation } from "@/i18n/hooks"
 import { useMotorcycleFilters } from "@/contexts/motorcycle-filter-context"
+import { cn } from "@/lib/utils/utils"
+import type { DateRange } from "react-day-picker"
 
 export default function MotorcycleFilters() {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
+  const [dateRange, setDateRange] = useState<DateRange | undefined>()
   
   // Menggunakan filter context
   const { filters, updateFilter, resetFilters, availableBrands, isLoading } = useMotorcycleFilters()
@@ -82,7 +88,20 @@ export default function MotorcycleFilters() {
   // Handler untuk reset filters
   const handleResetFilters = () => {
     resetFilters();
+    setDateRange(undefined);
     console.log("Filters reset to default");
+  };
+
+  // Handler untuk update date range
+  const handleDateRangeChange = (range: DateRange | undefined) => {
+    setDateRange(range);
+    if (range?.from && range?.to) {
+      updateFilter('startDate', format(range.from, 'yyyy-MM-dd'));
+      updateFilter('endDate', format(range.to, 'yyyy-MM-dd'));
+    } else {
+      updateFilter('startDate', '');
+      updateFilter('endDate', '');
+    }
   };
 
   return (
@@ -106,6 +125,46 @@ export default function MotorcycleFilters() {
 
           <CollapsibleContent>
             <div className="bg-card/50 border border-border rounded-lg p-4 space-y-6">
+              {/* Date Range Picker */}
+              <div>
+                <h3 className="font-medium mb-3">{t("rentalPeriod")}</h3>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !dateRange?.from && "text-muted-foreground"
+                      )}
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {dateRange?.from ? (
+                        dateRange?.to ? (
+                          <>
+                            {format(dateRange.from, "LLL dd, y")} -{" "}
+                            {format(dateRange.to, "LLL dd, y")}
+                          </>
+                        ) : (
+                          format(dateRange.from, "LLL dd, y")
+                        )
+                      ) : (
+                        <span>{t("pickDateRange")}</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      initialFocus
+                      mode="range"
+                      defaultMonth={dateRange?.from}
+                      selected={dateRange}
+                      onSelect={handleDateRangeChange}
+                      numberOfMonths={2}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
               <div>
                 <h3 className="font-medium mb-3">{t("engineSizeCC")}</h3>
                 <Slider
@@ -184,6 +243,46 @@ export default function MotorcycleFilters() {
       {/* Desktop Filters */}
       <div className="hidden lg:block sticky top-24">
         <div className="bg-card/50 border border-border rounded-lg p-6 space-y-6">
+          {/* Date Range Picker */}
+          <div>
+            <h3 className="font-medium mb-3">{t("rentalPeriod")}</h3>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !dateRange?.from && "text-muted-foreground"
+                  )}
+                >
+                  <Calendar className="mr-2 h-4 w-4" />
+                  {dateRange?.from ? (
+                    dateRange?.to ? (
+                      <>
+                        {format(dateRange.from, "LLL dd, y")} -{" "}
+                        {format(dateRange.to, "LLL dd, y")}
+                      </>
+                    ) : (
+                      format(dateRange.from, "LLL dd, y")
+                    )
+                  ) : (
+                    <span>{t("pickDateRange")}</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent
+                  initialFocus
+                  mode="range"
+                  defaultMonth={dateRange?.from}
+                  selected={dateRange}
+                  onSelect={handleDateRangeChange}
+                  numberOfMonths={2}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
           <div>
             <h3 className="font-medium mb-3">{t("search")}</h3>
             <div className="relative">
