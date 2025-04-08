@@ -5,6 +5,8 @@ import "./globals.css"
 import Navbar from "@/components/layout/navbar"
 import Footer from "@/components/layout/footer"
 import { Providers } from "./providers"
+import { VideoContextProvider } from "@/contexts/video-context"
+import { ThemeProvider } from "@/components/shared/theme/theme-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -33,9 +35,20 @@ export default function RootLayout({
     <html lang="id" suppressHydrationWarning>
       <body className={`${inter.className} min-h-screen flex flex-col`}>
         <Providers>
-          <Navbar />
-          <main className="flex-grow">{children}</main>
-          <Footer />
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <VideoContextProvider
+              autoPlay={true}
+              muted={true}
+              loop={true}
+              playWhenVisible={true}
+              playWhenSocketConnected={true}
+              slideDuration={5000}
+            >
+              <Navbar />
+              <main className="flex-grow">{children}</main>
+              <Footer />
+            </VideoContextProvider>
+          </ThemeProvider>
         </Providers>
       </body>
     </html>

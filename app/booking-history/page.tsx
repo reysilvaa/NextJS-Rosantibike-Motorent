@@ -10,7 +10,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import type { Transaction } from "@/lib/types";
-import { searchTransactionsByPhone } from "@/lib/api";
+import { searchTransactionsByPhone } from "@/lib/network/api";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "@/i18n/hooks";

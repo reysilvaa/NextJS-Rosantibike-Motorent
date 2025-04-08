@@ -9,7 +9,7 @@ import type {
   AvailabilitySearchParams,
   TransactionFormData,
   AvailabilityResponse
-} from "./types"
+} from "../types"
 import { API_CONFIG, getAuthHeader } from "./api-config"
 import { responseInterceptor, errorInterceptor } from "./api-interceptor"
 import axios from 'axios';

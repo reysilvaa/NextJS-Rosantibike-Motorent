@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion } from "framer-motion"
@@ -11,13 +11,17 @@ import { useTheme } from "next-themes"
 import { useVideoContext } from "@/contexts/video-context"
 
 export default function Hero() {
-  const [currentSlide, setCurrentSlide] = useState(0)
-  const [useVideoFallback, setUseVideoFallback] = useState(false)
   const { t, language } = useTranslation()
   const { theme } = useTheme()
-  const videoRefs = useRef<Array<HTMLVideoElement | null>>([])
-  const { isPageVisible } = useVideoContext()
-  const processedRef = useRef(false)
+  const {
+    videoRefs,
+    currentSlide,
+    isPlaying,
+    setCurrentSlide,
+    isPageVisible,
+    useVideoFallback,
+    setUseVideoFallback
+  } = useVideoContext()
 
   const slides = [
     {
@@ -63,110 +67,6 @@ export default function Hero() {
       subtitle: t("heroSlide7Subtitle") || "Temukan sudut-sudut wisata menarik dengan kebebasan berkendara sendiri",
     },
   ]
-
-  function addSilentAudioTrack(video: HTMLVideoElement) {
-    try {
-      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioContext) return;
-      
-      const audioCtx = new AudioContext();
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-      
-      gainNode.gain.value = 0.001;
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-      
-      oscillator.frequency.value = 1;
-      oscillator.start(0);
-      
-      setTimeout(() => {
-        oscillator.stop();
-      }, 1000);
-    } catch (error) {
-      console.warn('Tidak bisa menambahkan silent audio track:', error);
-    }
-  }
-
-  useEffect(() => {
-    if (processedRef.current) return;
-
-    videoRefs.current.forEach(video => {
-      if (video) {
-        video.muted = true;
-        video.setAttribute('playsinline', '');
-        video.setAttribute('loop', '');
-      }
-    });
-
-    processedRef.current = true;
-  }, []);
-
-  useEffect(() => {
-    if (useVideoFallback) return;
-    
-    const currentVideo = videoRefs.current[currentSlide];
-    
-    if (currentVideo) {
-      addSilentAudioTrack(currentVideo);
-      
-      if (isPageVisible) {
-        try {
-          const playPromise = currentVideo.play();
-          
-          if (playPromise !== undefined) {
-            playPromise.catch(err => {
-              console.error("Video play error:", err);
-              
-              if (err.name === 'NotAllowedError') {
-                currentVideo.muted = true;
-                currentVideo.play().catch(() => {
-                  setUseVideoFallback(true);
-                });
-              } else {
-                setUseVideoFallback(true);
-              }
-            });
-          }
-        } catch (error) {
-          console.error("Error saat memutar video:", error);
-          setUseVideoFallback(true);
-        }
-      }
-    }
-    
-    videoRefs.current.forEach((video, index) => {
-      if (video && index !== currentSlide && !video.paused) {
-        video.pause();
-      }
-    });
-    
-    const interval = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % slides.length);
-    }, 5000);
-    
-    return () => clearInterval(interval);
-  }, [currentSlide, isPageVisible, useVideoFallback, slides.length]);
-
-  useEffect(() => {
-    if (useVideoFallback) return;
-
-    const currentVideo = videoRefs.current[currentSlide];
-    if (!currentVideo) return;
-
-    if (isPageVisible) {
-      try {
-        currentVideo.play().catch(err => {
-          console.warn('Error saat memutar video setelah halaman aktif:', err);
-        });
-      } catch (error) {
-        console.warn('Gagal memutar video setelah halaman aktif:', error);
-      }
-    } else {
-      currentVideo.pause();
-    }
-  }, [isPageVisible, currentSlide, useVideoFallback]);
 
   return (
     <section className="relative h-screen w-full overflow-hidden">

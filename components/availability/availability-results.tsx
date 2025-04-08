@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency } from "@/lib/utils/utils"
 import type { MotorcycleUnit } from "@/lib/types"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "@/i18n/hooks"

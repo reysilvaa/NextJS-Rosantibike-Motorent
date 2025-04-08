@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Check, Globe } from 'lucide-react';
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 
 interface LanguageSwitcherProps {
   useWhiteStyle?: boolean;

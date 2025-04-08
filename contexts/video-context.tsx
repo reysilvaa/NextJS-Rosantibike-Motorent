@@ -1,123 +1,251 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react';
 import { useSocketContext } from './socket-context';
 
 // Interface untuk nilai context
 interface VideoContextValue {
-  registerVideo: (videoElement: HTMLVideoElement) => void;
-  unregisterVideo: (videoElement: HTMLVideoElement) => void;
+  videoRefs: React.MutableRefObject<(HTMLVideoElement | null)[]>;
+  currentSlide: number;
+  isPlaying: boolean;
+  isLoaded: boolean;
+  error: Error | null;
+  setCurrentSlide: (index: number) => void;
+  play: (index: number) => void;
+  pause: (index: number) => void;
+  togglePlay: (index: number) => void;
   isPageVisible: boolean;
+  useVideoFallback: boolean;
+  setUseVideoFallback: (value: boolean) => void;
 }
 
 // Buat context dengan nilai default
 const VideoContext = createContext<VideoContextValue>({
-  registerVideo: () => {},
-  unregisterVideo: () => {},
+  videoRefs: { current: [] },
+  currentSlide: 0,
+  isPlaying: false,
+  isLoaded: false,
+  error: null,
+  setCurrentSlide: () => {},
+  play: () => {},
+  pause: () => {},
+  togglePlay: () => {},
   isPageVisible: true,
+  useVideoFallback: false,
+  setUseVideoFallback: () => {},
 });
 
 // Props untuk provider
 interface VideoContextProviderProps {
   children: ReactNode;
+  autoPlay?: boolean;
+  muted?: boolean;
+  loop?: boolean;
+  playWhenVisible?: boolean;
+  playWhenSocketConnected?: boolean;
+  slideDuration?: number;
 }
 
-export const VideoContextProvider: React.FC<VideoContextProviderProps> = ({ children }) => {
-  const [isPageVisible, setIsPageVisible] = useState<boolean>(true);
-  const [registeredVideos, setRegisteredVideos] = useState<HTMLVideoElement[]>([]);
-  const { isConnected } = useSocketContext();
+export const VideoContextProvider: React.FC<VideoContextProviderProps> = ({ 
+  children,
+  autoPlay = false,
+  muted = true,
+  loop = false,
+  playWhenVisible = true,
+  playWhenSocketConnected = true,
+  slideDuration = 5000
+}) => {
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [isPageVisible, setIsPageVisible] = useState(true);
+  const [useVideoFallback, setUseVideoFallback] = useState(false);
+  const playPromiseRefs = useRef<Array<Promise<void> | null>>([]);
+  
+  const { isConnected: isSocketConnected } = useSocketContext();
 
-  // Handler untuk visibilitas halaman
+  // Handle page visibility
   useEffect(() => {
     const handleVisibilityChange = () => {
-      const isVisible = document.visibilityState === 'visible';
-      setIsPageVisible(isVisible);
-      
-      // Pause atau play video berdasarkan visibilitas
-      registeredVideos.forEach(video => {
-        if (isVisible) {
-          // Tambahkan try-catch untuk menangani error saat memanggil play()
-          try {
-            // Hanya play jika video sebelumnya sudah dimulai dan sekarang dijeda
-            if (video.paused && video.currentTime > 0) {
-              // Gunakan atribut muted untuk memastikan video bisa diputar
-              video.muted = true;
-              const playPromise = video.play();
-              
-              if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                  console.warn('Error saat mencoba play video:', error);
-                });
-              }
-            }
-          } catch (error) {
-            console.error('Error saat memanipulasi video:', error);
-          }
-        } else {
-          // Pause video saat halaman tidak terlihat
-          video.pause();
-        }
-      });
+      setIsPageVisible(document.visibilityState === 'visible');
     };
 
-    // Inisialisasi state visibilitas
-    setIsPageVisible(document.visibilityState === 'visible');
-    
-    // Tambahkan event listener
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [registeredVideos]);
+  }, []);
 
-  // Efek untuk menangani perubahan status koneksi socket
+  // Setup video elements
   useEffect(() => {
-    if (isConnected && isPageVisible) {
-      // Coba play video jika socket terhubung dan halaman terlihat
-      registeredVideos.forEach(video => {
-        try {
-          // Gunakan atribut muted untuk memastikan video bisa diputar
-          video.muted = true;
-          const playPromise = video.play();
-          
-          if (playPromise !== undefined) {
-            playPromise.catch(error => {
-              console.warn('Error saat mencoba play video setelah socket terhubung:', error);
-            });
-          }
-        } catch (error) {
-          console.error('Error saat memanipulasi video setelah socket terhubung:', error);
+    videoRefs.current.forEach((video, index) => {
+      if (!video) return;
+
+      // Event listeners
+      const handlePlay = () => {
+        if (index === currentSlide) {
+          setIsPlaying(true);
         }
-      });
-    }
-  }, [isConnected, isPageVisible, registeredVideos]);
+      };
+      const handlePause = () => {
+        if (index === currentSlide) {
+          setIsPlaying(false);
+          playPromiseRefs.current[index] = null;
+        }
+      };
+      const handleLoadedData = () => {
+        if (index === currentSlide) {
+          setIsLoaded(true);
+        }
+      };
+      const handleError = (e: any) => {
+        if (index === currentSlide) {
+          setError(new Error(`Video error: ${e.target.error?.message || 'unknown'}`));
+        }
+      };
 
-  // Fungsi untuk mendaftarkan video
-  const registerVideo = (videoElement: HTMLVideoElement) => {
-    // Tambahkan attributes yang diperlukan untuk menghindari error penghematan daya
-    videoElement.setAttribute('playsinline', ''); // Penting untuk iOS
-    videoElement.muted = true; // Mute video untuk memastikan autoplay bisa bekerja
-    
-    // Tambahkan video ke daftar jika belum ada
-    setRegisteredVideos(prev => {
-      if (!prev.includes(videoElement)) {
-        return [...prev, videoElement];
-      }
-      return prev;
+      video.addEventListener('play', handlePlay);
+      video.addEventListener('pause', handlePause);
+      video.addEventListener('loadeddata', handleLoadedData);
+      video.addEventListener('error', handleError);
+
+      // Apply options
+      video.autoplay = autoPlay;
+      video.muted = muted;
+      video.loop = loop;
+      video.setAttribute('playsinline', '');
+
+      return () => {
+        video.removeEventListener('play', handlePlay);
+        video.removeEventListener('pause', handlePause);
+        video.removeEventListener('loadeddata', handleLoadedData);
+        video.removeEventListener('error', handleError);
+      };
     });
+  }, [autoPlay, muted, loop, currentSlide]);
+
+  // Handle slideshow
+  useEffect(() => {
+    if (useVideoFallback) return;
+
+    const interval = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % videoRefs.current.length);
+    }, slideDuration);
+
+    return () => clearInterval(interval);
+  }, [slideDuration, useVideoFallback]);
+
+  // Handle play/pause based on visibility and socket connection
+  useEffect(() => {
+    if (useVideoFallback) return;
+
+    const currentVideo = videoRefs.current[currentSlide];
+    if (!currentVideo || !isLoaded) return;
+
+    const shouldPlay = 
+      (playWhenVisible && isPageVisible) &&
+      (playWhenSocketConnected ? isSocketConnected : true);
+
+    if (shouldPlay && !isPlaying) {
+      try {
+        if (playPromiseRefs.current[currentSlide]) {
+          playPromiseRefs.current[currentSlide] = null;
+        }
+        
+        playPromiseRefs.current[currentSlide] = currentVideo.play();
+        if (playPromiseRefs.current[currentSlide] !== undefined) {
+          playPromiseRefs.current[currentSlide]?.catch(err => {
+            console.warn('Tidak bisa memutar video:', err);
+            
+            if (err.name === 'NotAllowedError' && !currentVideo.muted) {
+              console.info('Mencoba putar video dengan muted');
+              currentVideo.muted = true;
+              playPromiseRefs.current[currentSlide] = currentVideo.play();
+              playPromiseRefs.current[currentSlide]?.catch(e => {
+                console.error('Masih tidak bisa memutar video:', e);
+                setUseVideoFallback(true);
+              });
+            } else {
+              setUseVideoFallback(true);
+            }
+          });
+        }
+      } catch (err) {
+        console.error('Error saat memutar video:', err);
+        setUseVideoFallback(true);
+      }
+    } else if (!shouldPlay && isPlaying) {
+      if (playPromiseRefs.current[currentSlide]) {
+        playPromiseRefs.current[currentSlide]?.then(() => {
+          currentVideo.pause();
+        }).catch(() => {
+          currentVideo.pause();
+        });
+      } else {
+        currentVideo.pause();
+      }
+    }
+
+    // Pause all other videos
+    videoRefs.current.forEach((video, index) => {
+      if (video && index !== currentSlide && !video.paused) {
+        video.pause();
+      }
+    });
+  }, [isPageVisible, isSocketConnected, playWhenVisible, playWhenSocketConnected, isPlaying, isLoaded, currentSlide, useVideoFallback]);
+
+  const play = (index: number) => {
+    const video = videoRefs.current[index];
+    if (video) {
+      if (playPromiseRefs.current[index]) {
+        playPromiseRefs.current[index] = null;
+      }
+      playPromiseRefs.current[index] = video.play();
+      playPromiseRefs.current[index]?.catch(err => console.warn('Error play:', err));
+    }
   };
 
-  // Fungsi untuk menghapus video dari daftar
-  const unregisterVideo = (videoElement: HTMLVideoElement) => {
-    setRegisteredVideos(prev => prev.filter(v => v !== videoElement));
+  const pause = (index: number) => {
+    const video = videoRefs.current[index];
+    if (video) {
+      if (playPromiseRefs.current[index]) {
+        playPromiseRefs.current[index]?.then(() => {
+          video.pause();
+        }).catch(() => {
+          video.pause();
+        });
+      } else {
+        video.pause();
+      }
+    }
   };
 
-  // Nilai untuk context
+  const togglePlay = (index: number) => {
+    const video = videoRefs.current[index];
+    if (video) {
+      if (video.paused) {
+        play(index);
+      } else {
+        pause(index);
+      }
+    }
+  };
+
   const value: VideoContextValue = {
-    registerVideo,
-    unregisterVideo,
+    videoRefs,
+    currentSlide,
+    isPlaying,
+    isLoaded,
+    error,
+    setCurrentSlide,
+    play,
+    pause,
+    togglePlay,
     isPageVisible,
+    useVideoFallback,
+    setUseVideoFallback
   };
 
   return (

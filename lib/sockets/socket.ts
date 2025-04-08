@@ -1,6 +1,6 @@
 "use client";
 import { io, Socket } from 'socket.io-client';
-import { API_CONFIG } from './api-config';
+import { API_CONFIG } from "@/lib/network/api-config";
 
 // Enum untuk event yang tersedia dalam sistem
 export enum SocketEvents {

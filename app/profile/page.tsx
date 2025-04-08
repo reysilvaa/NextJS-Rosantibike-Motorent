@@ -10,7 +10,7 @@ import { Loader2, Calendar, Bike, AlertCircle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { useAuth } from "@/hooks/use-auth";
-import { fetchUserTransactions } from "@/lib/api";
+import { fetchUserTransactions } from "@/lib/network/api";
 import type { Transaction } from "@/lib/types";
 
 export default function ProfilePage() {

@@ -8,7 +8,7 @@ import { Calendar, ChevronLeft, ChevronRight } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { fetchBlogPosts } from "@/lib/api"
+import { fetchBlogPosts } from "@/lib/network/api"
 import type { BlogPost } from "@/lib/types"
 import { useTranslation } from "@/i18n/hooks"
 

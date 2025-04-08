@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react"
-import { login as apiLogin } from "@/lib/api"
+import { login as apiLogin } from "@/lib/network/api"
 import { useRouter } from "next/navigation"
 import type { Admin } from "@/lib/types"
 
@@ -61,6 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         id: response.admin.id,
         username: response.admin.username,
         nama: response.admin.nama,
+        name: response.admin.nama
       }
       
       localStorage.setItem("auth_user", JSON.stringify(userData))

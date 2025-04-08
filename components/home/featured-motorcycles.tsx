@@ -8,7 +8,7 @@ import { ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { fetchMotorcycleTypes } from "@/lib/api"
+import { fetchMotorcycleTypes } from "@/lib/network/api"
 import type { MotorcycleType } from "@/lib/types"
 import { useTranslation } from "@/i18n/hooks"
 

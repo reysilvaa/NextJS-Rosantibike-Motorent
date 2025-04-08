@@ -11,9 +11,9 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useMotorcycleTypes } from "@/hooks/use-motorcycles"
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils/utils"
 import type { AvailabilitySearchParams } from "@/lib/types"
-import { useSocket } from "@/hooks/use-socket"
+import { useSocketContext } from "@/contexts/socket-context"
 import { Badge } from "@/components/ui/badge"
 import { useTranslation } from "@/i18n/hooks"
 
@@ -55,9 +55,13 @@ export default function AvailabilitySearch({
   }, [initialStartDate, initialEndDate]);
   
   // Koneksi Socket.IO untuk menampilkan status koneksi
-  const { isConnected } = useSocket({
-    room: "availability", // Bergabung ke room availability untuk event umum
-  })
+  const { isConnected, joinRoom } = useSocketContext();
+
+  useEffect(() => {
+    if (isConnected) {
+      joinRoom("availability");
+    }
+  }, [isConnected, joinRoom]);
 
   const handleSearch = () => {
     if (!startDate || !endDate) {

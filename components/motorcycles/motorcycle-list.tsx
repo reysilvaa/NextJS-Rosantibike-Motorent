@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useMotorcycleTypes } from "@/hooks/use-motorcycles"
-import { useSocket } from "@/hooks/use-socket"
+import { useSocketContext } from "@/contexts/socket-context"
 import { toast } from "sonner"
 import type { MotorcycleType } from "@/lib/types"
 import { useTranslation } from "@/i18n/hooks"
@@ -16,6 +16,18 @@ import { useMotorcycleFilters } from "@/contexts/motorcycle-filter-context"
 
 // Placeholder statis yang dijamin ada di folder public
 const MOTORCYCLE_PLACEHOLDER = "/motorcycle-placeholder.svg"
+
+// Helper function to normalize motorcycle data
+const normalizeMotorcycle = (motorcycle: MotorcycleType): MotorcycleType => {
+  return {
+    ...motorcycle,
+    imageUrl: motorcycle.imageUrl || motorcycle.gambar,
+    year: motorcycle.year || motorcycle.tahun,
+    pricePerDay: motorcycle.pricePerDay || (motorcycle.unitMotor?.[0]?.hargaSewa || 0),
+    status: motorcycle.status || (motorcycle.unitMotor?.[0]?.status === "TERSEDIA" ? "available" : 
+                               motorcycle.unitMotor?.[0]?.status === "DISEWA" ? "rented" : "maintenance")
+  };
+};
 
 export default function MotorcycleList() {
   const { t } = useTranslation()
@@ -43,14 +55,25 @@ export default function MotorcycleList() {
   }, [filters, refetch]);
 
   // Connect to socket for realtime motorcycle updates
-  const { isConnected } = useSocket({
-    room: 'motorcycles',
-    events: {
-      'new-motorcycle': handleNewMotorcycle,
-      'update-motorcycle': handleUpdateMotorcycle,
-      'delete-motorcycle': handleDeleteMotorcycle,
-    }
-  });
+  const { isConnected, listen, joinRoom } = useSocketContext();
+
+  useEffect(() => {
+    if (!isConnected) return;
+
+    // Join motorcycles room
+    joinRoom('motorcycles');
+
+    // Subscribe to motorcycle events
+    const unsubNew = listen('new-motorcycle', handleNewMotorcycle);
+    const unsubUpdate = listen('update-motorcycle', handleUpdateMotorcycle);
+    const unsubDelete = listen('delete-motorcycle', handleDeleteMotorcycle);
+
+    return () => {
+      unsubNew();
+      unsubUpdate();
+      unsubDelete();
+    };
+  }, [isConnected, listen, joinRoom]);
 
   // Handler untuk motor baru ditambahkan
   function handleNewMotorcycle(data: any) {
@@ -98,60 +121,32 @@ export default function MotorcycleList() {
           <Card key={i} className="bg-card/50 border-border overflow-hidden">
             <div className="h-48 bg-muted animate-pulse" />
             <CardContent className="p-5">
-              <div className="h-6 bg-muted rounded animate-pulse mb-2" />
-              <div className="h-4 bg-muted rounded animate-pulse w-3/4 mb-4" />
-              <div className="h-16 bg-muted rounded animate-pulse" />
+              <div className="space-y-2">
+                <div className="h-4 bg-muted rounded w-3/4 animate-pulse" />
+                <div className="h-4 bg-muted rounded w-1/2 animate-pulse" />
+              </div>
             </CardContent>
           </Card>
         ))}
       </div>
-    )
+    );
   }
 
   if (error) {
     return (
       <div className="text-center py-10">
-        <p className="text-red-500 mb-4">{error}</p>
-        <Button onClick={() => window.location.reload()}>{t("tryAgain")}</Button>
+        <p className="text-destructive">{t("errorLoadingMotorcycles")}</p>
+        <Button onClick={() => refetch()} className="mt-4">
+          {t("tryAgain")}
+        </Button>
       </div>
-    )
-  }
-  
-  if (hasNewMotor) {
-    return (
-      <div className="space-y-6">
-        <div className="bg-accent/30 border border-accent rounded-lg p-4 flex justify-between items-center">
-          <div>
-            <p className="text-accent-foreground">{t("newMotorcycleData")}</p>
-            <p className="text-sm text-accent-foreground/80">{t("reloadToSeeLatest")}</p>
-          </div>
-          <Button
-            onClick={() => {
-              refetch();
-              setHasNewMotor(false);
-            }}
-            className="bg-primary hover:bg-primary/90"
-          >
-            {t("reload")}
-          </Button>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {motorcycles && motorcycles.map((motorcycle, index) => (
-            <MotorcycleCard key={motorcycle.id} motorcycle={motorcycle} index={index} />
-          ))}
-        </div>
-      </div>
-    )
+    );
   }
 
   if (!motorcycles || motorcycles.length === 0) {
     return (
       <div className="text-center py-10">
-        <p className="text-lg mb-4">{t("noMotorcyclesFound")}</p>
-        <Button onClick={() => refetch()}>
-          {t("resetAndRefresh")}
-        </Button>
+        <p>{t("noMotorcyclesFound")}</p>
       </div>
     );
   }
@@ -159,53 +154,70 @@ export default function MotorcycleList() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {motorcycles.map((motorcycle, index) => (
-        <MotorcycleCard key={motorcycle.id} motorcycle={motorcycle} index={index} />
+        <MotorcycleCard 
+          key={motorcycle.id} 
+          motorcycle={normalizeMotorcycle(motorcycle)} 
+          index={index} 
+        />
       ))}
     </div>
-  )
+  );
 }
 
-// Komponen kartu motor yang lebih terstruktur
 interface MotorcycleCardProps {
   motorcycle: MotorcycleType;
   index: number;
 }
 
 function MotorcycleCard({ motorcycle, index }: MotorcycleCardProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
   
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
+      transition={{ delay: index * 0.1 }}
     >
-      <Link href={`/motorcycles/${motorcycle.id}`}>
-        <Card className="bg-card/50 border-border overflow-hidden hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/10 h-full">
-          <div className="relative h-48 overflow-hidden">
+      <Card className="bg-card/50 border-border overflow-hidden hover:shadow-lg transition-shadow">
+        <Link href={`/motorcycles/${motorcycle.id}`}>
+          <div className="relative h-48">
             <Image
-              src={motorcycle.gambar || MOTORCYCLE_PLACEHOLDER}
-              alt={`${motorcycle.merk} ${motorcycle.model}`}
+              src={motorcycle.imageUrl || MOTORCYCLE_PLACEHOLDER}
+              alt={motorcycle.merk + " " + motorcycle.model}
               fill
-              className="object-cover transition-transform hover:scale-105"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = MOTORCYCLE_PLACEHOLDER;
-                target.onerror = null; // Mencegah infinite loop
-              }}
+              className="object-cover"
+              priority={index < 3}
             />
-            <Badge className="absolute top-2 right-2 bg-primary">{motorcycle.cc} CC</Badge>
+            {motorcycle.status === "available" && (
+              <Badge className="absolute top-2 right-2 bg-green-500">
+                {t("available")}
+              </Badge>
+            )}
+            {motorcycle.status === "rented" && (
+              <Badge className="absolute top-2 right-2 bg-yellow-500">
+                {t("rented")}
+              </Badge>
+            )}
+            {motorcycle.status === "maintenance" && (
+              <Badge className="absolute top-2 right-2 bg-red-500">
+                {t("maintenance")}
+              </Badge>
+            )}
           </div>
           <CardContent className="p-5">
-            <h3 className="text-xl font-bold mb-1">
+            <h3 className="font-semibold text-lg mb-1">
               {motorcycle.merk} {motorcycle.model}
             </h3>
-            <p className="text-muted-foreground text-sm mb-3">{t("year")}: {motorcycle.tahun}</p>
-            <p className="text-foreground/80 line-clamp-3">{motorcycle.deskripsi}</p>
+            <p className="text-muted-foreground text-sm mb-2">
+              {motorcycle.year} • {motorcycle.cc}cc
+            </p>
+            <p className="text-primary font-semibold">
+              {t("pricePerDay")}: {motorcycle.pricePerDay ? motorcycle.pricePerDay.toLocaleString() : '0'} IDR
+            </p>
           </CardContent>
-        </Card>
-      </Link>
+        </Link>
+      </Card>
     </motion.div>
-  )
+  );
 }
 

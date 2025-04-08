@@ -35,8 +35,12 @@ export interface MotorcycleType {
   model: string
   cc: number
   tahun?: number
+  year?: number
   deskripsi?: string
   gambar: string | null
+  imageUrl?: string | null
+  status?: "available" | "rented" | "maintenance"
+  pricePerDay?: number
   createdAt?: string
   updatedAt?: string
   unitMotor?: MotorcycleUnit[]
