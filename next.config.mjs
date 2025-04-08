@@ -30,18 +30,14 @@ const nextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
+  output: 'standalone',
+  poweredByHeader: false,
+  compress: true,
   async rewrites() {
-    // Tentukan mode berdasarkan NODE_ENV
     const isProduction = process.env.NODE_ENV === 'production';
-    
-    // Gunakan URL dari environment variable
     const prodApiUrl = process.env.NEXT_PUBLIC_WS_URL || 'https://api.rosantibikemotorent.com';
     const devApiUrl = prodApiUrl;
-    
-    // Pilih URL berdasarkan mode
     const apiUrl = isProduction ? prodApiUrl : devApiUrl;
-  
-    console.log(`[${isProduction ? 'Production' : 'Development'}] Using API URL: ${apiUrl}`);
 
     return {
       beforeFiles: [
@@ -66,9 +62,24 @@ const nextConfig = {
   async headers() {
     return [
       {
-        // Apply these headers to all routes
         source: '/:path*',
         headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
           {
             key: 'Access-Control-Allow-Credentials',
             value: 'true',
@@ -83,7 +94,7 @@ const nextConfig = {
           },
           {
             key: 'Access-Control-Allow-Headers',
-            value: '*',
+            value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
           },
         ],
       },
