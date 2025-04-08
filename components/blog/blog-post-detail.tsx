@@ -9,10 +9,10 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { fetchBlogPostBySlug } from "@/lib/api"
-import type { BlogPost } from "@/lib/types"
+import { fetchBlogPostBySlug } from "@/lib/network/api"
+import type { BlogPost } from "@/lib/types/types"
 import { useTranslation } from "@/i18n/hooks"
-import { formatDate } from "@/lib/utils"
+import { formatDate } from "@/lib/utils/utils"
 
 interface BlogPostDetailProps {
   slug?: string;

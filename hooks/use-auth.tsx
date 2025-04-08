@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react"
 import { login as apiLogin } from "@/lib/network/api"
 import { useRouter } from "next/navigation"
-import type { Admin } from "@/lib/types"
+import type { Admin } from "@/lib/types/types"
 
 interface User {
   name: any

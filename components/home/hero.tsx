@@ -22,46 +22,62 @@ export default function Hero() {
     useVideoFallback,
     setUseVideoFallback
   } = useVideoContext()
+  
+  const [loadedVideos, setLoadedVideos] = useState<number[]>([0]) // Start with only the first video loaded
+
+  // Preload the current and next video when slide changes
+  useEffect(() => {
+    const nextSlideIndex = (currentSlide + 1) % slides.length
+    setLoadedVideos(prev => {
+      if (!prev.includes(currentSlide)) {
+        return [...prev, currentSlide]
+      }
+      if (!prev.includes(nextSlideIndex)) {
+        return [...prev, nextSlideIndex]
+      }
+      return prev
+    })
+  }, [currentSlide])
 
   const slides = [
     {
-      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/q0gtp8z72bayzdwqo7cp.mp4",
+      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/q_auto:low,f_auto/rental-motor/video/q0gtp8z72bayzdwqo7cp.mp4",
       imageUrl: "/placeholder.svg?height=1080&width=1920",
       title: t("heroSlide1Title") || "Jelajahi Keindahan dengan Motor Matic",
       subtitle: t("heroSlide1Subtitle") || "Pengalaman wisata nyaman dengan motor matic berkualitas",
     },
     {
-      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/qst0cbu2au5l9qyks1xr.mp4",
+      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/q_auto:low,f_auto/rental-motor/video/qst0cbu2au5l9qyks1xr.mp4",
       imageUrl: "/placeholder.svg?height=1080&width=1920",
       title: t("heroSlide2Title") || "Liburan Lebih Fleksibel dengan Motor Sewaan",
       subtitle: t("heroSlide2Subtitle") || "Jangkau tempat wisata tersembunyi dengan bebas dan praktis",
     },
     {
-      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/bykdq8mjfivukkfkujtw.mp4",
+      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/q_auto:low,f_auto/rental-motor/video/bykdq8mjfivukkfkujtw.mp4",
       imageUrl: "/placeholder.svg?height=1080&width=1920",
       title: t("heroSlide3Title") || "Harga Terjangkau, Kualitas Terjamin",
       subtitle: t("heroSlide3Subtitle") || "Nikmati tarif sewa kompetitif dengan pelayanan premium",
     },
     {
-      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/lyg6nonp8jj1ywzjqggh.mp4",
+      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/q_auto:low,f_auto/rental-motor/video/lyg6nonp8jj1ywzjqggh.mp4",
       imageUrl: "/placeholder.svg?height=1080&width=1920",
       title: t("heroSlide4Title") || "Paket Wisata Motor Matic Hemat",
       subtitle: t("heroSlide4Subtitle") || "Kombinasi sewa motor dan panduan wisata untuk pengalaman terbaik",
     },
     {
-      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/cljiyl0dbkokzax2pecf.mp4",
+      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/q_auto:low,f_auto/rental-motor/video/cljiyl0dbkokzax2pecf.mp4",
       imageUrl: "/placeholder.svg?height=1080&width=1920",
       title: t("heroSlide5Title") || "Berkeliling Kota dengan Nyaman",
       subtitle: t("heroSlide5Subtitle") || "Motor matic irit dan mudah dikendarai untuk wisata perkotaan",
     },
     {
-      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/ojy4yh9urck1pszysvto.mp4",
+      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/q_auto:low,f_auto/rental-motor/video/ojy4yh9urck1pszysvto.mp4",
       imageUrl: "/placeholder.svg?height=1080&width=1920",
       title: t("heroSlide6Title") || "Motor Matic untuk Segala Kebutuhan",
       subtitle: t("heroSlide6Subtitle") || "Tersedia berbagai jenis motor matic sesuai dengan rencana perjalanan Anda",
     },
     {
-      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/ysed7qkyskikc36yto80.mp4",
+      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/q_auto:low,f_auto/rental-motor/video/ysed7qkyskikc36yto80.mp4",
       imageUrl: "/placeholder.svg?height=1080&width=1920",
       title: t("heroSlide7Title") || "Bebas Bereksplorasi Tanpa Batas",
       subtitle: t("heroSlide7Subtitle") || "Temukan sudut-sudut wisata menarik dengan kebebasan berkendara sendiri",
@@ -70,41 +86,50 @@ export default function Hero() {
 
   return (
     <section className="relative h-screen w-full overflow-hidden">
-      {slides.map((slide, index) => (
-        <div
-          key={index}
-          className={`absolute inset-0 transition-opacity duration-1000 ${
-            index === currentSlide ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          {useVideoFallback ? (
-            <div className="absolute inset-0">
-              <Image 
-                src={slide.imageUrl} 
-                alt={slide.title} 
-                fill 
-                priority 
-                className="object-cover" 
-              />
-              <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/65' : 'bg-black/50'}`} />
-            </div>
-          ) : (
-            <div className="absolute inset-0">
-              <video
-                ref={el => { videoRefs.current[index] = el }}
-                src={slide.videoUrl}
-                className="w-full h-full object-cover"
-                muted
-                playsInline
-                loop
-                disablePictureInPicture
-                disableRemotePlayback
-              />
-              <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/65' : 'bg-black/50'}`} />
-            </div>
-          )}
-        </div>
-      ))}
+      {slides.map((slide, index) => {
+        // Only render the current slide and preloaded videos
+        if (!loadedVideos.includes(index) && index !== currentSlide) {
+          return null
+        }
+        
+        return (
+          <div
+            key={index}
+            className={`absolute inset-0 transition-opacity duration-1000 ${
+              index === currentSlide ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
+          >
+            {useVideoFallback ? (
+              <div className="absolute inset-0">
+                <Image 
+                  src={slide.imageUrl} 
+                  alt={slide.title} 
+                  fill 
+                  priority={index === currentSlide}
+                  loading={index === currentSlide ? "eager" : "lazy"}
+                  className="object-cover" 
+                />
+                <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/65' : 'bg-black/50'}`} />
+              </div>
+            ) : (
+              <div className="absolute inset-0">
+                <video
+                  ref={el => { videoRefs.current[index] = el }}
+                  src={slide.videoUrl}
+                  className="w-full h-full object-cover"
+                  muted
+                  playsInline
+                  loop
+                  preload={index === currentSlide ? "auto" : "metadata"}
+                  disablePictureInPicture
+                  disableRemotePlayback
+                />
+                <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/65' : 'bg-black/50'}`} />
+              </div>
+            )}
+          </div>
+        )
+      })}
 
       <div className="relative z-10 container mx-auto px-4 h-full flex flex-col justify-center">
         <motion.div
