@@ -169,6 +169,7 @@ export default function Navbar() {
                 "md:hidden h-9 w-9 rounded-full",
                 shouldUseWhiteStyle ? "hover:bg-white/10 text-white" : "hover:bg-primary/10 text-foreground",
               )}
+              aria-label={t("mobileMenuTitle")}
             >
               <Menu className="h-5 w-5" />
               <span className="sr-only">{t("mobileMenuTitle")}</span>
@@ -176,7 +177,7 @@ export default function Navbar() {
           </SheetTrigger>
           <SheetContent
             side="right"
-            className="border-l border-border/20 bg-background/90 backdrop-blur-xl w-[280px] p-0 animate-in slide-in-from-right duration-300"
+            className="border-l border-border/20 bg-background/95 backdrop-blur-xl w-[280px] p-0"
           >
             <SheetTitle className="sr-only">{t("mobileMenuTitle")}</SheetTitle>
             <div className="flex flex-col h-full">
@@ -192,25 +193,26 @@ export default function Navbar() {
                       width={96}
                       height={32}
                       className="h-8 w-auto" 
+                      priority
                     />
                   </span>
                 </Link>
               </div>
 
-              <nav className="flex flex-col p-4">
+              <nav className="flex flex-col p-4 overflow-y-auto">
                 {navLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
                     className={cn(
-                      "flex items-center py-3 px-2 text-base font-medium transition-all duration-300 hover:text-primary relative group rounded-lg",
+                      "flex items-center py-3 px-2 text-base font-medium transition-colors duration-200 hover:text-primary relative group rounded-lg",
                       pathname === link.href ? "text-primary bg-primary/5" : "text-muted-foreground hover:bg-primary/5",
                     )}
                   >
                     {link.label}
                     <span
                       className={cn(
-                        "absolute bottom-2 left-2 h-0.5 bg-primary/50 transition-all duration-300 rounded-full",
+                        "absolute bottom-2 left-2 h-0.5 bg-primary/50 transition-all duration-200 rounded-full",
                         pathname === link.href ? "w-12" : "w-0 group-hover:w-12",
                       )}
                     ></span>
@@ -218,7 +220,7 @@ export default function Navbar() {
                 ))}
               </nav>
 
-              <div className="mt-auto p-4 space-y-6 border-t border-border/30">
+              <div className="mt-auto p-4 space-y-4 border-t border-border/30">
                 <div className="flex items-center justify-between py-2 px-2 rounded-lg bg-primary/5">
                   <span className="text-sm font-medium">{t("theme")}</span>
                   <ThemeToggle useWhiteStyle={false} />

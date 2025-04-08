@@ -170,15 +170,24 @@ export const getSocket = (): Socket => {
       console.log(`getSocket: Mencoba connect ke socket: ${wsUrl} dengan path /socket.io/`);
       
       socketInstance = io(wsUrl, {
-        transports: ['polling'], // Gunakan polling saja untuk menghindari masalah WebSocket
+        transports: ['polling'], // Use only polling for better mobile compatibility
         path: '/socket.io/',
         autoConnect: true,
         reconnection: true,
-        reconnectionAttempts: MAX_RECONNECT_ATTEMPTS,
-        reconnectionDelay: 1000,
-        timeout: 60000, // Timeout yang lebih pendek
-        forceNew: true, // Force new connection
-        withCredentials: false, // Ubah ke false untuk mengatasi masalah CORS
+        reconnectionAttempts: 5, // Reduce reconnection attempts
+        reconnectionDelay: 2000, // Increase delay between attempts
+        timeout: 30000, // Shorter timeout
+        forceNew: true,
+        withCredentials: false,
+        // Add mobile-specific options
+        upgrade: false, // Disable transport upgrade
+        rememberUpgrade: false,
+        // Add better error handling
+        rejectUnauthorized: false,
+        // Add mobile-specific transport options
+        extraHeaders: {
+          'Access-Control-Allow-Origin': '*'
+        }
       });
 
       // Setup default handlers

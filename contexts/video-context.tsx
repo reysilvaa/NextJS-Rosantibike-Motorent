@@ -52,8 +52,8 @@ export const VideoContextProvider: React.FC<VideoContextProviderProps> = ({
   muted = true,
   loop = true,
   playWhenVisible = true,
-  playWhenSocketConnected = false, // Changed to false to avoid dependency on socket
-  slideDuration = 8000 // Increased duration for smoother experience
+  playWhenSocketConnected = false,
+  slideDuration = 8000
 }) => {
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -61,11 +61,21 @@ export const VideoContextProvider: React.FC<VideoContextProviderProps> = ({
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [isPageVisible, setIsPageVisible] = useState(true);
-  // Default to video fallback on mobile devices to save bandwidth and improve performance
   const [useVideoFallback, setUseVideoFallback] = useState(() => {
     if (typeof window !== 'undefined') {
-      // Check if this is a mobile device
-      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      // Enhanced mobile detection with better fallback logic
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const isLowEndDevice = /(Android|iPhone|iPad).*?AppleWebKit(?!.*Safari)/i.test(navigator.userAgent);
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+      const isAndroid = /Android/.test(navigator.userAgent);
+      
+      // Always use fallback for iOS devices
+      if (isIOS) return true;
+      
+      // For Android, check if it's a low-end device
+      if (isAndroid && isLowEndDevice) return true;
+      
+      return false;
     }
     return false;
   });
@@ -110,18 +120,35 @@ export const VideoContextProvider: React.FC<VideoContextProviderProps> = ({
     }
   };
 
-  // Setup video elements with better error handling
+  // Optimize video setup for mobile
   useEffect(() => {
     const currentVideo = videoRefs.current[currentSlide];
     if (!currentVideo) return;
 
     const setupVideo = () => {
-      currentVideo.muted = muted;
-      currentVideo.loop = loop;
-      currentVideo.setAttribute('playsinline', '');
-      
-      if (autoPlay && isPageVisible && !useVideoFallback) {
-        try {
+      try {
+        // Set mobile-specific attributes
+        currentVideo.muted = muted;
+        currentVideo.loop = loop;
+        currentVideo.setAttribute('playsinline', '');
+        currentVideo.setAttribute('webkit-playsinline', '');
+        currentVideo.setAttribute('x5-playsinline', '');
+        currentVideo.setAttribute('x5-video-player-type', 'h5');
+        currentVideo.setAttribute('x5-video-player-fullscreen', 'false');
+        currentVideo.setAttribute('x5-video-orientation', 'portraint');
+        
+        // Add preload attribute for better mobile performance
+        currentVideo.setAttribute('preload', 'auto');
+        
+        // Set mobile-specific styles
+        currentVideo.style.width = '100%';
+        currentVideo.style.height = 'auto';
+        currentVideo.style.objectFit = 'cover';
+        
+        if (autoPlay && isPageVisible && !useVideoFallback) {
+          // For mobile, always start muted
+          currentVideo.muted = true;
+          
           const playPromise = currentVideo.play();
           if (playPromise !== undefined) {
             playPromiseRefs.current[currentSlide] = playPromise;
@@ -130,16 +157,12 @@ export const VideoContextProvider: React.FC<VideoContextProviderProps> = ({
               setIsLoaded(true);
             }).catch(err => {
               console.warn('Video autoplay failed:', err);
-              
-              // Try with muted if autoplay failed due to browser policy
-              if (err.name === 'NotAllowedError' && !currentVideo.muted) {
+              // Try with muted if autoplay failed
+              if (!currentVideo.muted) {
                 currentVideo.muted = true;
                 const mutedPlayPromise = currentVideo.play();
-                playPromiseRefs.current[currentSlide] = mutedPlayPromise;
-                
                 if (mutedPlayPromise !== undefined) {
-                  mutedPlayPromise.catch(e => {
-                    console.error('Video autoplay failed even with mute:', e);
+                  mutedPlayPromise.catch(() => {
                     setUseVideoFallback(true);
                   });
                 }
@@ -148,10 +171,10 @@ export const VideoContextProvider: React.FC<VideoContextProviderProps> = ({
               }
             });
           }
-        } catch (err) {
-          console.error('Error during video play:', err);
-          setUseVideoFallback(true);
         }
+      } catch (err) {
+        console.error('Error during video setup:', err);
+        setUseVideoFallback(true);
       }
     };
 

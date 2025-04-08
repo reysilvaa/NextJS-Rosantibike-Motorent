@@ -13,6 +13,11 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Rosantibike Motorent",
   description: "Rental motor terpercaya dengan harga terjangkau dan layanan terbaik di Malang",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "white" },
+    { media: "(prefers-color-scheme: dark)", color: "black" }
+  ],
   icons: {
     icon: [
       { url: '/favicon.ico' },
@@ -33,7 +38,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" suppressHydrationWarning>
-      <body className={`${inter.className} min-h-screen flex flex-col`}>
+      <head>
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Rosantibike Motorent" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="Rosantibike Motorent" />
+        <meta name="apple-touch-fullscreen" content="yes" />
+        <meta name="apple-mobile-web-app-orientations" content="portrait" />
+      </head>
+      <body className={`${inter.className} min-h-screen flex flex-col antialiased`}>
         <Providers>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <VideoContextProvider
@@ -41,7 +58,7 @@ export default function RootLayout({
               muted={true}
               loop={true}
               playWhenVisible={true}
-              playWhenSocketConnected={true}
+              playWhenSocketConnected={false}
               slideDuration={5000}
             >
               <Navbar />
