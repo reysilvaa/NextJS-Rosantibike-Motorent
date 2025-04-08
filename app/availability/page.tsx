@@ -15,6 +15,7 @@ import { useEffect } from "react"
 import { useMotorcycleTypes } from "@/hooks/use-motorcycles"
 import { Badge } from "@/components/ui/badge"
 import { useAutoScroll } from "@/hooks/use-auto-scroll"
+import { MotorcycleType, AvailabilitySearchParams } from "@/lib/types"
 
 export default function AvailabilityPage() {
   const { t } = useTranslation()
@@ -232,17 +233,22 @@ export default function AvailabilityPage() {
                       .filter(motor => !!motor && !!motor.id)
                       .map(motor => ({
                         ...motor,
-                        // Pastikan jenis selalu ada dan memiliki format yang benar
                         jenis: motor.jenis || {
-                          id: motor.jenis || "",
+                          id: motor.jenisId || "",
                           merk: "Motor",
                           model: motor.platNomor || "Unknown",
+                          slug: `${motor.platNomor || "unknown"}`.toLowerCase().replace(/\s+/g, '-'),
                           cc: 0,
-                          gambar: null
+                          gambar: null,
+                          createdAt: new Date().toISOString(),
+                          updatedAt: new Date().toISOString(),
+                          unitMotor: []
                         }
                       }))} 
                     startDate={tanggalMulai!} 
                     endDate={tanggalSelesai!}
+                    isLoading={isLoading}
+                    onBook={(motorcycle) => router.push(`/availability/booking?unitId=${motorcycle.id}&startDate=${tanggalMulai}&endDate=${tanggalSelesai}`)}
                   />
                 )}
               </motion.div>

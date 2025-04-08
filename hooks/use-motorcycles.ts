@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { fetchMotorcycleTypes, fetchMotorcycleUnits, checkAvailability as apiCheckAvailability } from '@/lib/network/api';
 import { useLoading } from './use-loading';
 import { toast } from './use-toast';
-import type { MotorcycleType, MotorcycleUnit, AvailabilitySearchParams } from '@/lib/types/types';
+import { MotorcycleType, MotorcycleUnit, AvailabilitySearchParams } from '@/lib/types';
 import { API_CONFIG } from '@/lib/network/api-config';
 import { MotorcycleFilters } from '@/contexts/motorcycle-filter-context';
 
@@ -86,6 +86,7 @@ export function useMotorcycleTypes(filters?: Partial<MotorcycleFilters>) {
             id: unit.jenis.id,
             merk: unit.jenis.merk,
             model: unit.jenis.model,
+            slug: unit.jenis.slug || `${unit.jenis.merk}-${unit.jenis.model}`.toLowerCase().replace(/\s+/g, '-'),
             cc: unit.jenis.cc || 0,
             gambar: unit.jenis.gambar || null,
             createdAt: unit.createdAt,

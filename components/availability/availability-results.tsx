@@ -1,9 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { differenceInDays, parseISO, format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -17,48 +15,36 @@ import {
 import { motion } from "framer-motion"
 import { CalendarDays, ChevronRight, Clock, Tag, Key } from "lucide-react"
 import { formatCurrency } from "@/lib/utils/utils"
-import type { MotorcycleUnit } from "@/lib/types/types"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "@/i18n/hooks"
 import { toast } from "@/components/ui/use-toast"
+import type { MotorcycleUnit } from "@/lib/types/motorcycle"
+import { useAvailability } from "@/hooks/use-availability"
 
 interface AvailabilityResultsProps {
   motorcycles: MotorcycleUnit[]
   startDate: string
   endDate: string
+  isLoading?: boolean
+  onBook?: (motorcycle: MotorcycleUnit) => void
 }
 
-export default function AvailabilityResults({ motorcycles, startDate, endDate }: AvailabilityResultsProps) {
+export default function AvailabilityResults({ 
+  motorcycles, 
+  startDate, 
+  endDate,
+  isLoading,
+  onBook 
+}: AvailabilityResultsProps) {
   const { t } = useTranslation()
   const router = useRouter()
-  const [sortOption, setSortOption] = useState("price-asc")
-  
-  // Log untuk debugging
-  useEffect(() => {
-    console.log("AvailabilityResults received motorcycles:", motorcycles);
-    console.log("Motorcycles array length:", motorcycles.length);
-    
-    if (motorcycles.length > 0) {
-      console.log("Sample motorcycle in AvailabilityResults:", motorcycles[0]);
-    }
-  }, [motorcycles]);
-  
-  const rentalDays = differenceInDays(parseISO(endDate), parseISO(startDate))
-  
-  const sortedMotorcycles = [...motorcycles].sort((a, b) => {
-    switch (sortOption) {
-      case "price-asc":
-        return a.hargaSewa - b.hargaSewa
-      case "price-desc":
-        return b.hargaSewa - a.hargaSewa
-      case "name-asc":
-        return `${a.jenis?.merk || ''} ${a.jenis?.model || ''}`.localeCompare(`${b.jenis?.merk || ''} ${b.jenis?.model || ''}`)
-      case "name-desc":
-        return `${b.jenis?.merk || ''} ${b.jenis?.model || ''}`.localeCompare(`${a.jenis?.merk || ''} ${a.jenis?.model || ''}`)
-      default:
-        return 0
-    }
-  })
+  const { 
+    availableMotorcycles, 
+    sortOption, 
+    setSortOption,
+    rentalDays,
+    calculateTotalPrice
+  } = useAvailability()
   
   const handleBookNow = (motorcycleId: string) => {
     if (!motorcycleId || motorcycleId === 'undefined' || motorcycleId === 'null' || motorcycleId.trim() === '') {
@@ -85,7 +71,7 @@ export default function AvailabilityResults({ motorcycles, startDate, endDate }:
     router.push(`/availability/booking?unitId=${motorcycleId}&startDate=${startDate}&endDate=${endDate}`);
   }
 
-  if (motorcycles.length === 0) {
+  if (!motorcycles || motorcycles.length === 0) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -144,7 +130,7 @@ export default function AvailabilityResults({ motorcycles, startDate, endDate }:
       </motion.div>
 
       <div className="grid grid-cols-1 gap-6 w-full">
-        {sortedMotorcycles.map((motorcycle, index) => (
+        {motorcycles.map((motorcycle, index) => (
           <motion.div
             key={motorcycle.id}
             initial={{ opacity: 0, y: 20 }}
@@ -214,7 +200,7 @@ export default function AvailabilityResults({ motorcycles, startDate, endDate }:
                           <CalendarDays className="h-12 w-12 text-foreground -rotate-12" />
                         </div>
                         <p className="text-sm text-muted-foreground font-medium">{t("total")} ({rentalDays} {t("days")})</p>
-                        <p className="font-bold text-xl">{formatCurrency(motorcycle.hargaSewa * rentalDays)}</p>
+                        <p className="font-bold text-xl">{formatCurrency(calculateTotalPrice(motorcycle))}</p>
                       </div>
                     </div>
                   </div>

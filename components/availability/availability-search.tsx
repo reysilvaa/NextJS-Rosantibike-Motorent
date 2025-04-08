@@ -1,18 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { format, parse } from "date-fns"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DateRangePicker } from "@/components/ui/date-range-picker"
-import { useMotorcycleTypes } from "@/hooks/use-motorcycles"
 import { cn } from "@/lib/utils/utils"
-import { useSocketContext } from "@/contexts/socket-context"
 import { useTranslation } from "@/i18n/hooks"
-import type { DateRange } from "react-day-picker"
+import { useAvailabilitySearch } from "@/hooks/use-availability-search"
 
 interface AvailabilitySearchProps {
   onSearch?: (startDate: string, endDate: string, jenisMotorId?: string) => void;
@@ -27,62 +23,34 @@ export default function AvailabilitySearch({
 }: AvailabilitySearchProps) {
   const { t } = useTranslation()
   const router = useRouter()
-  const { data: motorcycleTypes, isLoading: isLoadingTypes } = useMotorcycleTypes()
-  const [dateRange, setDateRange] = useState<DateRange | undefined>()
-  const [motorcycleType, setMotorcycleType] = useState<string | undefined>()
   
-  // Inisialisasi tanggal dari props jika tersedia
-  useEffect(() => {
-    if (initialStartDate && initialEndDate) {
-      try {
-        const fromDate = parse(initialStartDate, "yyyy-MM-dd", new Date());
-        const toDate = parse(initialEndDate, "yyyy-MM-dd", new Date());
-        setDateRange({
-          from: fromDate,
-          to: toDate
-        });
-      } catch (e) {
-        console.error("Error parsing initial dates", e);
+  const {
+    dateRange,
+    setDateRange,
+    motorcycleType,
+    setMotorcycleType,
+    motorcycleTypes,
+    isLoadingTypes,
+    isConnected,
+    handleSearch
+  } = useAvailabilitySearch(initialStartDate, initialEndDate)
+
+  const handleSearchClick = () => {
+    const searchData = handleSearch(onSearch)
+    if (!searchData) return
+
+    // Legacy behavior - navigation with URL params
+    if (!onSearch) {
+      const queryString = new URLSearchParams()
+      queryString.append("startDate", searchData.startDate)
+      queryString.append("endDate", searchData.endDate)
+      if (searchData.motorcycleType) {
+        queryString.append("jenisId", searchData.motorcycleType)
       }
+
+      const searchUrl = `/availability?${queryString.toString()}`
+      router.push(searchUrl)
     }
-  }, [initialStartDate, initialEndDate]);
-  
-  // Koneksi Socket.IO untuk menampilkan status koneksi
-  const { isConnected, joinRoom } = useSocketContext();
-
-  useEffect(() => {
-    if (isConnected) {
-      joinRoom("availability");
-    }
-  }, [isConnected, joinRoom]);
-
-  const handleSearch = () => {
-    if (!dateRange?.from || !dateRange?.to) {
-      // Tambahkan validasi error disini jika diperlukan
-      console.warn(t("startAndEndDateRequired"))
-      return
-    }
-
-    const formattedStartDate = format(dateRange.from, "yyyy-MM-dd");
-    const formattedEndDate = format(dateRange.to, "yyyy-MM-dd");
-    const selectedMotorcycleType = motorcycleType && motorcycleType !== "all" ? motorcycleType : undefined;
-
-    // Jika onSearch prop tersedia, gunakan itu (untuk di-handling parent)
-    if (onSearch) {
-      onSearch(formattedStartDate, formattedEndDate, selectedMotorcycleType);
-      return;
-    }
-
-    // Legacy behavior - navigasi dengan URL params
-    const queryString = new URLSearchParams()
-    queryString.append("startDate", formattedStartDate)
-    queryString.append("endDate", formattedEndDate)
-    if (selectedMotorcycleType) {
-      queryString.append("jenisId", selectedMotorcycleType)
-    }
-
-    const searchUrl = `/availability?${queryString.toString()}`
-    router.push(searchUrl)
   }
 
   return (
@@ -139,7 +107,7 @@ export default function AvailabilitySearch({
         </div>
         <Button 
           className="w-full mt-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 font-bold py-6 rounded-lg transition-all duration-300 transform hover:scale-[1.02]"
-          onClick={handleSearch}
+          onClick={handleSearchClick}
         >
           {t("checkAvailability")}
         </Button>
