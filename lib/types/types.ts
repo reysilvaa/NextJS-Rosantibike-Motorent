@@ -37,7 +37,7 @@ export interface MotorcycleUnit {
   platNomor: string
   warna?: string
   hargaSewa: number
-  status: "TERSEDIA" | "DISEWA" | "SERVIS" | "OVERDUE"
+  status: "TERSEDIA" | "DISEWA" | "SERVIS" | "OVERDUE" | "DIPESAN"
   jenis: {
     id: string
     merk: string
@@ -143,7 +143,7 @@ export interface BackendUnitAvailability {
     cc: number
   }
   hargaSewa: number | string
-  status: "TERSEDIA" | "DISEWA" | "SERVIS" | "OVERDUE"
+  status: "TERSEDIA" | "DISEWA" | "SERVIS" | "OVERDUE" | "DIPESAN"
   availability: {
     date: string
     isAvailable: boolean

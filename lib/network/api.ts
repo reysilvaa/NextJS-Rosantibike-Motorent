@@ -404,7 +404,7 @@ export async function checkAvailability(params: AvailabilitySearchParams): Promi
         // Transformasi ke format yang diharapkan frontend, dengan memastikan
         // bahwa motor dikembalikan dalam format yang konsisten
         const result: MotorcycleUnit[] = units
-          .filter(unit => unit.status === "TERSEDIA")
+          .filter(unit => unit.status === "TERSEDIA" || unit.status === "DIPESAN")
           .map(unit => {
             // Pastikan semua field yang dibutuhkan ada
             return {
