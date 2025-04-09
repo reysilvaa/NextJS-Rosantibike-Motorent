@@ -40,10 +40,12 @@ jobs:
     # Step 4: Setup SSH key and known hosts
     - name: Setup SSH
       run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
-        chmod 600 ~/.ssh/deploy_key
-        ssh-keyscan ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+        mkdir -p $HOME/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > $HOME/.ssh/deploy_key
+        chmod 600 $HOME/.ssh/deploy_key
+        ssh-keyscan -H ${{ secrets.SERVER_IP }} >> $HOME/.ssh/known_hosts
+        eval $(ssh-agent -s)
+        ssh-add $HOME/.ssh/deploy_key
 
     # Step 5: Backup current deployment
     - name: Backup current deployment
