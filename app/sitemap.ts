@@ -7,18 +7,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   
   // Static routes
   const staticRoutes = [
-    '',
+    '', // home
     '/about',
     '/contact',
     '/blog',
     '/availability',
+    '/availability/booking',
     '/booking-history',
+    '/booking-success',
     '/motorcycles',
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
     changeFrequency: 'daily' as const,
-    priority: 1,
+    priority: route === '' ? 1 : 0.9, // home page has highest priority
   }));
 
   // Blog posts
