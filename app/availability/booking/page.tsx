@@ -9,6 +9,8 @@ import BookingForm from "@/components/features/booking/booking-form";
 import { fetchMotorcycleUnitById } from "@/lib/network/api";
 import { MotorcycleUnit } from "@/lib/types";
 import { Loader2 } from "lucide-react";
+import { NextSeo } from "next-seo";
+import { getClientSeoProps } from "@/lib/shared/seo";
 
 export default function BookingPage() {
   const router = useRouter();
@@ -23,6 +25,14 @@ export default function BookingPage() {
   const [motorcycle, setMotorcycle] = useState<MotorcycleUnit | null>(null);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
+
+  // SEO configuration
+  const seoProps = getClientSeoProps({
+    title: motorcycle ? `Booking ${motorcycle.jenis?.merk} ${motorcycle.jenis?.model}` : "Formulir Booking",
+    description: "Lengkapi formulir pemesanan untuk melanjutkan proses booking motor di Rosantibike Motorent Malang",
+    canonicalPath: "/availability/booking",
+    ogImage: "/images/booking-og.jpg",
+  });
 
   useEffect(() => {
     if (!unitId || !startDateParam || !endDateParam || unitId === 'undefined') {
@@ -71,6 +81,7 @@ export default function BookingPage() {
   if (isLoading) {
     return (
       <div className="container mx-auto py-12 px-4">
+        <NextSeo {...seoProps} />
         <div className="max-w-3xl mx-auto text-center">
           <Loader2 className="h-10 w-10 animate-spin mx-auto mb-4 text-primary" />
           <h2 className="text-xl font-semibold mb-2">Memuat data motor...</h2>
@@ -85,6 +96,7 @@ export default function BookingPage() {
     // Tampilkan pesan loading sementara menunggu redirect
     return (
       <div className="container mx-auto py-12 px-4 text-center">
+        <NextSeo {...seoProps} />
         <Loader2 className="h-10 w-10 animate-spin mx-auto mb-4 text-primary" />
         <h2 className="text-xl font-semibold mb-2">Mengarahkan ke halaman pencarian...</h2>
       </div>
@@ -93,6 +105,10 @@ export default function BookingPage() {
 
   return (
     <div className="container mx-auto py-12 px-4">
+      <NextSeo 
+        {...seoProps} 
+        title={`Booking ${motorcycle.jenis?.merk} ${motorcycle.jenis?.model} | Rosantibike Motorent`}
+      />
       <div className="max-w-3xl mx-auto">
         <div className="mb-8">
           <h1 className="text-2xl font-bold mb-2">

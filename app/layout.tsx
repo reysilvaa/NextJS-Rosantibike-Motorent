@@ -7,6 +7,8 @@ import Footer from "@/components/layout/footer"
 import { Providers } from "./providers"
 import { VideoContextProvider } from "@/contexts/video-context"
 import { ThemeProvider } from "@/components/shared/theme/theme-provider"
+import { DefaultSeo } from "next-seo"
+import { DEFAULT_SEO_CONFIG } from "@/lib/seo"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -28,7 +30,27 @@ export const metadata: Metadata = {
     other: [
       { rel: 'manifest', url: '/site.webmanifest' }
     ]
-  }
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  alternates: {
+    canonical: 'https://rosantibike.com',
+    languages: {
+      'id-ID': 'https://rosantibike.com',
+    },
+  },
+  verification: {
+    google: 'your-google-site-verification-code', // Replace with your verification code
+  },
 }
 
 export default function RootLayout({
@@ -51,6 +73,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-orientations" content="portrait" />
       </head>
       <body className={`${inter.className} min-h-screen flex flex-col antialiased`}>
+        <DefaultSeo {...DEFAULT_SEO_CONFIG} />
         <Providers>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <VideoContextProvider
