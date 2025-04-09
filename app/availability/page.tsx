@@ -16,8 +16,7 @@ import { useMotorcycleTypes } from "@/hooks/use-motorcycles"
 import { Badge } from "@/components/ui/badge"
 import { useAutoScroll } from "@/hooks/common/use-auto-scroll"
 import { MotorcycleType, AvailabilitySearchParams } from "@/lib/types"
-import { NextSeo } from "next-seo"
-import { getClientSeoProps } from "@/lib/shared/seo"
+import PageSeo from "@/components/shared/seo/page-seo"
 
 export default function AvailabilityPage() {
   const { t } = useTranslation()
@@ -57,14 +56,6 @@ export default function AvailabilityPage() {
     shouldScroll: Boolean(canSearch),
     isLoading,
     hasData: !!availableMotorcycles && availableMotorcycles.length > 0,
-  });
-
-  // SEO configuration
-  const seoProps = getClientSeoProps({
-    title: "Cek Ketersediaan Motor",
-    description: "Cek ketersediaan motor untuk disewa di Rosantibike Motorent Malang. Pilih tanggal dan temukan motor yang tersedia untuk perjalanan Anda.",
-    canonicalPath: "/availability",
-    ogImage: "/images/availability-og.jpg",
   });
 
   // Log untuk debugging
@@ -111,7 +102,12 @@ export default function AvailabilityPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/95">
-      <NextSeo {...seoProps} />
+      <PageSeo
+        title="Cek Ketersediaan Motor"
+        description="Cek ketersediaan motor untuk disewa di Rosantibike Motorent Malang. Pilih tanggal dan temukan motor yang tersedia untuk perjalanan Anda."
+        canonicalPath="/availability"
+        ogImage="/images/availability-og.jpg"
+      />
       
       {/* Hero section with background pattern */}
       <div className="relative bg-gradient-to-b from-primary/5 to-background pt-32 pb-24 border-b border-border/10 overflow-hidden">

@@ -1,9 +1,8 @@
-import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { fetchBlogPostBySlug } from '@/lib/network/api';
 import BlogPostDetail from '@/components/blog/blog-post-detail';
+import PageSeo from '@/components/shared/seo/page-seo';
 import type { BlogPost } from '@/lib/types/blog';
-import { getSeoMetadata } from '@/lib/shared/seo';
 
 interface BlogPostPageProps {
   params: {
@@ -11,16 +10,12 @@ interface BlogPostPageProps {
   };
 }
 
-export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
+export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = params;
   const post = await fetchBlogPostBySlug(slug);
 
   if (!post) {
-    return getSeoMetadata({
-      title: 'Artikel Tidak Ditemukan',
-      description: 'Artikel yang anda cari tidak ditemukan',
-      noIndex: true
-    });
+    notFound();
   }
 
   // Create description by shortening the content
@@ -34,24 +29,14 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
       : plainText;
   }
 
-  return getSeoMetadata({
-    title: post.judul,
-    description,
-    canonicalPath: `/blog/${slug}`,
-    ogImage: post.featuredImage || post.thumbnail || '/images/blog-default-og.jpg',
-  });
-}
-
-export default async function BlogPostPage({ params }: BlogPostPageProps) {
-  const { slug } = params;
-  const post = await fetchBlogPostBySlug(slug);
-
-  if (!post) {
-    notFound();
-  }
-
   return (
     <div className="pb-16">
+      <PageSeo
+        title={post.judul}
+        description={description}
+        canonicalPath={`/blog/${slug}`}
+        ogImage={post.featuredImage || post.thumbnail || '/images/blog-default-og.jpg'}
+      />
       <div className="pt-16">
         <BlogPostDetail post={post} />
       </div>

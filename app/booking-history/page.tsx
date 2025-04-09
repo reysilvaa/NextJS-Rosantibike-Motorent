@@ -17,8 +17,7 @@ import { useTranslation } from "@/i18n/hooks";
 import { motion } from "framer-motion";
 import { useAutoScroll } from "@/hooks/common/use-auto-scroll";
 import { Skeleton } from "@/components/ui/skeleton";
-import { NextSeo } from "next-seo";
-import { getClientSeoProps } from "@/lib/shared/seo";
+import PageSeo from "@/components/shared/seo/page-seo";
 
 export default function BookingHistoryPage() {
   const { toast } = useToast();
@@ -32,14 +31,6 @@ export default function BookingHistoryPage() {
     shouldScroll: Boolean(isSearched),
     isLoading,
     hasData: transactions.length > 0,
-  });
-
-  // SEO configuration
-  const seoProps = getClientSeoProps({
-    title: "Riwayat Booking",
-    description: "Lacak riwayat booking motor Anda di Rosantibike Motorent Malang dengan memasukkan nomor telepon yang digunakan saat pemesanan.",
-    canonicalPath: "/booking-history",
-    ogImage: "/images/booking-history-og.jpg",
   });
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -145,7 +136,12 @@ export default function BookingHistoryPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/95">
-      <NextSeo {...seoProps} />
+      <PageSeo
+        title="Riwayat Booking"
+        description="Lacak riwayat booking motor Anda di Rosantibike Motorent Malang dengan memasukkan nomor telepon yang digunakan saat pemesanan."
+        canonicalPath="/booking-history"
+        ogImage="/images/booking-history-og.jpg"
+      />
       
       {/* Hero section with background pattern */}
       <div className="relative bg-gradient-to-b from-primary/5 to-background pt-32 pb-24 border-b border-border/10 overflow-hidden">

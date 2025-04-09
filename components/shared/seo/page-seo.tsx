@@ -1,5 +1,5 @@
 import { NextSeo } from 'next-seo';
-import { getPageSeoProps } from '@/lib/seo';
+import { getClientSeoProps } from '@/lib/shared/seo';
 
 interface PageSeoProps {
   title?: string;
@@ -14,7 +14,7 @@ export default function PageSeo({
   canonicalPath,
   ogImage,
 }: PageSeoProps) {
-  const seoProps = getPageSeoProps({
+  const seoProps = getClientSeoProps({
     title,
     description,
     canonicalPath,

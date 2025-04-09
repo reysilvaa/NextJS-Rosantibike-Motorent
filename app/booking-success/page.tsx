@@ -6,6 +6,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+import PageSeo from "@/components/shared/seo/page-seo";
 
 export default function BookingSuccessPage() {
   const router = useRouter();
@@ -41,6 +42,12 @@ export default function BookingSuccessPage() {
 
   return (
     <div className="container mx-auto py-12 px-4">
+      <PageSeo
+        title="Pemesanan Berhasil | Rosantibike Motorent"
+        description="Pemesanan motor Anda telah berhasil. Terima kasih telah menggunakan layanan Rosantibike Motorent Malang."
+        canonicalPath="/booking-success"
+        ogImage="/images/booking-success-og.jpg"
+      />
       <div className="max-w-2xl mx-auto">
         <Card className="border-border bg-card">
           <CardContent className="pt-8 pb-6 px-6 text-center">
