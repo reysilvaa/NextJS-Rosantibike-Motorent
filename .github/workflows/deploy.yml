@@ -37,17 +37,19 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    # Step 4: Setup SSH key and known hosts
+    # Step 4: Setup SSH
     - name: Setup SSH
-      run: |
-        mkdir -p $HOME/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > $HOME/.ssh/deploy_key
-        chmod 600 $HOME/.ssh/deploy_key
-        ssh-keyscan -H ${{ secrets.SERVER_IP }} >> $HOME/.ssh/known_hosts
-        eval $(ssh-agent -s)
-        ssh-add $HOME/.ssh/deploy_key
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    # Step 5: Backup current deployment
+    # Step 5: Add host to known hosts
+    - name: Add host to known hosts
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+    # Step 6: Backup current deployment
     - name: Backup current deployment
       uses: appleboy/ssh-action@master
       with:
@@ -61,7 +63,7 @@ jobs:
             mv backup_*.tar.gz /var/www/backups/
           fi
 
-    # Step 6: Deploy new version
+    # Step 7: Deploy new version
     - name: Deploy to production
       uses: appleboy/ssh-action@master
       with:
@@ -98,7 +100,7 @@ jobs:
           # Log deployment
           echo "Deployment completed at $(date)" >> /var/www/rosantibike/deploy.log
 
-    # Step 7: Verify deployment
+    # Step 8: Verify deployment
     - name: Verify deployment
       uses: appleboy/ssh-action@master
       with:
@@ -115,7 +117,7 @@ jobs:
             exit 1
           fi
 
-    # Step 8: Cleanup old backups
+    # Step 9: Cleanup old backups
     - name: Cleanup old backups
       uses: appleboy/ssh-action@master
       with:
