@@ -2,6 +2,7 @@
  * File konfigurasi sentral untuk SEO
  * Semua nilai default dan konstanta SEO disimpan di sini
  */
+import keywordsArray from './keywords.json';
 
 // Konfigurasi dasar situs
 export const SITE_CONFIG = {
@@ -22,7 +23,7 @@ export const DEFAULT_OG_IMAGE = {
 }
 
 // Konfigurasi SEO default untuk metadata
-export const META_KEYWORDS = 'rental motor, sewa motor, malang, rosantibike, motorent, rental motor malang, sewa motor malang';
+export const META_KEYWORDS = keywordsArray.join(', ');
 
 // Konfigurasi untuk theme color
 export const THEME_COLORS = [
