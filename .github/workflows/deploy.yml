@@ -1,99 +1,109 @@
-name: Deploy ke VPS
+name: Deploy Frontend
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Frontend CI/CD"]
     branches: [master]
-  workflow_dispatch:
+    types:
+      - completed
 
 jobs:
   deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout kode
-        uses: actions/checkout@v4
+    # Step 1: Download build artifacts from previous workflow
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: frontend-build
+        path: frontend/.next
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-      
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: Konfigurasi ESLint
-        run: |
-          if [ ! -f .eslintrc.json ]; then
-            echo '{
-              "extends": "next/core-web-vitals",
-              "rules": {
-                "react/no-unescaped-entities": "off",
-                "react-hooks/exhaustive-deps": "warn",
-                "@next/next/no-img-element": "warn"
-              }
-            }' > .eslintrc.json
+    # Step 2: Setup SSH key and known hosts
+    - name: Setup SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+        chmod 600 ~/.ssh/deploy_key
+        ssh-keyscan ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+    # Step 3: Backup current deployment
+    - name: Backup current deployment
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd /var/www/rosantibike/frontend
+          if [ -d ".next" ]; then
+            tar -czf backup_$(date +%Y%m%d_%H%M%S).tar.gz .next
+            mv backup_*.tar.gz /var/www/backups/
           fi
-      
-      - name: Lint kode
-        run: npm run lint || true
-      
-      - name: Build aplikasi
-        run: npm run build
-      
-      - name: Setup SSH key
-        uses: webfactory/ssh-agent@v0.7.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      
-      - name: Tambahkan host ke known_hosts
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
-      
-      - name: Deploy ke VPS
-        env:
-          SSH_USER: root
-          SSH_HOST: ${{ secrets.SERVER_IP }}
-        run: |
-          # Kompres untuk deployment
-          tar -czf deploy.tar.gz .next/ package.json package-lock.json public/ ecosystem.config.js .eslintrc.json
 
-          # Transfer ke VPS
-          scp deploy.tar.gz $SSH_USER@$SSH_HOST:/tmp/
+    # Step 4: Deploy new version
+    - name: Deploy to production
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          # Navigate to project directory
+          cd /var/www/rosantibike/frontend
           
-          # Buat script deployment
-          cat > deploy.sh << 'EOFSCRIPT'
-          #!/bin/bash
-          mkdir -p /var/www/rosantibikemotorent/frontend
+          # Pull latest changes
+          git fetch origin master
+          git reset --hard origin/master
           
-          tar -xzf /tmp/deploy.tar.gz -C /var/www/rosantibikemotorent/frontend
+          # Install dependencies
+          echo "Installing dependencies..."
+          npm ci --production
           
-          cd /var/www/rosantibikemotorent/frontend
-          npm ci --omit=dev
+          # Build application
+          echo "Building application..."
+          npm run build
           
+          # Restart application
+          echo "Restarting application..."
           if pm2 list | grep -q "rental-frontend"; then
-            pm2 reload ecosystem.config.js
+            pm2 restart rental-frontend
           else
-            pm2 start ecosystem.config.js
+            pm2 start npm --name "rental-frontend" -- start
           fi
           
+          # Save PM2 process list
           pm2 save
           
-          rm /tmp/deploy.tar.gz
-          
-          echo "Frontend deployed at $(date)" >> /var/www/rosantibikemotorent/deploy.log
-          EOFSCRIPT
-          
-          # Transfer script ke VPS
-          scp deploy.sh $SSH_USER@$SSH_HOST:/tmp/
-          
-          # Jalankan script di VPS
-          ssh $SSH_USER@$SSH_HOST "chmod +x /tmp/deploy.sh && /tmp/deploy.sh && rm /tmp/deploy.sh"
-      
-      - name: Notifikasi sukses
-        if: success()
-        run: echo "Deployment berhasil pada $(date)"
-      
-      - name: Notifikasi gagal
-        if: failure()
-        run: echo "Deployment gagal pada $(date)" 
+          # Log deployment
+          echo "Deployment completed at $(date)" >> /var/www/rosantibike/deploy.log
+
+    # Step 5: Verify deployment
+    - name: Verify deployment
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          # Check if application is running
+          if pm2 list | grep -q "rental-frontend" && pm2 list | grep "rental-frontend" | grep -q "online"; then
+            echo "Application is running successfully"
+            exit 0
+          else
+            echo "Application failed to start"
+            exit 1
+          fi
+
+    # Step 6: Cleanup old backups
+    - name: Cleanup old backups
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          # Keep only last 5 backups
+          cd /var/www/backups
+          ls -t backup_*.tar.gz | tail -n +6 | xargs -r rm 

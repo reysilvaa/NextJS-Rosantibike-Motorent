@@ -1,25 +1,150 @@
 import { useState, useEffect, useCallback } from 'react';
-import { fetchMotorcycleTypes, fetchMotorcycleUnits, checkAvailability as apiCheckAvailability } from '@/lib/api';
-import { useLoading } from './use-loading';
-import { toast } from './use-toast';
-import type { MotorcycleType, MotorcycleUnit, AvailabilitySearchParams } from '@/lib/types';
-import { API_CONFIG } from '@/lib/api-config';
+import { 
+  fetchMotorcycleTypes as apiFetchMotorcycleTypes, 
+  fetchMotorcycleUnits as apiFetchMotorcycleUnits,
+  checkAvailability as checkMotorcycleAvailability
+} from '@/lib/network/api';
+import { useLoading } from './common/use-loading';
+import { toast } from './common/use-toast';
+import type {
+  MotorcycleType,
+  MotorcycleUnit,
+  AvailabilitySearchParams
+} from '@/lib/types';
+import { API_CONFIG } from '@/lib/network/api-config';
+import { MotorcycleFilters } from '@/contexts/motorcycle-filter-context';
 
-export function useMotorcycleTypes(search?: string) {
+// Fungsi utility untuk konversi filter ke parameter API
+function convertFiltersToApiParams(filters?: Partial<MotorcycleFilters>): Record<string, any> | undefined {
+  if (!filters) return undefined;
+  
+  const params: Record<string, any> = {};
+  
+  // Menangani filter pencarian
+  if (filters.search) {
+    params.search = filters.search;
+  }
+  
+  // Menangani filter rentang CC - pastikan nilai adalah number
+  if (filters.ccRange && filters.ccRange.length === 2) {
+    // Hanya tambahkan filter jika nilai tidak sama dengan default
+    if (filters.ccRange[0] > 0 || filters.ccRange[1] < 1500) {
+      params.ccMin = Number(filters.ccRange[0]);
+      params.ccMax = Number(filters.ccRange[1]);
+      console.log(`CC filter active: ${params.ccMin}-${params.ccMax}`);
+    }
+  }
+  
+  // Menangani filter tahun - pastikan nilai adalah number
+  if (filters.yearRange && filters.yearRange.length === 2) {
+    const currentYear = new Date().getFullYear();
+    // Hanya tambahkan filter jika nilai tidak sama dengan default
+    if (filters.yearRange[0] > 2010 || filters.yearRange[1] < currentYear) {
+      params.yearMin = Number(filters.yearRange[0]);
+      params.yearMax = Number(filters.yearRange[1]);
+      console.log(`Year filter active: ${params.yearMin}-${params.yearMax}`);
+    }
+  }
+  
+  // Menangani filter brand/merek - pastikan dikirim sebagai array
+  if (filters.brands && filters.brands.length > 0) {
+    // Gunakan parameter brands dengan array
+    params.brands = filters.brands;
+    console.log(`Brand filter active: ${params.brands.join(', ')}`);
+  }
+  
+  console.log('Filter params yang dikirim ke API:', params);
+  
+  return Object.keys(params).length > 0 ? params : undefined;
+}
+
+export function useMotorcycleTypes(filters?: Partial<MotorcycleFilters>) {
   const [data, setData] = useState<MotorcycleType[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { isLoading, withLoading } = useLoading(true);
+  const [retryCount, setRetryCount] = useState(0);
+  const [disabledFilters, setDisabledFilters] = useState<string[]>([]);
 
   const fetchData = useCallback(async () => {
     try {
-      const result = await withLoading(fetchMotorcycleTypes(search));
-      setData(Array.isArray(result) ? result : []);
+      // Konversi filter ke parameter API
+      const apiParams = convertFiltersToApiParams(filters);
+      
+      // Hapus filter yang tidak didukung berdasarkan percobaan sebelumnya
+      if (apiParams && disabledFilters.length > 0) {
+        disabledFilters.forEach(filterName => {
+          if (apiParams[filterName]) {
+            console.log(`Menghapus filter yang tidak didukung: ${filterName}`);
+            delete apiParams[filterName];
+          }
+        });
+      }
+      
+      // Log untuk debugging
+      console.log("Fetching motorcycle units with params:", apiParams);
+      
+      // Panggil API unit-motor (bukan jenis-motor) dengan parameter filter
+      const result = await withLoading(apiFetchMotorcycleUnits(apiParams));
+      
+      // Transformasi data unit-motor ke format jenis-motor
+      const motorcycleTypes = result.reduce((acc: MotorcycleType[], unit) => {
+        // Ambil data jenis dari unit
+        if (unit.jenis && !acc.some(item => item.id === unit.jenis.id)) {
+          acc.push({
+            id: unit.jenis.id,
+            merk: unit.jenis.merk,
+            model: unit.jenis.model,
+            slug: unit.jenis.slug || `${unit.jenis.merk}-${unit.jenis.model}`.toLowerCase().replace(/\s+/g, '-'),
+            cc: unit.jenis.cc || 0,
+            gambar: unit.jenis.gambar || null,
+            createdAt: unit.createdAt,
+            updatedAt: unit.updatedAt,
+            unitMotor: [unit]
+          });
+        }
+        return acc;
+      }, []);
+      
+      setData(motorcycleTypes);
       setError(null);
+      setRetryCount(0); // Reset retry count on success
     } catch (err: any) {
+      console.error("Error fetching data:", err);
+      
+      // Cek jika error berkaitan dengan kolom yang tidak ada
+      if (err.message && err.message.includes('Unknown argument') && retryCount < 2) {
+        setRetryCount(prevCount => prevCount + 1);
+        
+        // Deteksi filter yang menyebabkan masalah
+        const errorMessage = err.message;
+        const unknownArgMatch = errorMessage.match(/Unknown argument `([^`]+)`/);
+        
+        if (unknownArgMatch && unknownArgMatch[1]) {
+          const problematicFilter = unknownArgMatch[1];
+          console.warn(`Filter ${problematicFilter} tidak didukung, mencoba kembali tanpa filter ini`);
+          
+          // Tambahkan ke daftar filter yang dinonaktifkan
+          setDisabledFilters(prev => {
+            if (!prev.includes(problematicFilter)) {
+              return [...prev, problematicFilter];
+            }
+            return prev;
+          });
+          
+          // Tunggu sebentar lalu coba kembali
+          setTimeout(() => {
+            console.log("Mencoba kembali fetching data tanpa filter yang bermasalah");
+            fetchData();
+          }, 500);
+          
+          return;
+        }
+      }
+      
       setError(err.message || 'Gagal memuat jenis motor');
       setData([]);
     }
-  }, [search, withLoading]);
+  }, [filters, withLoading, disabledFilters, retryCount]);
 
   useEffect(() => {
     fetchData();
@@ -29,7 +154,7 @@ export function useMotorcycleTypes(search?: string) {
     fetchData();
   }, [fetchData]);
 
-  return { data, isLoading, error, refetch };
+  return { data, isLoading, error, refetch, disabledFilters };
 }
 
 export function useMotorcycleUnits(filters?: Record<string, any>) {
@@ -39,7 +164,7 @@ export function useMotorcycleUnits(filters?: Record<string, any>) {
 
   const fetchData = useCallback(async () => {
     try {
-      const result = await withLoading(fetchMotorcycleUnits(filters));
+      const result = await withLoading(apiFetchMotorcycleUnits(filters));
       setData(Array.isArray(result) ? result : []);
       setError(null);
     } catch (err: any) {
@@ -191,48 +316,13 @@ export function useAvailability(params: AvailabilitySearchParams | null) {
       // Update timestamp request
       setLastRequestTime(now);
       
-      // Panggil API
-      const result = await withLoading(apiCheckAvailability(params));
+      // Panggil API - Gunakan fungsi dari api.ts untuk memastikan logika filtering di satu tempat
+      const result = await withLoading(checkMotorcycleAvailability(params));
       
-      console.log('Availability result returned:', result);
+      // API sudah mengembalikan array dengan format yang benar dan hanya yang tersedia
+      console.log(`Received ${result.length} available motorcycles`);
       
-      // Handle berbagai format respons
-      if (Array.isArray(result)) {
-        console.log(`Received array of ${result.length} motorcycles from API`);
-        
-        // Log detail untuk debugging
-        if (result.length > 0) {
-          console.log('Sample motor from availability:', result[0]);
-        } else {
-          console.log('No motorcycles returned from availability API');
-        }
-        
-        setData(result);
-      } else if (result && typeof result === 'object') {
-        console.log('Received object result instead of array:', result);
-        
-        // Coba ekstrak data dari berbagai format yang mungkin
-        // Cast result sebagai any untuk menghindari error typing
-        const responseObj = result as any;
-        
-        if (responseObj.data && Array.isArray(responseObj.data)) {
-          console.log(`Found ${responseObj.data.length} motorcycles in data property`);
-          setData(responseObj.data);
-        } else if (responseObj.units && Array.isArray(responseObj.units)) {
-          console.log(`Found ${responseObj.units.length} motorcycles in units property`);
-          setData(responseObj.units);
-        } else if (responseObj.motorcycles && Array.isArray(responseObj.motorcycles)) {
-          console.log(`Found ${responseObj.motorcycles.length} motorcycles in motorcycles property`);
-          setData(responseObj.motorcycles);
-        } else {
-          console.warn('Could not find valid motorcycle array in response');
-          setData([]);
-        }
-      } else {
-        console.warn('API returned unknown result type:', result);
-        setData([]);
-      }
-      
+      setData(result);
       setError(null);
     } catch (err: any) {
       console.error('Error checking availability:', err);

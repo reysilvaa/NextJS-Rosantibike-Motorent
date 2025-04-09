@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
-import GoogleMapComponent from "@/components/google-map"
+import GoogleMapComponent from "@/components/features/map/google-map"
 import { useTranslation } from "@/i18n/hooks"
 
 export default function ContactSection() {

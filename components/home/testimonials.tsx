@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { useTranslation } from "@/i18n/hooks"
-import reviewsData from "@/lib/reviews.json"
+import reviewsData from "@/lib/data/reviews.json"
 
 interface Review {
   "nama pengulas": string;

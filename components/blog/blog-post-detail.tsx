@@ -3,16 +3,17 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowLeft, Calendar, Tag, User } from "lucide-react"
+import { ArrowLeft, Calendar, Tag, User, Clock } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { fetchBlogPostBySlug } from "@/lib/api"
-import type { BlogPost } from "@/lib/types"
+import { fetchBlogPostBySlug } from "@/lib/network/api"
+import type { BlogPost } from "@/lib/types/blog"
 import { useTranslation } from "@/i18n/hooks"
-import { formatDate } from "@/lib/utils"
+import { formatDate } from "@/lib/utils/utils"
+import { calculateReadingTime } from "@/lib/utils/blog-utils"
 
 interface BlogPostDetailProps {
   slug?: string;
@@ -24,11 +25,13 @@ export default function BlogPostDetail({ slug, post: initialPost }: BlogPostDeta
   const [blogPost, setBlogPost] = useState<BlogPost | null>(initialPost || null)
   const [isLoading, setIsLoading] = useState(!initialPost)
   const [error, setError] = useState<string | null>(null)
+  const [readingTime, setReadingTime] = useState<number>(0)
 
   useEffect(() => {
     // Jika post sudah disediakan, tidak perlu mengambil dari API
     if (initialPost) {
       setBlogPost(initialPost)
+      setReadingTime(calculateReadingTime(initialPost.konten))
       setIsLoading(false)
       return
     }
@@ -36,6 +39,7 @@ export default function BlogPostDetail({ slug, post: initialPost }: BlogPostDeta
     const fetchBlogPostDetail = async () => {
       try {
         setIsLoading(true)
+        setError(null)
         
         // Jika tidak ada slug, tampilkan error
         if (!slug) {
@@ -44,10 +48,14 @@ export default function BlogPostDetail({ slug, post: initialPost }: BlogPostDeta
           return
         }
         
+        console.log(`Fetching blog post with slug: ${slug}`)
         const data = await fetchBlogPostBySlug(slug)
+        
+        console.log("Blog post data:", data)
+        
         if (data) {
           setBlogPost(data)
-          setError(null)
+          setReadingTime(calculateReadingTime(data.konten))
         } else {
           setError(t("blogPostNotFound"))
         }
@@ -136,35 +144,6 @@ export default function BlogPostDetail({ slug, post: initialPost }: BlogPostDeta
     )
   }
 
-  // Placeholder untuk konten demo
-  const demoContent = `
-    <p>
-      ${t("blogIntroductoryText")}
-    </p>
-    <h2>${t("blogSection1")}</h2>
-    <p>
-      ${t("blogSection1Content")}
-    </p>
-    <p>
-      ${t("blogSection1Content2")}
-    </p>
-    <h2>${t("blogSection2")}</h2>
-    <p>
-      ${t("blogSection2Content")}
-    </p>
-    <ul>
-      <li>${t("blogListItem1")}</li>
-      <li>${t("blogListItem2")}</li>
-      <li>${t("blogListItem3")}</li>
-    </ul>
-    <p>
-      ${t("blogConclusion")}
-    </p>
-  `
-
-  // Gunakan konten dari API jika tersedia, atau gunakan konten demo
-  const contentToDisplay = blogPost.konten || demoContent
-
   return (
     <div className="container mx-auto px-4">
       <div className="max-w-4xl mx-auto space-y-8">
@@ -184,7 +163,11 @@ export default function BlogPostDetail({ slug, post: initialPost }: BlogPostDeta
             </div>
             <div className="flex items-center bg-accent/20 px-3 py-1 rounded-full">
               <User className="h-3.5 w-3.5 mr-2 text-primary" />
-              {t("adminAuthor")}
+              {blogPost.author?.nama || t("adminAuthor")}
+            </div>
+            <div className="flex items-center bg-accent/20 px-3 py-1 rounded-full">
+              <Clock className="h-3.5 w-3.5 mr-2 text-primary" />
+              {readingTime} min {t("readingTime")}
             </div>
             <div className="flex items-center">
               <Tag className="h-3.5 w-3.5 mr-2 text-primary" />
@@ -208,7 +191,10 @@ export default function BlogPostDetail({ slug, post: initialPost }: BlogPostDeta
 
         <Card className="bg-card/60 border-border shadow-lg rounded-xl overflow-hidden">
           <CardContent className="p-8 prose prose-invert max-w-none prose-headings:text-primary prose-a:text-primary prose-img:rounded-lg prose-strong:text-primary/90">
-            <div dangerouslySetInnerHTML={{ __html: contentToDisplay }} />
+            <div 
+              dangerouslySetInnerHTML={{ __html: blogPost.konten }} 
+              className="blog-content"
+            />
           </CardContent>
         </Card>
 
