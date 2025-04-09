@@ -23,9 +23,8 @@ export default function Hero() {
     setUseVideoFallback
   } = useVideoContext()
   
-  const [loadedVideos, setLoadedVideos] = useState<number[]>([0]) // Start with only the first video loaded
+  const [loadedVideos, setLoadedVideos] = useState<number[]>([0])
 
-  // Preload the current and next video when slide changes
   useEffect(() => {
     const nextSlideIndex = (currentSlide + 1) % slides.length
     setLoadedVideos(prev => {
@@ -87,7 +86,6 @@ export default function Hero() {
   return (
     <section className="relative h-screen w-full overflow-hidden">
       {slides.map((slide, index) => {
-        // Only render the current slide and preloaded videos
         if (!loadedVideos.includes(index) && index !== currentSlide) {
           return null
         }
@@ -112,11 +110,11 @@ export default function Hero() {
                 <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/65' : 'bg-black/50'}`} />
               </div>
             ) : (
-              <div className="absolute inset-0">
+              <div className="absolute inset-0 w-full h-full">
                 <video
                   ref={el => { videoRefs.current[index] = el }}
                   src={slide.videoUrl}
-                  className="w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-cover"
                   muted
                   playsInline
                   loop
@@ -131,17 +129,17 @@ export default function Hero() {
         )
       })}
 
-      <div className="relative z-10 container mx-auto px-4 h-full flex flex-col justify-center">
+      <div className="absolute inset-0 flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="max-w-3xl"
+          className="max-w-3xl text-center"
         >
           <h1 className="text-4xl md:text-6xl font-bold mb-4 text-white">{slides[currentSlide].title}</h1>
           <p className="text-xl md:text-2xl text-white/90 mb-8">{slides[currentSlide].subtitle}</p>
 
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/motorcycles">
               <Button
                 size="lg"
