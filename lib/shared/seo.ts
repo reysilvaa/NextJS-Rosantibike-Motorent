@@ -1,5 +1,12 @@
-import { Metadata } from 'next';
+import { Metadata, Viewport } from 'next';
 import { DefaultSeoProps } from 'next-seo';
+import { 
+  SITE_CONFIG,
+  DEFAULT_OG_IMAGE,
+  META_KEYWORDS,
+  THEME_COLORS,
+  DEFAULT_ROBOTS
+} from './seo-config';
 
 export type SeoProps = {
   title?: string;
@@ -9,41 +16,82 @@ export type SeoProps = {
   noIndex?: boolean;
 };
 
+// Konfigurasi Viewport untuk layout utama
+export function getDefaultViewport(): Viewport {
+  return {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+    viewportFit: "cover",
+    themeColor: THEME_COLORS,
+  };
+}
+
+// Konfigurasi Metadata untuk layout utama
+export function getDefaultMetadata(): Metadata {
+  return {
+    title: SITE_CONFIG.name,
+    description: SITE_CONFIG.description,
+    icons: {
+      icon: [
+        { url: '/favicon.ico' },
+        { url: '/favicon.svg', type: 'image/svg+xml' },
+        { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' }
+      ],
+      apple: { url: '/apple-touch-icon.png', sizes: '180x180' },
+      other: [
+        { rel: 'manifest', url: '/site.webmanifest' }
+      ]
+    },
+    robots: DEFAULT_ROBOTS,
+    alternates: {
+      canonical: SITE_CONFIG.url,
+      languages: {
+        'id-ID': SITE_CONFIG.url,
+      },
+    },
+    verification: {
+      google: 'your-google-site-verification-code', // Replace with your verification code
+    },
+  };
+}
+
 // Default SEO configuration for Next-SEO
 export const DEFAULT_SEO_CONFIG: DefaultSeoProps = {
-  titleTemplate: '%s | Rosantibike Motorent',
-  defaultTitle: 'Rosantibike Motorent - Rental Motor di Malang',
-  description: 'Rental motor terpercaya dengan harga terjangkau dan layanan terbaik di Malang. Berbagai pilihan motor untuk kebutuhan Anda.',
-  canonical: 'https://rosantibike.com',
+  titleTemplate: `%s | ${SITE_CONFIG.name}`,
+  defaultTitle: `${SITE_CONFIG.name} - ${SITE_CONFIG.title}`,
+  description: SITE_CONFIG.description,
+  canonical: SITE_CONFIG.url,
   openGraph: {
     type: 'website',
-    locale: 'id_ID',
-    url: 'https://rosantibike.com',
-    siteName: 'Rosantibike Motorent',
-    title: 'Rosantibike Motorent - Rental Motor di Malang',
-    description: 'Rental motor terpercaya dengan harga terjangkau dan layanan terbaik di Malang. Berbagai pilihan motor untuk kebutuhan Anda.',
+    locale: SITE_CONFIG.locale,
+    url: SITE_CONFIG.url,
+    siteName: SITE_CONFIG.name,
+    title: `${SITE_CONFIG.name} - ${SITE_CONFIG.title}`,
+    description: SITE_CONFIG.description,
     images: [
       {
-        url: 'https://rosantibike.com/og-image.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'Rosantibike Motorent',
+        url: `${SITE_CONFIG.url}${DEFAULT_OG_IMAGE.url}`,
+        width: DEFAULT_OG_IMAGE.width,
+        height: DEFAULT_OG_IMAGE.height,
+        alt: DEFAULT_OG_IMAGE.alt,
       },
     ],
   },
   twitter: {
-    handle: '@rosantibike',
-    site: '@rosantibike',
+    handle: SITE_CONFIG.twitterHandle,
+    site: SITE_CONFIG.twitterHandle,
     cardType: 'summary_large_image',
   },
   additionalMetaTags: [
     {
       name: 'keywords',
-      content: 'rental motor, sewa motor, malang, rosantibike, motorent, rental motor malang, sewa motor malang',
+      content: META_KEYWORDS,
     },
     {
       name: 'author',
-      content: 'Rosantibike Motorent',
+      content: SITE_CONFIG.name,
     },
   ],
   robotsProps: {
@@ -64,39 +112,36 @@ export function getSeoMetadata({
   ogImage,
   noIndex = false,
 }: SeoProps): Metadata {
-  const siteName = 'Rosantibike Motorent';
-  const defaultTitle = 'Rental Motor Terpercaya di Malang';
-  const defaultDescription = 'Rental motor terpercaya dengan harga terjangkau dan layanan terbaik di Malang. Berbagai pilihan motor untuk kebutuhan Anda.';
-  const baseUrl = 'https://rosantibike.com';
-
+  const fullTitle = title ? `${title} | ${SITE_CONFIG.name}` : `${SITE_CONFIG.name} - ${SITE_CONFIG.title}`;
+  
   return {
-    title: title ? `${title} | ${siteName}` : `${siteName} - ${defaultTitle}`,
-    description: description || defaultDescription,
+    title: fullTitle,
+    description: description || SITE_CONFIG.description,
     openGraph: {
       type: 'website',
-      locale: 'id_ID',
-      url: canonicalPath ? `${baseUrl}${canonicalPath}` : baseUrl,
-      siteName,
-      title: title ? `${title} | ${siteName}` : `${siteName} - ${defaultTitle}`,
-      description: description || defaultDescription,
+      locale: SITE_CONFIG.locale,
+      url: canonicalPath ? `${SITE_CONFIG.url}${canonicalPath}` : SITE_CONFIG.url,
+      siteName: SITE_CONFIG.name,
+      title: fullTitle,
+      description: description || SITE_CONFIG.description,
       images: ogImage ? [
         {
-          url: ogImage.startsWith('http') ? ogImage : `${baseUrl}${ogImage}`,
+          url: ogImage.startsWith('http') ? ogImage : `${SITE_CONFIG.url}${ogImage}`,
           width: 1200,
           height: 630,
-          alt: title || siteName,
+          alt: title || SITE_CONFIG.name,
         },
       ] : [
         {
-          url: `${baseUrl}/images/default-og.jpg`,
-          width: 1200,
-          height: 630,
-          alt: siteName,
+          url: `${SITE_CONFIG.url}${DEFAULT_OG_IMAGE.url}`,
+          width: DEFAULT_OG_IMAGE.width,
+          height: DEFAULT_OG_IMAGE.height,
+          alt: SITE_CONFIG.name,
         },
       ],
     },
     alternates: {
-      canonical: canonicalPath ? `${baseUrl}${canonicalPath}` : baseUrl,
+      canonical: canonicalPath ? `${SITE_CONFIG.url}${canonicalPath}` : SITE_CONFIG.url,
     },
     robots: {
       index: !noIndex,
@@ -120,39 +165,34 @@ export function getClientSeoProps({
   ogImage,
   noIndex = false,
 }: SeoProps) {
-  const siteName = 'Rosantibike Motorent';
-  const defaultTitle = 'Rental Motor Terpercaya di Malang';
-  const defaultDescription = 'Rental motor terpercaya dengan harga terjangkau dan layanan terbaik di Malang. Berbagai pilihan motor untuk kebutuhan Anda.';
-  const baseUrl = 'https://rosantibike.com';
-  
-  const fullTitle = title ? `${title} | ${siteName}` : `${siteName} - ${defaultTitle}`;
+  const fullTitle = title ? `${title} | ${SITE_CONFIG.name}` : `${SITE_CONFIG.name} - ${SITE_CONFIG.title}`;
   
   return {
     title: fullTitle,
-    description: description || defaultDescription,
-    canonical: canonicalPath ? `${baseUrl}${canonicalPath}` : baseUrl,
+    description: description || SITE_CONFIG.description,
+    canonical: canonicalPath ? `${SITE_CONFIG.url}${canonicalPath}` : SITE_CONFIG.url,
     noindex: noIndex,
     nofollow: noIndex,
     openGraph: {
       title: fullTitle,
-      description: description || defaultDescription,
-      url: canonicalPath ? `${baseUrl}${canonicalPath}` : baseUrl,
-      siteName,
-      locale: 'id_ID',
+      description: description || SITE_CONFIG.description,
+      url: canonicalPath ? `${SITE_CONFIG.url}${canonicalPath}` : SITE_CONFIG.url,
+      siteName: SITE_CONFIG.name,
+      locale: SITE_CONFIG.locale,
       type: 'website',
       images: ogImage ? [
         {
-          url: ogImage.startsWith('http') ? ogImage : `${baseUrl}${ogImage}`,
+          url: ogImage.startsWith('http') ? ogImage : `${SITE_CONFIG.url}${ogImage}`,
           width: 1200,
           height: 630,
-          alt: title || siteName,
+          alt: title || SITE_CONFIG.name,
         },
       ] : [
         {
-          url: `${baseUrl}/images/default-og.jpg`,
-          width: 1200,
-          height: 630,
-          alt: siteName,
+          url: `${SITE_CONFIG.url}${DEFAULT_OG_IMAGE.url}`,
+          width: DEFAULT_OG_IMAGE.width,
+          height: DEFAULT_OG_IMAGE.height,
+          alt: SITE_CONFIG.name,
         },
       ],
     },

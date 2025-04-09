@@ -1,5 +1,5 @@
 import type React from "react"
-import type { Metadata } from "next/types"
+import type { Metadata, Viewport } from "next/types"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import Navbar from "@/components/layout/navbar"
@@ -8,50 +8,12 @@ import { Providers } from "./providers"
 import { VideoContextProvider } from "@/contexts/video-context"
 import { ThemeProvider } from "@/components/shared/theme/theme-provider"
 import { DefaultSeo } from "next-seo"
-import { DEFAULT_SEO_CONFIG } from "@/lib/shared/seo"
+import { DEFAULT_SEO_CONFIG, getDefaultMetadata, getDefaultViewport } from "@/lib/shared/seo"
 
 const inter = Inter({ subsets: ["latin"] })
 
-export const metadata: Metadata = {
-  title: "Rosantibike Motorent",
-  description: "Rental motor terpercaya dengan harga terjangkau dan layanan terbaik di Malang",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover",
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "white" },
-    { media: "(prefers-color-scheme: dark)", color: "black" }
-  ],
-  icons: {
-    icon: [
-      { url: '/favicon.ico' },
-      { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' }
-    ],
-    apple: { url: '/apple-touch-icon.png', sizes: '180x180' },
-    other: [
-      { rel: 'manifest', url: '/site.webmanifest' }
-    ]
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
-  alternates: {
-    canonical: 'https://rosantibike.com',
-    languages: {
-      'id-ID': 'https://rosantibike.com',
-    },
-  },
-  verification: {
-    google: 'your-google-site-verification-code', // Replace with your verification code
-  },
-}
+export const viewport: Viewport = getDefaultViewport();
+export const metadata: Metadata = getDefaultMetadata();
 
 export default function RootLayout({
   children,
