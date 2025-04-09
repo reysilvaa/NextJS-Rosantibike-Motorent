@@ -232,6 +232,8 @@ export default function MotorcycleDetail({ id }: { id: string }) {
       const searchParams = {
         tanggalMulai: formattedStartDate,
         tanggalSelesai: formattedEndDate,
+        jamMulai: "08:00",
+        jamSelesai: "08:00",
         jenisMotorId: id
       };
       

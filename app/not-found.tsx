@@ -27,13 +27,13 @@ export default function NotFound() {
             <Button asChild variant="outline" className="gap-2">
               <Link href="/">
                 <Home className="h-4 w-4" />
-                Kembali ke Beranda
+                <span>Kembali ke Beranda</span>
               </Link>
             </Button>
             <Button asChild className="gap-2">
-              <Link href="/">
+              <Link href="javascript:history.back()">
                 <ArrowLeft className="h-4 w-4" />
-                Kembali ke Halaman Sebelumnya
+                <span>Kembali ke Halaman Sebelumnya</span>
               </Link>
             </Button>
           </div>

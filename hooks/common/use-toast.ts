@@ -8,6 +8,9 @@ import type {
   ToastProps,
 } from "@/components/ui/toast"
 
+// Import ENDPOINTS if this file directly makes API calls
+// Add the import if it's needed for direct API calls
+
 const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 1000000
 

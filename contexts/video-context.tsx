@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react';
 import { useSocketContext } from './socket-context';
+import ENDPOINTS from "@/lib/network/endpoint";
 
 // Interface untuk nilai context
 interface VideoContextValue {

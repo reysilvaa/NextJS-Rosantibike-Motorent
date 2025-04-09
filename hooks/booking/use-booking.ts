@@ -6,6 +6,7 @@ import { useLoading } from "../common/use-loading";
 import { createTransaction, calculateRentalPrice as apiCalculateRentalPrice, checkMotorcycleAvailability } from "@/lib/network/api";
 import { calculateRentalPrice } from "@/lib/utils/booking-calculations";
 import type { MotorcycleUnit } from "@/lib/types";
+import ENDPOINTS from '@/lib/network/endpoint';
 
 // Types for the booking form data
 export interface BookingFormData {

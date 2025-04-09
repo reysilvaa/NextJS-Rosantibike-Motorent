@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from "react"
 
+// Import ENDPOINTS if this file directly makes API calls
+// Add the import if it's needed for direct API calls
+
 export function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState(false)
 

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { fetchBlogPosts, fetchBlogPostById, fetchBlogPostBySlug } from '@/lib/network/api';
 import { useLoading } from '../common/use-loading';
 import type { BlogPost, BlogTag } from '@/lib/types/blog';
+import ENDPOINTS from '@/lib/network/endpoint';
 
 interface BlogMeta {
   totalItems: number;

@@ -26,7 +26,7 @@ export default function MotorcycleUnits({ typeId, startDate, endDate }: Motorcyc
 
   // Use the appropriate hooks based on whether date range is provided
   const params = startDate && endDate 
-    ? { tanggalMulai: startDate, tanggalSelesai: endDate, jenisMotorId: typeId }
+    ? { tanggalMulai: startDate, tanggalSelesai: endDate, jenisMotorId: typeId, jamMulai: "08:00", jamSelesai: "08:00" }
     : null;
   
   const { data: availableUnits, isLoading: availabilityLoading, error: availabilityError } = 

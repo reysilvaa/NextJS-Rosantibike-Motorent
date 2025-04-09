@@ -46,6 +46,8 @@ export default function AvailabilityPage() {
     ? { 
         tanggalMulai, 
         tanggalSelesai,
+        jamMulai: "08:00",
+        jamSelesai: "08:00",
         ...(jenisMotorId ? { jenisMotorId } : {})
       } 
     : null

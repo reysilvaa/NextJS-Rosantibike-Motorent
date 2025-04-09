@@ -5,6 +5,7 @@ import { useMotorcycleTypes } from '@/hooks/use-motorcycles';
 import { useAutoScroll } from '@/hooks/common/use-auto-scroll';
 import { MotorcycleType, AvailabilitySearchParams, MotorcycleUnit } from '@/lib/types';
 import { useAvailability as useMotorcycleAvailability } from '@/hooks/use-motorcycles';
+import ENDPOINTS from '@/lib/network/endpoint';
 
 export function useAvailability() {
   const router = useRouter();
@@ -34,6 +35,8 @@ export function useAvailability() {
     ? { 
         tanggalMulai, 
         tanggalSelesai,
+        jamMulai: "08:00", // Default time values
+        jamSelesai: "08:00",
         ...(jenisMotorId ? { jenisMotorId } : {})
       } 
     : null;

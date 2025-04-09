@@ -3,6 +3,7 @@ import { format, parse } from "date-fns"
 import type { DateRange } from "react-day-picker"
 import { useSocketContext } from "@/contexts/socket-context"
 import { useMotorcycleTypes } from "@/hooks/use-motorcycles"
+import ENDPOINTS from '@/lib/network/endpoint'
 
 export function useAvailabilitySearch(initialStartDate?: string | null, initialEndDate?: string | null) {
   const { data: motorcycleTypes, isLoading: isLoadingTypes } = useMotorcycleTypes()

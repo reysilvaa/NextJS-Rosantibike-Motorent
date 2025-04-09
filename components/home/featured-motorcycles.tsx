@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { fetchMotorcycleTypes } from "@/lib/network/api"
-import type { MotorcycleType } from "@/lib/types/types"
+import type { MotorcycleType } from "@/lib/types/"
 import { useTranslation } from "@/i18n/hooks"
 
 export default function FeaturedMotorcycles() {
@@ -148,8 +148,12 @@ export default function FeaturedMotorcycles() {
                       <h3 className="text-xl font-bold mb-1">
                         {motorcycle.merk} {motorcycle.model}
                       </h3>
-                      <p className="text-muted-foreground text-sm mb-3">{t("year")}: {motorcycle.tahun}</p>
-                      <p className="text-foreground/80 line-clamp-3">{motorcycle.deskripsi}</p>
+                      <p className="text-muted-foreground text-sm mb-3">
+                        {t("year")}: {motorcycle.unitMotor?.[0]?.tahunPembuatan || t("notAvailable")}
+                      </p>
+                      <p className="text-foreground/80 line-clamp-3">
+                        {t("cc")}: {motorcycle.cc} CC {motorcycle.unitMotor?.[0] && ` | ${t("color")}: ${motorcycle.unitMotor[0].warna}`}
+                      </p>
                     </CardContent>
                   </Card>
                 </Link>

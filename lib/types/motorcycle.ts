@@ -8,6 +8,8 @@ export interface MotorcycleType {
   slug: string
   cc: number
   gambar: string | null
+  tahun?: number
+  deskripsi?: string
   createdAt: string
   updatedAt: string
   unitMotor?: MotorcycleUnit[]

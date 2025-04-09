@@ -39,6 +39,8 @@ export default function MotorcycleList() {
   const availabilityParams: AvailabilitySearchParams | null = filters.startDate && filters.endDate ? {
     tanggalMulai: filters.startDate,
     tanggalSelesai: filters.endDate,
+    jamMulai: "08:00",
+    jamSelesai: "08:00",
     jenisMotorId: undefined // We'll check availability for all motorcycles
   } : null;
   

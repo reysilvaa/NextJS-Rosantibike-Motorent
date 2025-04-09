@@ -1,5 +1,8 @@
 import { useState, useCallback } from "react"
 
+// Import ENDPOINTS if this file directly makes API calls
+// Add the import if it's needed for direct API calls
+
 export function useLoading(initialState: boolean = false) {
   const [isLoading, setIsLoading] = useState(initialState)
 

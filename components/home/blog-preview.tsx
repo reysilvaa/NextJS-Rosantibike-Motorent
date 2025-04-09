@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { fetchBlogPosts } from "@/lib/network/api"
-import type { BlogPost } from "@/lib/types/types"
+import type { BlogPost } from "@/lib/types/blog"
 import { useTranslation } from "@/i18n/hooks"
 
 export default function BlogPreview() {
@@ -47,38 +47,7 @@ export default function BlogPreview() {
     getBlogPosts()
   }, [t])
 
-  // Placeholder data for when API fails or during development
-  const placeholderPosts = [
-    {
-      id: "1",
-      judul: "Top 5 Motorcycle Routes in California",
-      slug: "top-5-motorcycle-routes-california",
-      konten: "Discover the most scenic and thrilling motorcycle routes that California has to offer...",
-      featuredImage: "/placeholder.svg?height=400&width=600",
-      kategori: "Travel",
-      createdAt: "2023-05-15T10:30:00Z",
-    },
-    {
-      id: "2",
-      judul: "Motorcycle Maintenance Tips for Beginners",
-      slug: "motorcycle-maintenance-tips-beginners",
-      konten: "Essential maintenance tips every motorcycle rider should know to keep their bike in top condition...",
-      featuredImage: "/placeholder.svg?height=400&width=600",
-      kategori: "Maintenance",
-      createdAt: "2023-06-02T14:45:00Z",
-    },
-    {
-      id: "3",
-      judul: "Choosing the Right Motorcycle Gear",
-      slug: "choosing-right-motorcycle-gear",
-      konten: "A comprehensive guide to selecting the perfect gear for safety and comfort on your rides...",
-      featuredImage: "/placeholder.svg?height=400&width=600",
-      kategori: "Gear",
-      createdAt: "2023-06-20T09:15:00Z",
-    },
-  ]
-
-  const displayPosts = posts.length > 0 ? posts : placeholderPosts
+  const displayPosts = posts.length > 0 ? posts : []
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)

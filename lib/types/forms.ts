@@ -4,6 +4,8 @@ import { MotorcycleType } from './motorcycle'
 export interface AvailabilitySearchParams {
   tanggalMulai: string
   tanggalSelesai: string
+  jamMulai: string
+  jamSelesai: string
   jenisMotorId?: string
 }
 

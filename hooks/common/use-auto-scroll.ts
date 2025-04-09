@@ -1,5 +1,8 @@
 import { useRef, useState, useEffect } from "react";
 
+// Import ENDPOINTS if this file directly makes API calls
+// Add the import if it's needed for direct API calls
+
 interface UseAutoScrollOptions {
   shouldScroll: boolean;
   isLoading: boolean;

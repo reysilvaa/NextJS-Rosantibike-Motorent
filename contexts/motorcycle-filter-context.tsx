@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react"
 import { apiClient } from "@/lib/network/api"
 import { toast } from "@/hooks/common/use-toast" // Pastikan path ini sesuai
+import ENDPOINTS from "@/lib/network/endpoint"
 
 export interface MotorcycleFilters {
   search: string
@@ -60,8 +61,8 @@ export function MotorcycleFilterProvider({ children }: { children: ReactNode }) 
       setIsLoading(true)
       try {
         // Ambil merek-merek motor yang tersedia dari endpoint yang benar
-        // Gunakan endpoint yang benar dan tambahkan timeout yang lebih panjang
-        const brandsResponse = await apiClient.get('/unit-motor/brands', {
+        // Gunakan endpoint centralized
+        const brandsResponse = await apiClient.get(ENDPOINTS.UNIT_MOTOR.BRANDS, {
           timeout: 30000, // Tingkatkan timeout
           baseURL: typeof window !== 'undefined' && window.location.hostname === 'localhost'
             ? 'https://api.rosantibikemotorent.com'

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { fetchTransactions, fetchTransactionById, fetchTransactionHistory, createTransaction, completeTransaction } from '@/lib/api';
+import { fetchTransactions, fetchTransactionById, fetchTransactionHistory, createTransaction, completeTransaction } from '@/lib/network/api';
 import { useLoading } from './common/use-loading';
 import { toast } from './common/use-toast';
 import type { Transaction, TransactionFormData } from '@/lib/types';

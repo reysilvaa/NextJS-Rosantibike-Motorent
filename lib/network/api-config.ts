@@ -1,4 +1,6 @@
 // API Configuration
+import ENDPOINTS from './endpoint';
+
 export const API_CONFIG = {
   BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3030/api',
   API_TIMEOUT: 60000,
@@ -6,17 +8,7 @@ export const API_CONFIG = {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   },
-  ENDPOINTS: {
-    AUTH_LOGIN: '/auth/login',
-    JENIS_MOTOR: '/jenis-motor',
-    UNIT_MOTOR: '/unit-motor',
-    UNIT_MOTOR_AVAILABILITY: '/unit-motor/availability',
-    TRANSAKSI: '/transaksi',
-    TRANSAKSI_HISTORY: '/transaksi/history',
-    TRANSAKSI_USER: '/transaksi/user',
-    TRANSAKSI_SEARCH: '/transaksi/search',
-    BLOG: '/blog'
-  }
+  ENDPOINTS: ENDPOINTS
 };
 
 // Helper to get authentication header

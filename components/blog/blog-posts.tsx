@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/utils/utils";
 import { Calendar, Search, Tag } from "lucide-react";
 import { useTranslation } from "@/i18n/hooks";
 

@@ -11,7 +11,7 @@ import type {
   MotorcycleUnit,
   AvailabilitySearchParams
 } from '@/lib/types';
-import { API_CONFIG } from '@/lib/network/api-config';
+import ENDPOINTS, { buildApiUrl } from '@/lib/network/endpoint';
 import { MotorcycleFilters } from '@/contexts/motorcycle-filter-context';
 
 // Fungsi utility untuk konversi filter ke parameter API
@@ -190,25 +190,26 @@ const CACHE_TTL = 60000; // 1 menit cache time-to-live
 
 export async function checkAvailability(params: AvailabilitySearchParams): Promise<MotorcycleUnit[]> {
   try {
-    const queryParams = new URLSearchParams()
-    
     // Log parameter untuk debugging
     console.log("Availability check parameters:", params);
     
-    // Pastikan format tanggal adalah ISO 8601
-    const startDate = new Date(params.tanggalMulai);
-    const endDate = new Date(params.tanggalSelesai);
-    
-    // Format tanggal dalam ISO 8601 (YYYY-MM-DDTHH:mm:ss.sssZ)
-    queryParams.append("startDate", startDate.toISOString());
-    queryParams.append("endDate", endDate.toISOString());
+    // Use the endpoint helper function
+    let endpoint = buildApiUrl(
+      ENDPOINTS.UNIT_MOTOR.AVAILABILITY_WITH_PARAMS({
+        tanggalMulai: params.tanggalMulai,
+        tanggalSelesai: params.tanggalSelesai,
+        jamMulai: params.jamMulai || "08:00",
+        jamSelesai: params.jamSelesai || "08:00"
+      })
+    );
     
     if (params.jenisMotorId) {
-      queryParams.append("jenisId", params.jenisMotorId)
+      // If we need to add jenisMotorId, create a URL object to manipulate it
+      const url = new URL(endpoint);
+      url.searchParams.append("jenisId", params.jenisMotorId);
       console.log("Filtering by motorcycle type ID:", params.jenisMotorId);
+      endpoint = url.toString();
     }
-    
-    const endpoint = `${API_CONFIG.ENDPOINTS.UNIT_MOTOR_AVAILABILITY}?${queryParams.toString()}`;
     
     // Cek cache sebelum melakukan request
     const cacheKey = endpoint;

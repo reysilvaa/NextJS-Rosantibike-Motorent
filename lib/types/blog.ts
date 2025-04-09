@@ -8,6 +8,7 @@ export interface BlogPost {
   konten: string
   thumbnail: string | null
   featuredImage?: string | null
+  meta_description?: string
   kategori: string
   status: 'DRAFT' | 'TERBIT'
   createdAt: string

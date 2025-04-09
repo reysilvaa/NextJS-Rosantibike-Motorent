@@ -1,6 +1,6 @@
 "use client";
 import { io, Socket } from 'socket.io-client';
-import { API_CONFIG } from "@/lib/network/api-config";
+import ENDPOINTS, { buildApiUrl } from "@/lib/network/endpoint";
 
 // Enum untuk event yang tersedia dalam sistem
 export enum SocketEvents {
@@ -161,11 +161,12 @@ export const getSocket = (): Socket => {
   
   if (!socketInstance) {
     try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3030/api';
       const wsUrl = typeof window !== 'undefined' 
         ? window.location.hostname === 'localhost' 
           ? 'http://localhost:8000' // URL absolut untuk server backend lokal
-          : (process.env.NEXT_PUBLIC_WS_URL || API_CONFIG.BASE_URL)
-        : (process.env.NEXT_PUBLIC_WS_URL || API_CONFIG.BASE_URL);
+          : (process.env.NEXT_PUBLIC_WS_URL || baseUrl)
+        : (process.env.NEXT_PUBLIC_WS_URL || baseUrl);
       
       console.log(`getSocket: Mencoba connect ke socket: ${wsUrl} dengan path /socket.io/`);
       
