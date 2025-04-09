@@ -9,8 +9,8 @@ import {
   emitEvent,
   listenEvent, 
   disconnect,
-  SocketEvents 
-} from '../lib/socket';
+  SocketEvents as SocketEventsType
+} from '../lib/sockets/socket';
 
 // Interface untuk nilai context
 interface SocketContextValue {
@@ -47,47 +47,89 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
   enableNotifications = true,
   defaultRooms = []
 }) => {
+  const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [connectionAttempts, setConnectionAttempts] = useState(0);
-  const socket = getSocket();
 
-  // Fungsi untuk mencoba koneksi ulang secara manual
-  const manualReconnect = () => {
-    if (socket) {
+  // Initialize socket connection
+  useEffect(() => {
+    const socketInstance = getSocket();
+    setSocket(socketInstance);
+    
+    const handleConnect = () => {
+      setIsConnected(true);
       if (enableNotifications) {
-        toast.info('Menghubungkan Kembali', {
-          description: 'Mencoba menghubungkan kembali ke server...',
+        toast.success('Koneksi server berhasil', {
+          id: 'socket-connected',
+          duration: 2000,
         });
       }
       
-      // Periksa koneksi internet terlebih dahulu
-      if (!navigator.onLine) {
-        if (enableNotifications) {
-          toast.error('Tidak Ada Koneksi Internet', {
-            description: 'Periksa koneksi internet Anda dan coba lagi.',
-          });
-        }
-        return;
-      }
+      // Join default rooms
+      defaultRooms.forEach(room => joinRoom(room));
+    };
+    
+    const handleDisconnect = (reason: string) => {
+      setIsConnected(false);
       
-      // Reset koneksi socket dan coba hubungkan kembali
-      socket.connect();
-      setConnectionAttempts(prev => prev + 1);
+      if (enableNotifications) {
+        const messages: Record<string, string> = {
+          'io server disconnect': 'Terputus oleh server, mencoba menghubungkan kembali...',
+          'io client disconnect': 'Koneksi diputus',
+          'ping timeout': 'Timeout koneksi server, mencoba menghubungkan kembali...',
+          'transport close': 'Koneksi tertutup, mencoba menghubungkan kembali...',
+          'transport error': 'Error jaringan, mencoba menghubungkan kembali...'
+        };
+        
+        const message = messages[reason] || `Koneksi terputus: ${reason}`;
+        toast.error(message, {
+          id: 'socket-disconnected',
+          duration: 5000,
+        });
+      }
+    };
+    
+    const handleError = (error: Error) => {
+      console.error('Socket error:', error);
+      if (enableNotifications) {
+        toast.error(`Error koneksi: ${error.message}`, {
+          id: 'socket-error',
+          duration: 5000,
+        });
+      }
+    };
+    
+    if (socketInstance) {
+      socketInstance.on('connect', handleConnect);
+      socketInstance.on('disconnect', handleDisconnect);
+      socketInstance.on('error', handleError);
+      socketInstance.on('connect_error', handleError);
+      
+      // Setup ping/pong heartbeat
+      socketInstance.on('ping', () => {
+        socketInstance.emit('pong', { timestamp: new Date().toISOString() });
+      });
+      
+      // Set initial state
+      setIsConnected(socketInstance.connected);
     }
-  };
+    
+    return () => {
+      if (socketInstance) {
+        socketInstance.off('connect', handleConnect);
+        socketInstance.off('disconnect', handleDisconnect);
+        socketInstance.off('error', handleError);
+        socketInstance.off('connect_error', handleError);
+        socketInstance.off('ping');
+        
+        // Leave default rooms
+        defaultRooms.forEach(room => leaveRoom(room));
+      }
+    };
+  }, [defaultRooms, enableNotifications]);
 
-  // Segera hubungkan socket saat komponen dimuat
-  useEffect(() => {
-    if (socket && !socket.connected) {
-      console.log('Menginisialisasi koneksi socket.io...');
-      socket.connect();
-    }
-  }, []);
-
-  // Pemantauan status koneksi internet
+  // Monitor internet connection
   useEffect(() => {
     const handleOnline = () => {
-      console.log('Koneksi internet kembali tersedia, mencoba menghubungkan socket...');
       if (socket && !socket.connected) {
         if (enableNotifications) {
           toast.info('Koneksi Internet Terhubung', {
@@ -99,7 +141,6 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
     };
 
     const handleOffline = () => {
-      console.log('Koneksi internet terputus');
       if (enableNotifications) {
         toast.warning('Koneksi Internet Terputus', {
           description: 'Tidak dapat terhubung ke server karena tidak ada koneksi internet.',
@@ -107,150 +148,36 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
       }
     };
 
-    // Tambahkan event listener untuk online/offline status
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // Cleanup event listener
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
   }, [socket, enableNotifications]);
 
-  // Handler untuk koneksi socket
-  useEffect(() => {
-    const handleConnect = () => {
-      console.log('Socket berhasil terhubung!');
-      setIsConnected(true);
-      
-      // Join ke default rooms jika ada
-      if (defaultRooms.length > 0) {
-        defaultRooms.forEach(room => joinRoom(room));
-      }
-    };
-
-    const handleDisconnect = () => {
-      console.log('Socket terputus!');
-      setIsConnected(false);
-      
+  // Manual reconnect function
+  const manualReconnect = () => {
+    if (socket) {
       if (enableNotifications) {
-        // Tambahkan notifikasi ketika socket terputus
-        toast.warning('Koneksi Terputus', {
-          description: 'Mendeteksi socket tidak terhubung, mencoba menghubungkan kembali...',
+        toast.info('Menghubungkan Kembali', {
+          description: 'Mencoba menghubungkan kembali ke server...',
         });
       }
-    };
-
-    // Tambahkan listener
-    socket.on('connect', handleConnect);
-    socket.on('disconnect', handleDisconnect);
-
-    // Tambahkan handler untuk connect_error
-    socket.on('connect_error', (error) => {
-      console.error('Socket connect error:', error.message);
       
-      if (enableNotifications) {
-        if (error.message.includes('timeout')) {
-          toast.error('Koneksi Timeout', {
-            description: 'Koneksi ke server timeout. Beralih ke mode alternatif...',
-          });
-        } else {
-          toast.error('Kesalahan Koneksi', {
-            description: `Error: ${error.message}. Mencoba menghubungkan kembali...`,
+      if (!navigator.onLine) {
+        if (enableNotifications) {
+          toast.error('Tidak Ada Koneksi Internet', {
+            description: 'Periksa koneksi internet Anda dan coba lagi.',
           });
         }
+        return;
       }
-    });
-
-    // Inisialisasi status koneksi
-    setIsConnected(socket.connected);
-
-    // Listener untuk upaya menghubungkan kembali
-    socket.io.on('reconnect_attempt', (attempt) => {
-      console.log(`Mencoba reconnect ke socket (percobaan ke-${attempt})`);
-      if (enableNotifications && attempt === 1) {
-        toast.info('Reconnecting', {
-          description: `Mencoba menghubungkan kembali ke server...`,
-        });
-      }
-    });
-
-    socket.io.on('reconnect', (attempt) => {
-      console.log(`Berhasil reconnect ke socket setelah ${attempt} percobaan`);
-      if (enableNotifications) {
-        toast.success('Terhubung Kembali', {
-          description: `Berhasil terhubung kembali ke server setelah ${attempt} percobaan`,
-        });
-      }
-    });
-
-    // Coba hubungkan jika belum terhubung
-    if (!socket.connected) {
+      
       socket.connect();
     }
-
-    // Cleanup listener ketika component unmount
-    return () => {
-      socket.off('connect', handleConnect);
-      socket.off('disconnect', handleDisconnect);
-      
-      // Leave default rooms
-      if (defaultRooms.length > 0) {
-        defaultRooms.forEach(room => leaveRoom(room));
-      }
-    };
-  }, [socket, defaultRooms, enableNotifications]);
-
-  // Setup notification handlers
-  useEffect(() => {
-    if (!enableNotifications) return;
-
-    // Handler untuk notifikasi transaksi baru
-    const handleNewTransaction = (data: any) => {
-      toast.success('Transaksi Baru', {
-        description: `Transaksi baru telah dibuat: ${data.id || 'No ID'}`,
-        action: {
-          label: 'Lihat',
-          onClick: () => window.location.href = `/dashboard/transaksi/${data.id}`,
-        },
-      });
-    };
-
-    // Handler untuk notifikasi transaksi jatuh tempo
-    const handleOverdueTransaction = (data: any) => {
-      toast.error('Transaksi Jatuh Tempo', {
-        description: `Transaksi #${data.id || 'No ID'} telah jatuh tempo!`,
-        action: {
-          label: 'Lihat',
-          onClick: () => window.location.href = `/dashboard/transaksi/${data.id}`,
-        },
-      });
-    };
-
-    // Handler untuk notifikasi perubahan status motor
-    const handleMotorStatusUpdate = (data: any) => {
-      toast.info('Status Motor Berubah', {
-        description: `Motor ${data.plat_nomor || 'No Plate'} status: ${data.status || 'updated'}`,
-        action: {
-          label: 'Lihat',
-          onClick: () => window.location.href = `/dashboard/unit-motor/${data.id}`,
-        },
-      });
-    };
-
-    // Subscribe ke event
-    const unsubNewTrans = listenEvent(SocketEvents.NEW_TRANSACTION, handleNewTransaction);
-    const unsubOverdue = listenEvent(SocketEvents.OVERDUE_TRANSACTION, handleOverdueTransaction);
-    const unsubMotorStatus = listenEvent(SocketEvents.MOTOR_STATUS_UPDATE, handleMotorStatusUpdate);
-
-    // Cleanup ketika component unmount
-    return () => {
-      unsubNewTrans();
-      unsubOverdue();
-      unsubMotorStatus();
-    };
-  }, [enableNotifications]);
+  };
 
   // Nilai untuk context
   const value: SocketContextValue = {
@@ -274,4 +201,4 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
 export const useSocketContext = () => useContext(SocketContext);
 
 // Export enum untuk kemudahan
-export { SocketEvents }; 
+export { SocketEventsType as SocketEvents }; 

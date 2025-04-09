@@ -1,205 +1,156 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { motion } from "framer-motion"
-import { Calendar, ChevronLeft, ChevronRight } from "lucide-react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { fetchBlogPosts } from "@/lib/api"
-import type { BlogPost } from "@/lib/types"
+import { Skeleton } from "@/components/ui/skeleton"
 import { useTranslation } from "@/i18n/hooks"
+import { useBlogPosts } from "@/hooks/blog/use-blog"
+import { format } from "date-fns"
+import Link from "next/link"
+import Image from "next/image"
+import { Search, Calendar, Tag, Folder } from "lucide-react"
+import { BlogPost, Category, BlogTag } from "@/lib/types/blog"
+import { useState, useEffect } from "react"
 
 export default function BlogList() {
-  const { t, i18n } = useTranslation()
-  const [posts, setPosts] = useState<BlogPost[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { t } = useTranslation()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  
   const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [selectedTag, setSelectedTag] = useState<string | null>(null)
 
+  const { 
+    data: blogPosts, 
+    isLoading, 
+    error,
+    meta 
+  } = useBlogPosts(currentPage, 10, searchQuery, undefined, selectedCategory || undefined)
+
+  // Initialize from URL params
   useEffect(() => {
-    const getBlogPosts = async () => {
-      try {
-        setIsLoading(true)
-        const data = await fetchBlogPosts(currentPage, 6)
-        setPosts(data)
-        setTotalPages(3) // Hardcoded for now, would come from API response in real app
-        setIsLoading(false)
-      } catch (err) {
-        setError(t("failedToLoadBlogPosts"))
-        setIsLoading(false) 
-        console.error(err)
-      }
-    }
+    const page = searchParams.get("page")
+    const search = searchParams.get("search")
+    const category = searchParams.get("category")
+    const tag = searchParams.get("tag")
 
-    getBlogPosts()
-  }, [currentPage, t])
+    if (page) setCurrentPage(parseInt(page))
+    if (search) setSearchQuery(search)
+    if (category) setSelectedCategory(category)
+    if (tag) setSelectedTag(tag)
+  }, [searchParams])
 
-  // Placeholder data for when API fails or during development
-  const placeholderPosts = [
-    {
-      id: "1",
-      judul: "Top 5 Motorcycle Routes in California",
-      slug: "top-5-motorcycle-routes-california",
-      konten: "Discover the most scenic and thrilling motorcycle routes that California has to offer. From coastal highways to mountain passes, these routes provide breathtaking views and exciting riding experiences for motorcyclists of all levels.",
-      featuredImage: "/placeholder.svg?height=400&width=600",
-      kategori: "Travel",
-      createdAt: "2023-05-15T10:30:00Z",
-    },
-    {
-      id: "2",
-      judul: "Motorcycle Maintenance Tips for Beginners",
-      slug: "motorcycle-maintenance-tips-beginners",
-      konten: "Essential maintenance tips every motorcycle rider should know to keep their bike in top condition. Learn about regular checks, fluid changes, and simple repairs that can save you time and money while ensuring your safety on the road.",
-      featuredImage: "/placeholder.svg?height=400&width=600",
-      kategori: "Maintenance",
-      createdAt: "2023-06-02T14:45:00Z",
-    },
-    {
-      id: "3",
-      judul: "Choosing the Right Motorcycle Gear",
-      slug: "choosing-right-motorcycle-gear",
-      konten: "A comprehensive guide to selecting the perfect gear for safety and comfort on your rides. From helmets and jackets to gloves and boots, we cover everything you need to know about protective equipment for motorcyclists.",
-      featuredImage: "/placeholder.svg?height=400&width=600",
-      kategori: "Gear",
-      createdAt: "2023-06-20T09:15:00Z",
-    },
-    {
-      id: "4",
-      judul: "The Evolution of Motorcycle Design",
-      slug: "evolution-motorcycle-design",
-      konten: "Explore the fascinating history and evolution of motorcycle design from the early 20th century to modern times. Learn how technological advancements and cultural influences have shaped the motorcycles we ride today.",
-      featuredImage: "/placeholder.svg?height=400&width=600",
-      kategori: "History",
-      createdAt: "2023-07-05T11:20:00Z",
-    },
-    {
-      id: "5",
-      judul: "Preparing for a Long-Distance Motorcycle Trip",
-      slug: "preparing-long-distance-motorcycle-trip",
-      konten: "Planning a long-distance motorcycle journey? This guide covers everything from route planning and packing essentials to bike preparation and safety considerations for extended rides.",
-      featuredImage: "/placeholder.svg?height=400&width=600",
-      kategori: "Travel",
-      createdAt: "2023-07-18T08:30:00Z",
-    },
-    {
-      id: "6",
-      judul: "Understanding Motorcycle Engine Types",
-      slug: "understanding-motorcycle-engine-types",
-      konten: "A beginner-friendly explanation of different motorcycle engine types and configurations. Learn about inline, V-twin, boxer, and rotary engines, and understand the pros and cons of each design for different riding styles.",
-      featuredImage: "/placeholder.svg?height=400&width=600",
-      kategori: "Technical",
-      createdAt: "2023-08-01T13:45:00Z",
-    },
-  ]
-
-  const displayPosts = posts.length > 0 ? posts : placeholderPosts
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    // Format date based on current language
-    return date.toLocaleDateString(i18n.language === "id" ? "id-ID" : "en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
   }
 
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1)
-    }
+  const handleSearch = (query: string) => {
+    setSearchQuery(query)
+    setCurrentPage(1)
   }
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1)
-    }
+  const handleCategoryChange = (category: string | null) => {
+    setSelectedCategory(category)
+    setCurrentPage(1)
+  }
+
+  const handleTagChange = (tag: string | null) => {
+    setSelectedTag(tag)
+    setCurrentPage(1)
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-10">
+        <p className="text-destructive">{error}</p>
+      </div>
+    )
   }
 
   return (
     <div className="space-y-8">
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Card key={i} className="bg-card/50 border-border overflow-hidden">
-              <div className="h-48 bg-muted animate-pulse" />
-              <CardContent className="p-5">
-                <div className="h-6 bg-muted rounded animate-pulse mb-2" />
-                <div className="h-4 bg-muted rounded animate-pulse w-3/4 mb-4" />
-                <div className="h-16 bg-muted rounded animate-pulse" />
+      {/* Blog Posts */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        {isLoading ? (
+          // Loading skeletons
+          Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i} className="bg-card/50 border-border">
+              <CardContent className="p-0">
+                <Skeleton className="aspect-[16/9] w-full" />
+                <div className="p-4 space-y-3">
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-2/3" />
+                </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
-      ) : error ? (
-        <div className="text-center py-10">
-          <p className="text-destructive mb-4">{error}</p>
-          <Button onClick={() => window.location.reload()}>{t("tryAgain")}</Button>
-        </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {displayPosts.map((post, index) => (
-              <motion.div
-                key={post.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                <Link href={`/blog/${post.slug}`}>
-                  <Card className="bg-card/50 border-border overflow-hidden hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/10 h-full">
-                    <div className="relative h-48 overflow-hidden">
-                      <Image
-                        src={post.featuredImage || "/placeholder.svg?height=400&width=600"}
-                        alt={post.judul}
-                        fill
-                        className="object-cover transition-transform hover:scale-105"
-                      />
-                      <Badge className="absolute top-2 right-2 bg-primary">{post.kategori}</Badge>
-                    </div>
-                    <CardContent className="p-5">
-                      <div className="flex items-center text-muted-foreground text-sm mb-3">
-                        <Calendar className="h-4 w-4 mr-1" />
-                        {formatDate(post.createdAt)}
-                      </div>
-                      <h3 className="text-xl font-bold mb-2">{post.judul}</h3>
-                      <p className="text-foreground/80 line-clamp-3">{post.konten}</p>
-                    </CardContent>
-                  </Card>
-                </Link>
-              </motion.div>
-            ))}
+          ))
+        ) : blogPosts?.length === 0 ? (
+          <div className="col-span-full text-center py-10">
+            <p className="text-muted-foreground">{t("noBlogPostsFound")}</p>
           </div>
+        ) : (
+          blogPosts?.map((post: BlogPost) => (
+            <Link key={post.id} href={`/blog/${post.slug}`}>
+              <Card className="bg-card/50 border-border hover:border-primary/50 transition-colors group h-full">
+                <CardContent className="p-0 flex flex-col h-full">
+                  <div className="relative aspect-[16/9] overflow-hidden">
+                    <Image
+                      src={post.thumbnail || "/blog-placeholder.svg"}
+                      alt={post.judul}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+                  </div>
+                  <div className="p-4 space-y-3 flex-1">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Calendar className="h-4 w-4" />
+                      <span>{format(new Date(post.createdAt), "d MMMM yyyy")}</span>
+                    </div>
+                    <h3 className="text-lg font-bold line-clamp-2 group-hover:text-primary transition-colors">
+                      {post.judul}
+                    </h3>
+                    <p className="text-muted-foreground line-clamp-2 text-sm">{post.konten}</p>
+                    <div className="flex flex-wrap gap-1.5 mt-auto">
+                      <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20">
+                        <Folder className="h-3 w-3 mr-1" />
+                        {post.kategori}
+                      </Badge>
+                      {post.tags?.map((tag) => (
+                        <Badge key={tag.tagId} variant="outline" className="hover:bg-muted">
+                          <Tag className="h-3 w-3 mr-1" />
+                          {tag.tag.nama}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))
+        )}
+      </div>
 
-          <div className="flex justify-center mt-8">
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon" onClick={handlePreviousPage} disabled={currentPage === 1}>
-                <ChevronLeft className="h-4 w-4" />
-                <span className="sr-only">{t("previousPage")}</span>
-              </Button>
-
-              {[...Array(totalPages)].map((_, i) => (
+      {/* Pagination */}
+      {meta.totalPages > 1 && (
+        <div className="flex justify-center gap-2">
+          {Array.from({ length: meta.totalPages }, (_, i) => i + 1).map((page) => (
                 <Button
-                  key={i}
-                  variant={currentPage === i + 1 ? "default" : "outline"}
+              key={page}
+              variant={currentPage === page ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setCurrentPage(i + 1)}
+              onClick={() => handlePageChange(page)}
                 >
-                  {i + 1}
+              {page}
                 </Button>
               ))}
-
-              <Button variant="outline" size="icon" onClick={handleNextPage} disabled={currentPage === totalPages}>
-                <ChevronRight className="h-4 w-4" />
-                <span className="sr-only">{t("nextPage")}</span>
-              </Button>
-            </div>
           </div>
-        </>
       )}
     </div>
   )

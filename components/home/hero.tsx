@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion } from "framer-motion"
@@ -11,212 +11,135 @@ import { useTheme } from "next-themes"
 import { useVideoContext } from "@/contexts/video-context"
 
 export default function Hero() {
-  const [currentSlide, setCurrentSlide] = useState(0)
-  const [useVideoFallback, setUseVideoFallback] = useState(false)
   const { t, language } = useTranslation()
   const { theme } = useTheme()
-  const videoRefs = useRef<Array<HTMLVideoElement | null>>([])
-  const { isPageVisible } = useVideoContext()
-  const processedRef = useRef(false)
+  const {
+    videoRefs,
+    currentSlide,
+    isPlaying,
+    setCurrentSlide,
+    isPageVisible,
+    useVideoFallback,
+    setUseVideoFallback
+  } = useVideoContext()
+  
+  const [loadedVideos, setLoadedVideos] = useState<number[]>([0])
+
+  useEffect(() => {
+    const nextSlideIndex = (currentSlide + 1) % slides.length
+    setLoadedVideos(prev => {
+      if (!prev.includes(currentSlide)) {
+        return [...prev, currentSlide]
+      }
+      if (!prev.includes(nextSlideIndex)) {
+        return [...prev, nextSlideIndex]
+      }
+      return prev
+    })
+  }, [currentSlide])
 
   const slides = [
     {
-      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/q0gtp8z72bayzdwqo7cp.mp4",
+      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/q_auto:low,f_auto/rental-motor/video/q0gtp8z72bayzdwqo7cp.mp4",
       imageUrl: "/placeholder.svg?height=1080&width=1920",
       title: t("heroSlide1Title") || "Jelajahi Keindahan dengan Motor Matic",
       subtitle: t("heroSlide1Subtitle") || "Pengalaman wisata nyaman dengan motor matic berkualitas",
     },
     {
-      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/qst0cbu2au5l9qyks1xr.mp4",
+      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/q_auto:low,f_auto/rental-motor/video/qst0cbu2au5l9qyks1xr.mp4",
       imageUrl: "/placeholder.svg?height=1080&width=1920",
       title: t("heroSlide2Title") || "Liburan Lebih Fleksibel dengan Motor Sewaan",
       subtitle: t("heroSlide2Subtitle") || "Jangkau tempat wisata tersembunyi dengan bebas dan praktis",
     },
     {
-      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/bykdq8mjfivukkfkujtw.mp4",
+      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/q_auto:low,f_auto/rental-motor/video/bykdq8mjfivukkfkujtw.mp4",
       imageUrl: "/placeholder.svg?height=1080&width=1920",
       title: t("heroSlide3Title") || "Harga Terjangkau, Kualitas Terjamin",
       subtitle: t("heroSlide3Subtitle") || "Nikmati tarif sewa kompetitif dengan pelayanan premium",
     },
     {
-      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/lyg6nonp8jj1ywzjqggh.mp4",
+      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/q_auto:low,f_auto/rental-motor/video/lyg6nonp8jj1ywzjqggh.mp4",
       imageUrl: "/placeholder.svg?height=1080&width=1920",
       title: t("heroSlide4Title") || "Paket Wisata Motor Matic Hemat",
       subtitle: t("heroSlide4Subtitle") || "Kombinasi sewa motor dan panduan wisata untuk pengalaman terbaik",
     },
     {
-      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/cljiyl0dbkokzax2pecf.mp4",
+      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/q_auto:low,f_auto/rental-motor/video/cljiyl0dbkokzax2pecf.mp4",
       imageUrl: "/placeholder.svg?height=1080&width=1920",
       title: t("heroSlide5Title") || "Berkeliling Kota dengan Nyaman",
       subtitle: t("heroSlide5Subtitle") || "Motor matic irit dan mudah dikendarai untuk wisata perkotaan",
     },
     {
-      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/ojy4yh9urck1pszysvto.mp4",
+      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/q_auto:low,f_auto/rental-motor/video/ojy4yh9urck1pszysvto.mp4",
       imageUrl: "/placeholder.svg?height=1080&width=1920",
       title: t("heroSlide6Title") || "Motor Matic untuk Segala Kebutuhan",
       subtitle: t("heroSlide6Subtitle") || "Tersedia berbagai jenis motor matic sesuai dengan rencana perjalanan Anda",
     },
     {
-      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/rental-motor/video/ysed7qkyskikc36yto80.mp4",
+      videoUrl: "https://res.cloudinary.com/dxuxgut2c/video/upload/q_auto:low,f_auto/rental-motor/video/ysed7qkyskikc36yto80.mp4",
       imageUrl: "/placeholder.svg?height=1080&width=1920",
       title: t("heroSlide7Title") || "Bebas Bereksplorasi Tanpa Batas",
       subtitle: t("heroSlide7Subtitle") || "Temukan sudut-sudut wisata menarik dengan kebebasan berkendara sendiri",
     },
   ]
 
-  function addSilentAudioTrack(video: HTMLVideoElement) {
-    try {
-      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioContext) return;
-      
-      const audioCtx = new AudioContext();
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-      
-      gainNode.gain.value = 0.001;
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-      
-      oscillator.frequency.value = 1;
-      oscillator.start(0);
-      
-      setTimeout(() => {
-        oscillator.stop();
-      }, 1000);
-    } catch (error) {
-      console.warn('Tidak bisa menambahkan silent audio track:', error);
-    }
-  }
-
-  useEffect(() => {
-    if (processedRef.current) return;
-
-    videoRefs.current.forEach(video => {
-      if (video) {
-        video.muted = true;
-        video.setAttribute('playsinline', '');
-        video.setAttribute('loop', '');
-      }
-    });
-
-    processedRef.current = true;
-  }, []);
-
-  useEffect(() => {
-    if (useVideoFallback) return;
-    
-    const currentVideo = videoRefs.current[currentSlide];
-    
-    if (currentVideo) {
-      addSilentAudioTrack(currentVideo);
-      
-      if (isPageVisible) {
-        try {
-          const playPromise = currentVideo.play();
-          
-          if (playPromise !== undefined) {
-            playPromise.catch(err => {
-              console.error("Video play error:", err);
-              
-              if (err.name === 'NotAllowedError') {
-                currentVideo.muted = true;
-                currentVideo.play().catch(() => {
-                  setUseVideoFallback(true);
-                });
-              } else {
-                setUseVideoFallback(true);
-              }
-            });
-          }
-        } catch (error) {
-          console.error("Error saat memutar video:", error);
-          setUseVideoFallback(true);
-        }
-      }
-    }
-    
-    videoRefs.current.forEach((video, index) => {
-      if (video && index !== currentSlide && !video.paused) {
-        video.pause();
-      }
-    });
-    
-    const interval = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % slides.length);
-    }, 5000);
-    
-    return () => clearInterval(interval);
-  }, [currentSlide, isPageVisible, useVideoFallback, slides.length]);
-
-  useEffect(() => {
-    if (useVideoFallback) return;
-
-    const currentVideo = videoRefs.current[currentSlide];
-    if (!currentVideo) return;
-
-    if (isPageVisible) {
-      try {
-        currentVideo.play().catch(err => {
-          console.warn('Error saat memutar video setelah halaman aktif:', err);
-        });
-      } catch (error) {
-        console.warn('Gagal memutar video setelah halaman aktif:', error);
-      }
-    } else {
-      currentVideo.pause();
-    }
-  }, [isPageVisible, currentSlide, useVideoFallback]);
-
   return (
     <section className="relative h-screen w-full overflow-hidden">
-      {slides.map((slide, index) => (
-        <div
-          key={index}
-          className={`absolute inset-0 transition-opacity duration-1000 ${
-            index === currentSlide ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          {useVideoFallback ? (
-            <div className="absolute inset-0">
-              <Image 
-                src={slide.imageUrl} 
-                alt={slide.title} 
-                fill 
-                priority 
-                className="object-cover" 
-              />
-              <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/65' : 'bg-black/50'}`} />
-            </div>
-          ) : (
-            <div className="absolute inset-0">
-              <video
-                ref={el => { videoRefs.current[index] = el }}
-                src={slide.videoUrl}
-                className="w-full h-full object-cover"
-                muted
-                playsInline
-                loop
-                disablePictureInPicture
-                disableRemotePlayback
-              />
-              <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/65' : 'bg-black/50'}`} />
-            </div>
-          )}
-        </div>
-      ))}
+      {slides.map((slide, index) => {
+        if (!loadedVideos.includes(index) && index !== currentSlide) {
+          return null
+        }
+        
+        return (
+          <div
+            key={index}
+            className={`absolute inset-0 transition-opacity duration-1000 ${
+              index === currentSlide ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
+          >
+            {useVideoFallback ? (
+              <div className="absolute inset-0">
+                <Image 
+                  src={slide.imageUrl} 
+                  alt={slide.title} 
+                  fill 
+                  priority={index === currentSlide}
+                  loading={index === currentSlide ? "eager" : "lazy"}
+                  className="object-cover" 
+                />
+                <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/65' : 'bg-black/50'}`} />
+              </div>
+            ) : (
+              <div className="absolute inset-0 w-full h-full">
+                <video
+                  ref={el => { videoRefs.current[index] = el }}
+                  src={slide.videoUrl}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  muted
+                  playsInline
+                  loop
+                  preload={index === currentSlide ? "auto" : "metadata"}
+                  disablePictureInPicture
+                  disableRemotePlayback
+                />
+                <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/65' : 'bg-black/50'}`} />
+              </div>
+            )}
+          </div>
+        )
+      })}
 
-      <div className="relative z-10 container mx-auto px-4 h-full flex flex-col justify-center">
+      <div className="absolute inset-0 flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="max-w-3xl"
+          className="max-w-3xl text-center"
         >
           <h1 className="text-4xl md:text-6xl font-bold mb-4 text-white">{slides[currentSlide].title}</h1>
           <p className="text-xl md:text-2xl text-white/90 mb-8">{slides[currentSlide].subtitle}</p>
 
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/motorcycles">
               <Button
                 size="lg"

@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion"
 import { Card } from "@/components/ui/card"
-import GoogleMapComponent from "@/components/google-map"
+import GoogleMapComponent from "@/components/features/map/google-map"
 import { useTranslation } from "@/i18n/hooks"
 
 export default function ContactMap() {

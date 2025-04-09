@@ -1,8 +1,8 @@
 "use client";
 import { useEffect } from 'react';
 import { toast } from 'sonner';
-import { useSocketContext, SocketEvents } from '../../contexts/socket-context';
-import { initializeSocket } from "@/lib/socket";
+import { useSocketContext, SocketEvents } from "@/contexts/socket-context";
+import { initializeSocket } from "@/lib/sockets/socket";
 
 // Tipe data untuk notifikasi
 type NotificationType = 'success' | 'error' | 'info' | 'warning';
@@ -10,7 +10,6 @@ type NotificationType = 'success' | 'error' | 'info' | 'warning';
 // Interface untuk Props
 interface NotificationHandlerProps {
   userId?: string;
-  role?: 'admin' | 'user';
 }
 
 /**
