@@ -9,6 +9,25 @@ import BookingForm from "@/components/features/booking/booking-form";
 import { fetchMotorcycleUnitById } from "@/lib/network/api";
 import { MotorcycleUnit } from "@/lib/types";
 import { Loader2 } from "lucide-react";
+import { generateMetadata } from '@/lib/seo/config';
+import { generateKeywords } from '@/lib/seo/keywords';
+
+// Since this is a client component, we need to export metadata separately
+export const metadata = generateMetadata({
+  title: 'Book Your Motorcycle - Rosanti Bike Rental',
+  description: 'Complete your motorcycle booking details. Fast and secure motorcycle reservation process with flexible options.',
+  keywords: generateKeywords('availability', {
+    additionalKeywords: ['motorcycle booking', 'reservation form', 'rental booking']
+  }),
+  openGraph: {
+    url: 'https://rosantibike.com/availability/booking',
+    images: ['/images/booking-og.jpg'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+});
 
 export default function BookingPage() {
   const router = useRouter();

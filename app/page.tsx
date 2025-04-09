@@ -7,13 +7,19 @@ import ContactSection from "@/components/home/contact-section"
 import AvailabilityPreview from "@/components/home/availability-preview"
 import { VideoContextProvider } from "@/contexts/video-context"
 import { generateMetadata } from '@/lib/seo/config';
+import { generateKeywords } from '@/lib/seo/keywords';
 
 export const metadata = generateMetadata({
   title: 'Rosanti Bike - Premium Motorcycle Rental Service',
   description: 'Experience the best motorcycle rental service in town. Choose from our wide range of high-quality bikes for your next adventure.',
+  keywords: generateKeywords('home'),
   openGraph: {
     url: 'https://rosantibike.com',
     images: ['/images/home-og.jpg'],
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 });
 

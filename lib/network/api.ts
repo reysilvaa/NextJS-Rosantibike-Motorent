@@ -877,3 +877,38 @@ export async function checkMotorcycleAvailability(data: {
   }
 }
 
+// Add the API functions for fetching all motorcycles and blog posts
+export async function fetchAllMotorcycles(): Promise<Motorcycle[]> {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/motorcycles`, {
+      cache: 'no-store',
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch motorcycles');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching all motorcycles:', error);
+    return [];
+  }
+}
+
+export async function fetchAllBlogPosts(): Promise<BlogPost[]> {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/blog-posts`, {
+      cache: 'no-store',
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch blog posts');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching all blog posts:', error);
+    return [];
+  }
+}
+
