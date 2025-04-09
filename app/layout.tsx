@@ -8,7 +8,7 @@ import { Providers } from "./providers"
 import { VideoContextProvider } from "@/contexts/video-context"
 import { ThemeProvider } from "@/components/shared/theme/theme-provider"
 import { DefaultSeo } from "next-seo"
-import { DEFAULT_SEO_CONFIG } from "@/lib/seo"
+import { DEFAULT_SEO_CONFIG } from "@/lib/shared/seo"
 
 const inter = Inter({ subsets: ["latin"] })
 

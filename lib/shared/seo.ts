@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { DefaultSeoProps } from 'next-seo';
 
 export type SeoProps = {
   title?: string;
@@ -6,6 +7,54 @@ export type SeoProps = {
   canonicalPath?: string;
   ogImage?: string;
   noIndex?: boolean;
+};
+
+// Default SEO configuration for Next-SEO
+export const DEFAULT_SEO_CONFIG: DefaultSeoProps = {
+  titleTemplate: '%s | Rosantibike Motorent',
+  defaultTitle: 'Rosantibike Motorent - Rental Motor di Malang',
+  description: 'Rental motor terpercaya dengan harga terjangkau dan layanan terbaik di Malang. Berbagai pilihan motor untuk kebutuhan Anda.',
+  canonical: 'https://rosantibike.com',
+  openGraph: {
+    type: 'website',
+    locale: 'id_ID',
+    url: 'https://rosantibike.com',
+    siteName: 'Rosantibike Motorent',
+    title: 'Rosantibike Motorent - Rental Motor di Malang',
+    description: 'Rental motor terpercaya dengan harga terjangkau dan layanan terbaik di Malang. Berbagai pilihan motor untuk kebutuhan Anda.',
+    images: [
+      {
+        url: 'https://rosantibike.com/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Rosantibike Motorent',
+      },
+    ],
+  },
+  twitter: {
+    handle: '@rosantibike',
+    site: '@rosantibike',
+    cardType: 'summary_large_image',
+  },
+  additionalMetaTags: [
+    {
+      name: 'keywords',
+      content: 'rental motor, sewa motor, malang, rosantibike, motorent, rental motor malang, sewa motor malang',
+    },
+    {
+      name: 'author',
+      content: 'Rosantibike Motorent',
+    },
+  ],
+  robotsProps: {
+    nosnippet: false,
+    notranslate: false,
+    noimageindex: false,
+    noarchive: false,
+    maxSnippet: -1,
+    maxImagePreview: 'large',
+    maxVideoPreview: -1,
+  },
 };
 
 export function getSeoMetadata({
