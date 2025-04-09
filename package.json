@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start -p 3001",
     "lint": "next lint",
-    "clean": "if exist .next rmdir /s /q .next && if exist out rmdir /s /q out",
+    "clean": "rm -rf .next out",
     "prebuild": "npm run clean"
   },
   "dependencies": {
