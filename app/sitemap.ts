@@ -3,7 +3,7 @@ import { fetchAllMotorcycles, fetchAllBlogPosts } from '@/lib/network/api'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Base URL for the site
-  const baseUrl = 'https://rosantibike.com'
+  const baseUrl = 'https://rosantibikemotorent.com'
   
   // Static routes
   const staticRoutes = [
