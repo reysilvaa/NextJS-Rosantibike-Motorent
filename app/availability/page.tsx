@@ -16,6 +16,16 @@ import { useMotorcycleTypes } from "@/hooks/use-motorcycles"
 import { Badge } from "@/components/ui/badge"
 import { useAutoScroll } from "@/hooks/common/use-auto-scroll"
 import { MotorcycleType, AvailabilitySearchParams } from "@/lib/types"
+import { generateMetadata } from '@/lib/seo/config';
+
+export const metadata = generateMetadata({
+  title: 'Check Availability - Rosanti Bike Rental',
+  description: 'Check motorcycle availability and book your preferred bike for your trip. Easy online booking with instant confirmation.',
+  openGraph: {
+    url: 'https://rosantibike.com/availability',
+    images: ['/images/availability-og.jpg'],
+  },
+});
 
 export default function AvailabilityPage() {
   const { t } = useTranslation()

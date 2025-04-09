@@ -17,6 +17,20 @@ import { useTranslation } from "@/i18n/hooks";
 import { motion } from "framer-motion";
 import { useAutoScroll } from "@/hooks/common/use-auto-scroll";
 import { Skeleton } from "@/components/ui/skeleton";
+import { generateMetadata } from '@/lib/seo/config';
+
+export const metadata = generateMetadata({
+  title: 'Booking History - Rosanti Bike Rental',
+  description: 'View your motorcycle rental booking history and manage your reservations.',
+  openGraph: {
+    url: 'https://rosantibike.com/booking-history',
+    images: ['/images/booking-history-og.jpg'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+});
 
 export default function BookingHistoryPage() {
   const { toast } = useToast();

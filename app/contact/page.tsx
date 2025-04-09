@@ -3,11 +3,16 @@ import ContactForm from "@/components/contact/contact-form"
 import ContactInfo from "@/components/contact/contact-info"
 import ContactMap from "@/components/contact/contact-map"
 import { PageHeader } from "@/components/ui/page-header"
+import { generateMetadata } from '@/lib/seo/config';
 
-export const metadata: Metadata = {
-  title: "Hubungi Kami | MotoCruise",
-  description: "Hubungi tim kami untuk pertanyaan, dukungan, atau masukan",
-}
+export const metadata = generateMetadata({
+  title: 'Contact Us - Rosanti Bike Rental',
+  description: 'Get in touch with Rosanti Bike Rental. We\'re here to help you with your motorcycle rental needs and answer any questions you may have.',
+  openGraph: {
+    url: 'https://rosantibike.com/contact',
+    images: ['/images/contact-og.jpg'],
+  },
+});
 
 export default function ContactPage() {
   return (
