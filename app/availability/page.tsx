@@ -11,27 +11,15 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle, Calendar, Search, Bike } from "lucide-react"
 import { useTranslation } from "@/i18n/hooks"
 import { motion } from "framer-motion"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useMotorcycleTypes } from "@/hooks/use-motorcycles"
 import { Badge } from "@/components/ui/badge"
 import { useAutoScroll } from "@/hooks/common/use-auto-scroll"
 import { MotorcycleType, AvailabilitySearchParams } from "@/lib/types"
-import { generateMetadata } from '@/lib/seo/config';
-import { generateKeywords } from '@/lib/seo/keywords';
-
-export const metadata = generateMetadata({
-  title: 'Check Availability - Rosanti Bike Rental',
-  description: 'Check motorcycle availability and book your preferred bike for your trip. Easy online booking with instant confirmation.',
-  keywords: generateKeywords('availability'),
-  openGraph: {
-    url: 'https://rosantibike.com/availability',
-    images: ['/images/availability-og.jpg'],
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-});
+import { Card, CardContent } from "@/components/ui/card"
+import { useToast } from "@/components/ui/use-toast"
+import { fetchMotorcycleUnits } from "@/lib/network/api"
+import { Loader2 } from "lucide-react"
 
 export default function AvailabilityPage() {
   const { t } = useTranslation()
