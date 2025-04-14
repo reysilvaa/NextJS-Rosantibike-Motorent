@@ -5,6 +5,12 @@ try {
   // ignore error
 }
 
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -29,6 +35,42 @@ const nextConfig = {
     webpackBuildWorker: true,
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
+    optimizePackageImports: ['react-icons', 'date-fns', 'lodash'],
+  },
+  turbopack: {
+    // Konfigurasi loader untuk Turbopack
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
+      },
+      '*.yaml': {
+        loaders: ['yaml-loader'],
+      },
+      '*.mdx': {
+        loaders: ['babel-loader'],
+      },
+    },
+    // Konfigurasi alias untuk Turbopack
+    resolveAlias: {
+      '@': join(__dirname),
+      '@components': join(__dirname, 'components'),
+      '@app': join(__dirname, 'app'),
+      '@lib': join(__dirname, 'lib'),
+      '@hooks': join(__dirname, 'hooks'),
+      '@contexts': join(__dirname, 'contexts'),
+      '@styles': join(__dirname, 'styles'),
+    },
+    // Ekstensi file yang didukung
+    resolveExtensions: ['.js', '.jsx', '.ts', '.tsx', '.json', '.mdx', '.svg'],
+  },
+  webpack: (config) => {
+    config.module.rules.push({
+      test: /\.(svg|png|jpg|jpeg|gif|ico|webp)$/i,
+      type: 'asset/resource',
+    });
+    
+    return config;
   },
   output: 'standalone',
   poweredByHeader: false,

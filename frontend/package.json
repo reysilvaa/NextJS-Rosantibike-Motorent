@@ -1,0 +1,5 @@
+{
+	"devDependencies": {
+		"cache-loader": "^4.1.0"
+	}
+}
