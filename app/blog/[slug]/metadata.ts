@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
         additionalKeywords: [...post.tags.map(tag => tag.tag.nama), post.judul]
       }),
       openGraph: {
-        url: `https://rosantibike.com/blog/${post.slug}`,
+        url: `https://rosantibikemotorent.com/blog/${post.slug}`,
         images: post.thumbnail ? [post.thumbnail] : ['/images/blog-og.jpg'],
       },
       robots: {

@@ -4,6 +4,7 @@ export interface SeoConfig {
   title: string;
   description: string;
   keywords?: string[];
+  metadataBase?: string;
   openGraph?: {
     title?: string;
     description?: string;
@@ -28,6 +29,7 @@ export const defaultSeoConfig: SeoConfig = {
   title: 'Rosanti Bike - Motorcycle Rental Service',
   description: 'Rent high-quality motorcycles for your adventures. Best motorcycle rental service with competitive prices and excellent customer service.',
   keywords: ['motorcycle rental', 'bike rental', 'rental service', 'adventure bikes'],
+  metadataBase: 'https://rosantibikemotorent.com',
   openGraph: {
     type: 'website',
     siteName: 'Rosanti Bike',
@@ -44,11 +46,13 @@ export const defaultSeoConfig: SeoConfig = {
 
 export const generateMetadata = (config: Partial<SeoConfig> = {}): Metadata => {
   const mergedConfig = { ...defaultSeoConfig, ...config };
+  const metadataBaseUrl = mergedConfig.metadataBase || 'https://rosantibikemotorent.com';
 
   return {
     title: mergedConfig.title,
     description: mergedConfig.description,
     keywords: mergedConfig.keywords?.join(', '),
+    metadataBase: new URL(metadataBaseUrl),
     openGraph: mergedConfig.openGraph ? {
       title: mergedConfig.openGraph.title || mergedConfig.title,
       description: mergedConfig.openGraph.description || mergedConfig.description,

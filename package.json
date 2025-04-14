@@ -2,13 +2,14 @@
   "name": "rosantibike-motorent",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.8.0",
   "scripts": {
     "dev": "next dev -p 3001 --turbo",
     "build": "next build",
     "start": "next start -p 3001",
     "lint": "next lint",
     "clean": "rm -rf .next out",
-    "prebuild": "npm run clean"
+    "prebuild": "pnpm run clean"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "latest",
