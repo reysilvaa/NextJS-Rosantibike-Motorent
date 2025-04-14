@@ -2,6 +2,11 @@
 
 # dependencies
 /node_modules
+node_modules/
+node_modules
+**/.pnpm/**/node_modules
+**/**/node_modules
+.pnpm-store/
 
 # next.js
 /.next/
