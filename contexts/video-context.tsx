@@ -73,11 +73,16 @@ export const VideoContextProvider: React.FC<VideoContextProviderProps> = ({
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
       const isAndroid = /Android/.test(navigator.userAgent);
       
-      // Always use fallback for iOS devices
-      if (isIOS) return true;
+      // Kode fallback yang diubah - izinkan pemutaran video pada lebih banyak perangkat
       
-      // For Android, check if it's a low-end device
-      if (isAndroid && isLowEndDevice) return true;
+      // Hanya gunakan fallback untuk perangkat yang sangat low-end
+      // Identifikasi perangkat sangat low-end dengan pengecekan browser khusus
+      const isVeryLowEndDevice = /UCBrowser|UCWEB|Opera Mini/.test(navigator.userAgent);
+      
+      if (isVeryLowEndDevice) return true;
+      
+      // Untuk iOS sangat lama (iOS < 10)
+      if (isIOS && /(CPU OS )([0-9])(_|\.)[0-9]/i.test(navigator.userAgent)) return true;
       
       return false;
     }

@@ -76,6 +76,17 @@ const nextConfig = {
       'recharts'
     ],
     optimisticClientCache: true,
+    modularizeImports: {
+      'lucide-react': {
+        transform: 'lucide-react/dist/esm/icons/{{member}}',
+      },
+      'date-fns': {
+        transform: 'date-fns/{{member}}',
+      },
+      '@radix-ui/react-icons': {
+        transform: '@radix-ui/react-icons/dist/{{member}}',
+      },
+    },
   },
   turbopack: {
     // Konfigurasi loader untuk Turbopack

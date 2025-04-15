@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: MotorcycleDetailPageProps): P
         additionalKeywords: [params.id]
       }),
       openGraph: {
-        url: `https://rosantibike.com/motorcycles/${params.id}`,
+        url: `https://rosantibikemotorent.com/motorcycles/${params.id}`,
         images: ['/images/motorcycle-detail-og.jpg'],
         type: 'article',
       },

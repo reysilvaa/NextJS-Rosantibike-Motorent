@@ -97,9 +97,10 @@ export default function Hero() {
     const isMobile = window.innerWidth < 768 || 
                     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
-    if (isMobile && !useVideoFallback) {
-      setUseVideoFallback(true);
-    }
+    // Komentar kode berikut jika ingin menampilkan video di mobile
+    // if (isMobile && !useVideoFallback) {
+    //   setUseVideoFallback(true);
+    // }
   }, [useVideoFallback, setUseVideoFallback]);
 
   // Fetch motorcycle types from API
@@ -172,6 +173,18 @@ export default function Hero() {
           >
             {useVideoFallback ? (
               <div className="absolute inset-0 bg-gray-900">
+                {/* Tambahkan gambar fallback untuk mobile jika video gagal loading */}
+                <Image 
+                  src={slide.videoUrl.replace('.mp4', '.jpg') || "/images/fallback-bg.jpg"}
+                  alt={slide.title}
+                  fill
+                  className="object-cover opacity-70"
+                  priority={index === currentSlide}
+                  onError={(e) => {
+                    // Jika gambar fallback error, tampilkan warna solid
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
                 <div className={`absolute inset-0 ${theme === "light" ? "bg-black/75" : "bg-black/60"}`} />
               </div>
             ) : (
@@ -195,11 +208,16 @@ export default function Hero() {
                   muted
                   playsInline
                   loop
+                  autoPlay={index === currentSlide}
                   preload={index === currentSlide ? "auto" : "none"} // Hanya preload video saat ini
                   disablePictureInPicture
                   disableRemotePlayback
                   onLoadStart={() => handleVideoLoadStart(index)}
                   onCanPlay={() => handleVideoCanPlay(index)}
+                  // Optimasi untuk mobile
+                  poster={slide.videoUrl.replace('.mp4', '.jpg')}
+                  width="100%"
+                  height="100%"
                 />
                 <div className={`absolute inset-0 ${theme === "light" ? "bg-black/65" : "bg-black/50"}`} />
               </div>
