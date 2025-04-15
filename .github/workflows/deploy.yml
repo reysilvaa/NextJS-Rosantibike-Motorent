@@ -29,27 +29,31 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
-        cache: 'npm'
-        cache-dependency-path: package-lock.json
+        node-version: '23'
+        cache: 'pnpm'
+        cache-dependency-path: pnpm-lock.yaml
 
-    # Step 3: Install dependencies
+    # Step 3: Install PNPM
+    - name: Install PNPM 
+      run: npm install -g pnpm
+
+    # Step 4: Install dependencies
     - name: Install dependencies
-      run: npm ci
+      run: pnpm install --frozen-lockfile
 
-    # Step 4: Setup SSH
+    # Step 5: Setup SSH
     - name: Setup SSH
       uses: webfactory/ssh-agent@v0.7.0
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    # Step 5: Add host to known hosts
+    # Step 6: Add host to known hosts
     - name: Add host to known hosts
       run: |
         mkdir -p ~/.ssh
         ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
 
-    # Step 6: Backup current deployment
+    # Step 7: Backup current deployment
     - name: Backup current deployment
       uses: appleboy/ssh-action@master
       with:
@@ -63,7 +67,7 @@ jobs:
             mv backup_*.tar.gz /var/www/backups/
           fi
 
-    # Step 7: Deploy new version
+    # Step 8: Deploy new version
     - name: Deploy to production
       uses: appleboy/ssh-action@master
       with:
@@ -80,18 +84,18 @@ jobs:
           
           # Install dependencies
           echo "Installing dependencies..."
-          npm ci --production
+          pnpm install --frozen-lockfile --prod
           
           # Build application
           echo "Building application..."
-          npm run build
+          pnpm run build
           
           # Restart application
           echo "Restarting application..."
           if pm2 list | grep -q "rental-frontend"; then
             pm2 restart rental-frontend
           else
-            pm2 start npm --name "rental-frontend" -- start
+            pm2 start pnpm --name "rental-frontend" -- start
           fi
           
           # Save PM2 process list
@@ -100,7 +104,7 @@ jobs:
           # Log deployment
           echo "Deployment completed at $(date)" >> /var/www/rosantibike/deploy.log
 
-    # Step 8: Verify deployment
+    # Step 9: Verify deployment
     - name: Verify deployment
       uses: appleboy/ssh-action@master
       with:
@@ -117,7 +121,7 @@ jobs:
             exit 1
           fi
 
-    # Step 9: Cleanup old backups
+    # Step 10: Cleanup old backups
     - name: Cleanup old backups
       uses: appleboy/ssh-action@master
       with:

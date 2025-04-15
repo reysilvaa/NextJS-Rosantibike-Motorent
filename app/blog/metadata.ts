@@ -6,7 +6,7 @@ export const metadata = generateMetadata({
   description: 'Explore motorcycle riding tips, travel guides, and adventure stories on our blog.',
   keywords: generateKeywords('blog'),
   openGraph: {
-    url: 'https://rosantibike.com/blog',
+    url: 'https://rosantibikemotorent.com/blog',
     images: ['/images/blog-og.jpg'],
   },
   robots: {

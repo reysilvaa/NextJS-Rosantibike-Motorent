@@ -1,5 +1,5 @@
 import type React from "react"
-import type { Metadata } from "next/types"
+import type { Metadata, Viewport } from "next/types"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import Navbar from "@/components/layout/navbar"
@@ -10,14 +10,21 @@ import { ThemeProvider } from "@/components/shared/theme/theme-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
-export const metadata: Metadata = {
-  title: "Rosantibike Motorent",
-  description: "Rental motor terpercaya dengan harga terjangkau dan layanan terbaik di Malang",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover",
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "white" },
     { media: "(prefers-color-scheme: dark)", color: "black" }
   ],
+}
+
+export const metadata: Metadata = {
+  title: "Rosantibike Motorent",
+  description: "Rental motor terpercaya dengan harga terjangkau dan layanan terbaik di Malang",
   icons: {
     icon: [
       { url: '/favicon.ico' },

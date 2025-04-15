@@ -6,7 +6,7 @@ export const metadata = generateMetadata({
   description: 'Check motorcycle availability and book your preferred bike for your trip. Easy online booking with instant confirmation.',
   keywords: generateKeywords('availability'),
   openGraph: {
-    url: 'https://rosantibike.com/availability',
+    url: 'https://rosantibikemotorent.com/availability',
     images: ['/images/availability-og.jpg'],
   },
   robots: {

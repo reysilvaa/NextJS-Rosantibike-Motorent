@@ -8,7 +8,7 @@ export const metadata = generateMetadata({
     additionalKeywords: ['motorcycle booking', 'reservation form', 'rental booking']
   }),
   openGraph: {
-    url: 'https://rosantibike.com/availability/booking',
+    url: 'https://rosantibikemotorent.com/availability/booking',
     images: ['/images/booking-og.jpg'],
   },
   robots: {

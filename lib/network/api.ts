@@ -878,36 +878,71 @@ export async function checkMotorcycleAvailability(data: {
 }
 
 // Add the API functions for fetching all motorcycles and blog posts
-export async function fetchAllMotorcycles(): Promise<Motorcycle[]> {
+export async function fetchAllMotorcycles(): Promise<MotorcycleType[]> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/motorcycles`, {
-      cache: 'no-store',
+    // Gunakan endpoint yang sudah ada untuk konsistensi dengan api lainnya
+    const endpoint = API_CONFIG.ENDPOINTS.JENIS_MOTOR || '/api/jenis-motor';
+    
+    console.log('Fetching all motorcycles for sitemap from: ', endpoint);
+    
+    // Gunakan API client yang sudah ada
+    const response = await apiClient.get(endpoint, {
+      params: {
+        limit: 100, // Ambil lebih banyak untuk sitemap
+      }
     });
     
-    if (!response.ok) {
-      throw new Error('Failed to fetch motorcycles');
+    // Pastikan data memiliki format yang benar
+    const motorcycles = response.data?.data || response.data || [];
+    
+    console.log(`Fetched ${motorcycles.length} motorcycles for sitemap`);
+    
+    // Log jika ada item tanpa slug
+    const missingSlug = motorcycles.filter((m: MotorcycleType) => !m.slug);
+    if (missingSlug.length > 0) {
+      console.warn(`Warning: ${missingSlug.length} motorcycles have missing slugs:`, 
+        missingSlug.map((m: MotorcycleType) => ({ id: m.id, merk: m.merk, model: m.model }))
+      );
     }
     
-    return await response.json();
+    return motorcycles;
   } catch (error) {
-    console.error('Error fetching all motorcycles:', error);
+    console.error('Error fetching all motorcycles for sitemap:', error);
     return [];
   }
 }
 
 export async function fetchAllBlogPosts(): Promise<BlogPost[]> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/blog-posts`, {
-      cache: 'no-store',
+    // Gunakan endpoint yang sudah ada
+    const endpoint = API_CONFIG.ENDPOINTS.BLOG || '/api/blog';
+    
+    console.log('Fetching all blog posts for sitemap from: ', endpoint);
+    
+    // Gunakan API client yang sudah ada
+    const response = await apiClient.get(endpoint, {
+      params: {
+        limit: 100, // Ambil lebih banyak untuk sitemap
+        status: 'published' // Hanya yang sudah dipublish
+      }
     });
     
-    if (!response.ok) {
-      throw new Error('Failed to fetch blog posts');
+    // Pastikan data memiliki format yang benar
+    const posts = response.data?.data || response.data || [];
+    
+    console.log(`Fetched ${posts.length} blog posts for sitemap`);
+    
+    // Log jika ada item tanpa slug
+    const missingSlug = posts.filter((p: BlogPost) => !p.slug);
+    if (missingSlug.length > 0) {
+      console.warn(`Warning: ${missingSlug.length} blog posts have missing slugs:`, 
+        missingSlug.map((p: BlogPost) => ({ id: p.id, judul: p.judul }))
+      );
     }
     
-    return await response.json();
+    return posts;
   } catch (error) {
-    console.error('Error fetching all blog posts:', error);
+    console.error('Error fetching all blog posts for sitemap:', error);
     return [];
   }
 }
