@@ -100,8 +100,8 @@ export default function Navbar() {
             )}
           >
             <Image 
-              src={isHomePage ? isLightTheme ? (isScrolled ? "/logo/logo2.png" : "/logo/logo1.png") : "/logo/logo1.png" : "/logo/logo2.png"} 
-              alt="RosantiBike" 
+              src={isHomePage ? isLightTheme ? (isScrolled ? "/logo/logo2.svg" : "/logo/logo1.svg") : "/logo/logo1.svg" : "/logo/logo2.svg"} 
+              alt="Rosantibike Motorent" 
               width={120}
               height={40}
               className="h-10 w-auto" 
@@ -188,7 +188,7 @@ export default function Navbar() {
                   </div>
                   <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
                     <Image 
-                      src={isHomePage ? (isScrolled ? "/logo/logo2.png" : "/logo/logo1.png") : "/logo/logo2.png"} 
+                      src={isHomePage ? (isScrolled ? "/logo/logo2.svg" : "/logo/logo1.svg") : "/logo/logo2.svg"} 
                       alt="RosantiBike Motorent" 
                       width={96}
                       height={32}

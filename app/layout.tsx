@@ -1,18 +1,12 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next/types"
-import { Inter } from "next/font/google"
 import "./globals.css"
 import Navbar from "@/components/layout/navbar"
 import Footer from "@/components/layout/footer"
 import { Providers } from "./providers"
 import { VideoContextProvider } from "@/contexts/video-context"
 import { ThemeProvider } from "@/components/shared/theme/theme-provider"
-
-const inter = Inter({ 
-  subsets: ["latin"],
-  display: 'swap',
-  preload: true,
-})
+import { inter } from "./fonts"
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -48,23 +42,27 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="id" suppressHydrationWarning>
+    <html lang="id" suppressHydrationWarning className={inter.variable}>
       <head>
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Rosantibike Motorent" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="Rosantibike Motorent" />
         <meta name="apple-touch-fullscreen" content="yes" />
         <meta name="apple-mobile-web-app-orientations" content="portrait" />
         
-        <link rel="preconnect" href={process.env.NEXT_PUBLIC_WS_URL || ''} />
+        {/* Preconnect dan DNS prefetch untuk optimasi */}
+        <link rel="preconnect" href={process.env.NEXT_PUBLIC_WS_URL || ''} crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_WS_URL || ''} />
+        <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         
+        {/* Preload critical resources */}
         <link rel="preload" href="/logo/logo.svg" as="image" type="image/svg+xml" />
+        <link rel="preload" href="/motorcycle-placeholder.svg" as="image" type="image/svg+xml" />
         
+        {/* Service Worker Registration - Menggunakan event listener untuk tidak blocking */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -84,7 +82,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.className} min-h-screen flex flex-col antialiased`}>
+      <body className="min-h-screen flex flex-col antialiased font-sans">
         <Providers>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <VideoContextProvider

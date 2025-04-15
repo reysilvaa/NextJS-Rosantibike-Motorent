@@ -1,15 +1,22 @@
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+// Import bundle analyzer
+import withBundleAnalyzer from '@next/bundle-analyzer';
+
+const bundleAnalyzer = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 let userConfig = undefined
 try {
   userConfig = await import('./v0-user-next.config')
 } catch (e) {
   // ignore error
 }
-
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -47,6 +54,13 @@ const nextConfig = {
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
+  outputFileTracingExcludes: {
+    '*': [
+      'node_modules/@swc/core-linux-x64-gnu',
+      'node_modules/@swc/core-linux-x64-musl',
+      'node_modules/@esbuild/linux-x64',
+    ],
+  },
   experimental: {
     webpackBuildWorker: true,
     parallelServerBuildTraces: true,
@@ -62,18 +76,6 @@ const nextConfig = {
       'recharts'
     ],
     optimisticClientCache: true,
-    outputFileTracingExcludes: {
-      '*': [
-        'node_modules/@swc/core-linux-x64-gnu',
-        'node_modules/@swc/core-linux-x64-musl',
-        'node_modules/@esbuild/linux-x64',
-      ],
-    },
-    instrumentationHook: true,
-    serviceWorker: {
-      register: true,
-      scope: '/',
-    },
   },
   turbopack: {
     // Konfigurasi loader untuk Turbopack
@@ -176,7 +178,6 @@ const nextConfig = {
   output: 'standalone',
   poweredByHeader: false,
   compress: true,
-  swcMinify: true,
   async rewrites() {
     const isProduction = process.env.NODE_ENV === 'production';
     const prodApiUrl = process.env.NEXT_PUBLIC_WS_URL || 'https://api.rosantibikemotorent.com';
@@ -290,4 +291,4 @@ function mergeConfig(nextConfig, userConfig) {
   }
 }
 
-export default nextConfig
+export default bundleAnalyzer(nextConfig)

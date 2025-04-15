@@ -9,7 +9,8 @@
     "start": "next start -p 3001",
     "lint": "next lint",
     "clean": "rm -rf .next out",
-    "prebuild": "pnpm run clean"
+    "prebuild": "pnpm run clean",
+    "analyze": "ANALYZE=true pnpm run build"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "latest",

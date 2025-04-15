@@ -10,11 +10,11 @@ import { generateMetadata } from '@/lib/seo/config';
 import { generateKeywords } from '@/lib/seo/keywords';
 
 export const metadata = generateMetadata({
-  title: 'Rosanti Bike - Premium Motorcycle Rental Service',
+  title: 'Rosantibike - Premium Motorcycle Rental Service',
   description: 'Experience the best motorcycle rental service in town. Choose from our wide range of high-quality bikes for your next adventure.',
   keywords: generateKeywords('home'),
   openGraph: {
-    url: 'https://rosantibike.com',
+    url: 'https://rosantibikemotorent.com',
     images: ['/images/home-og.jpg'],
   },
   robots: {
