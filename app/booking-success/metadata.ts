@@ -6,7 +6,7 @@ export const metadata = generateMetadata({
   description: 'Your motorcycle rental booking has been confirmed. View your reservation details.',
   keywords: generateKeywords('booking-success'),
   openGraph: {
-    url: 'https://rosantibike.com/booking-success',
+    url: 'https://rosantibikemotorent.com/booking-success',
     images: ['/images/booking-success-og.jpg'],
   },
   robots: {
