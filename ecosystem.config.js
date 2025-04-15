@@ -2,14 +2,13 @@ module.exports = {
     apps: [
       {
         name: "rental-frontend",
-        script: "npm",
-        args: "run start",
-        exec_mode: "cluster",
-        instances: "max",
+        script: "pnpm",
+        args: "start",
+        cwd: "/var/www/rosantibike/frontend",
+        interpreter: "none",
         env: {
           NODE_ENV: "production",
-          PORT: 3001,
-          NODE_OPTIONS: "--max-old-space-size=512"
+          PORT: 3001
         },
         autorestart: true,
         watch: false,
