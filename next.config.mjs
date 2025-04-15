@@ -51,7 +51,16 @@ const nextConfig = {
     webpackBuildWorker: true,
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
-    optimizePackageImports: ['react-icons', 'date-fns', 'lodash', 'lucide-react', 'framer-motion'],
+    optimizePackageImports: [
+      '@radix-ui/react-icons',
+      'lucide-react',
+      'date-fns',
+      'framer-motion',
+      'react-hook-form',
+      'embla-carousel-react',
+      '@radix-ui',
+      'recharts'
+    ],
     optimisticClientCache: true,
     outputFileTracingExcludes: {
       '*': [
@@ -111,8 +120,7 @@ const nextConfig = {
           vendor: {
             test: /[\\/]node_modules[\\/]/,
             name(module) {
-              // get the name. E.g. node_modules/packageName/sub/path
-              // or node_modules/packageName
+              // Protect against null module.context
               if (!module.context) return 'npm.unknown';
               
               const match = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/);
@@ -120,9 +128,27 @@ const nextConfig = {
               
               const packageName = match[1];
               
-              // group larger packages like framer-motion separately
-              if (['framer-motion', 'react-icons', 'date-fns', 'recharts'].includes(packageName)) {
+              // Separate larger packages (match these with popular deps from package.json)
+              if ([
+                'framer-motion', 
+                'react-icons', 
+                'date-fns', 
+                'recharts',
+                'axios',
+                'embla-carousel-react',
+                'lucide-react',
+                'socket.io-client',
+                'video.js',
+                'react-hook-form',
+                'zod',
+                'i18next'
+              ].includes(packageName)) {
                 return `npm.${packageName}`;
+              }
+              
+              // Group all radix-ui components together
+              if (packageName.startsWith('@radix-ui')) {
+                return 'npm.radix-ui';
               }
 
               // otherwise bundle smaller packages together
@@ -133,11 +159,24 @@ const nextConfig = {
       },
     };
     
+    // Alias setup in webpack
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': join(__dirname),
+      '@components': join(__dirname, 'components'),
+      '@app': join(__dirname, 'app'),
+      '@lib': join(__dirname, 'lib'),
+      '@hooks': join(__dirname, 'hooks'),
+      '@contexts': join(__dirname, 'contexts'),
+      '@styles': join(__dirname, 'styles'),
+    };
+    
     return config;
   },
   output: 'standalone',
   poweredByHeader: false,
   compress: true,
+  swcMinify: true,
   async rewrites() {
     const isProduction = process.env.NODE_ENV === 'production';
     const prodApiUrl = process.env.NEXT_PUBLIC_WS_URL || 'https://api.rosantibikemotorent.com';
