@@ -17,6 +17,8 @@ interface VideoContextValue {
   isPageVisible: boolean;
   useVideoFallback: boolean;
   setUseVideoFallback: (value: boolean) => void;
+  registerVideo: (video: HTMLVideoElement) => void;
+  unregisterVideo: (video: HTMLVideoElement) => void;
 }
 
 // Buat context dengan nilai default
@@ -33,6 +35,8 @@ const VideoContext = createContext<VideoContextValue>({
   isPageVisible: true,
   useVideoFallback: false,
   setUseVideoFallback: () => {},
+  registerVideo: () => {},
+  unregisterVideo: () => {},
 });
 
 // Props untuk provider
@@ -310,6 +314,14 @@ export const VideoContextProvider: React.FC<VideoContextProviderProps> = ({
     }
   };
 
+  const registerVideo = (video: HTMLVideoElement) => {
+    videoRefs.current.push(video);
+  };
+
+  const unregisterVideo = (video: HTMLVideoElement) => {
+    videoRefs.current = videoRefs.current.filter(v => v !== video);
+  };
+
   const value: VideoContextValue = {
     videoRefs,
     currentSlide,
@@ -322,7 +334,9 @@ export const VideoContextProvider: React.FC<VideoContextProviderProps> = ({
     togglePlay,
     isPageVisible,
     useVideoFallback,
-    setUseVideoFallback
+    setUseVideoFallback,
+    registerVideo,
+    unregisterVideo
   };
 
   return (

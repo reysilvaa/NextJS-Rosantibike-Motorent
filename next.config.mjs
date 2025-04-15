@@ -22,6 +22,10 @@ const nextConfig = {
   },
   images: {
     unoptimized: false,
+    minimumCacheTTL: 60,
+    formats: ['image/avif', 'image/webp'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     remotePatterns: [
       {
         protocol: 'https',
@@ -47,7 +51,20 @@ const nextConfig = {
     webpackBuildWorker: true,
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
-    optimizePackageImports: ['react-icons', 'date-fns', 'lodash'],
+    optimizePackageImports: ['react-icons', 'date-fns', 'lodash', 'lucide-react', 'framer-motion'],
+    optimisticClientCache: true,
+    outputFileTracingExcludes: {
+      '*': [
+        'node_modules/@swc/core-linux-x64-gnu',
+        'node_modules/@swc/core-linux-x64-musl',
+        'node_modules/@esbuild/linux-x64',
+      ],
+    },
+    instrumentationHook: true,
+    serviceWorker: {
+      register: true,
+      scope: '/',
+    },
   },
   turbopack: {
     // Konfigurasi loader untuk Turbopack
@@ -81,6 +98,35 @@ const nextConfig = {
       test: /\.(svg|png|jpg|jpeg|gif|ico|webp)$/i,
       type: 'asset/resource',
     });
+
+    // Optimize bundle size
+    config.optimization = {
+      ...config.optimization,
+      runtimeChunk: 'single',
+      splitChunks: {
+        chunks: 'all',
+        maxInitialRequests: Infinity,
+        minSize: 20000,
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name(module) {
+              // get the name. E.g. node_modules/packageName/sub/path
+              // or node_modules/packageName
+              const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
+              
+              // group larger packages like framer-motion separately
+              if (['framer-motion', 'react-icons', 'date-fns', 'recharts'].includes(packageName)) {
+                return `npm.${packageName}`;
+              }
+
+              // otherwise bundle smaller packages together
+              return `npm.bundle`;
+            },
+          },
+        },
+      },
+    };
     
     return config;
   },
@@ -150,7 +196,29 @@ const nextConfig = {
             key: 'Access-Control-Allow-Headers',
             value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
           },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
         ],
+      },
+      {
+        source: '/public/fonts/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          }
+        ]
+      },
+      {
+        source: '/public/images/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          }
+        ]
       },
     ];
   },

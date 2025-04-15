@@ -164,6 +164,11 @@ export default function Hero() {
                   priority={index === currentSlide}
                   loading={index === currentSlide ? "eager" : "lazy"}
                   className="object-cover"
+                  sizes="100vw"
+                  fetchPriority={index === currentSlide ? "high" : "low"}
+                  decoding={index === currentSlide ? "sync" : "async"} 
+                  width={1920}
+                  height={1080}
                 />
                 <div className={`absolute inset-0 ${theme === "light" ? "bg-black/65" : "bg-black/50"}`} />
               </div>
@@ -181,6 +186,7 @@ export default function Hero() {
                   preload={index === currentSlide ? "auto" : "metadata"}
                   disablePictureInPicture
                   disableRemotePlayback
+                  poster={slide.imageUrl || "/placeholder.svg"}
                 />
                 <div className={`absolute inset-0 ${theme === "light" ? "bg-black/65" : "bg-black/50"}`} />
               </div>

@@ -8,13 +8,17 @@ import { Providers } from "./providers"
 import { VideoContextProvider } from "@/contexts/video-context"
 import { ThemeProvider } from "@/components/shared/theme/theme-provider"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ 
+  subsets: ["latin"],
+  display: 'swap',
+  preload: true,
+})
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
+  userScalable: true,
   viewportFit: "cover",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "white" },
@@ -56,6 +60,29 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Rosantibike Motorent" />
         <meta name="apple-touch-fullscreen" content="yes" />
         <meta name="apple-mobile-web-app-orientations" content="portrait" />
+        
+        <link rel="preconnect" href={process.env.NEXT_PUBLIC_WS_URL || ''} />
+        
+        <link rel="preload" href="/logo/logo.svg" as="image" type="image/svg+xml" />
+        
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').then(
+                    function(registration) {
+                      console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    },
+                    function(err) {
+                      console.log('ServiceWorker registration failed: ', err);
+                    }
+                  );
+                });
+              }
+            `,
+          }}
+        />
       </head>
       <body className={`${inter.className} min-h-screen flex flex-col antialiased`}>
         <Providers>
