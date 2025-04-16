@@ -26,7 +26,7 @@ export interface SeoConfig {
 }
 
 export const defaultSeoConfig: SeoConfig = {
-  title: 'Rosanti Bike - Motorcycle Rental Service',
+  title: 'Rosantibike - Motorcycle Rental Service',
   description: 'Rent high-quality motorcycles for your adventures. Best motorcycle rental service with competitive prices and excellent customer service.',
   keywords: ['motorcycle rental', 'bike rental', 'rental service', 'adventure bikes'],
   metadataBase: 'https://rosantibikemotorent.com',
@@ -47,15 +47,18 @@ export const defaultSeoConfig: SeoConfig = {
 export const generateMetadata = (config: Partial<SeoConfig> = {}): Metadata => {
   const mergedConfig = { ...defaultSeoConfig, ...config };
   const metadataBaseUrl = mergedConfig.metadataBase || 'https://rosantibikemotorent.com';
+  
+  // Pastikan description selalu tersedia
+  const description = mergedConfig.description || defaultSeoConfig.description;
 
   return {
     title: mergedConfig.title,
-    description: mergedConfig.description,
+    description: description,
     keywords: mergedConfig.keywords?.join(', '),
     metadataBase: new URL(metadataBaseUrl),
     openGraph: mergedConfig.openGraph ? {
       title: mergedConfig.openGraph.title || mergedConfig.title,
-      description: mergedConfig.openGraph.description || mergedConfig.description,
+      description: mergedConfig.openGraph.description || description,
       images: mergedConfig.openGraph.images,
       url: mergedConfig.openGraph.url,
       siteName: mergedConfig.openGraph.siteName,
@@ -63,7 +66,7 @@ export const generateMetadata = (config: Partial<SeoConfig> = {}): Metadata => {
     } : undefined,
     twitter: mergedConfig.twitter ? {
       title: mergedConfig.twitter.title || mergedConfig.title,
-      description: mergedConfig.twitter.description || mergedConfig.description,
+      description: mergedConfig.twitter.description || description,
       images: mergedConfig.twitter.images,
       ...(mergedConfig.twitter.card ? { card: mergedConfig.twitter.card } : {})
     } : undefined,

@@ -11,7 +11,7 @@ import { generateKeywords } from '@/lib/seo/keywords';
 
 export const metadata = generateMetadata({
   title: 'Rosantibike - Premium Motorcycle Rental Service',
-  description: 'Experience the best motorcycle rental service in town. Choose from our wide range of high-quality bikes for your next adventure.',
+  description: 'Rosantibike Motorent menyediakan layanan rental motor terbaik di Malang dengan harga terjangkau. Nikmati pengalaman berkendara dengan motor berkualitas untuk petualangan Anda.',
   keywords: generateKeywords('home'),
   openGraph: {
     url: 'https://rosantibikemotorent.com',

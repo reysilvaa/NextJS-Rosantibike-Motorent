@@ -51,6 +51,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Rosantibike Motorent" />
         <meta name="apple-touch-fullscreen" content="yes" />
         <meta name="apple-mobile-web-app-orientations" content="portrait" />
+        <meta name="description" content="Rental motor terpercaya dengan harga terjangkau dan layanan terbaik di Malang" />
         
         {/* Preconnect dan DNS prefetch untuk optimasi */}
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_WS_URL || ''} crossOrigin="anonymous" />
