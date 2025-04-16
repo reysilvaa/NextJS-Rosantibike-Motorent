@@ -1,4 +1,4 @@
-// Konfigurasi PM2 untuk frontend - format CommonJS
+// Konfigurasi PM2 untuk frontend
 module.exports = {
   apps: [
     {
@@ -16,4 +16,4 @@ module.exports = {
       },
     },
   ],
-};
+}; 
