@@ -1,19 +1,24 @@
-"use client"
-import { Moon, Sun } from "lucide-react"
-import { useTheme } from "next-themes"
-import { useTranslation } from "@/i18n/hooks"
-import { cn } from "@/lib/utils/utils"
+'use client';
+import { Moon, Sun } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useTranslation } from '@/i18n/hooks';
+import { cn } from '@/lib/utils/utils';
 
 interface ThemeToggleProps {
   useWhiteStyle?: boolean;
 }
 
 export function ThemeToggle({ useWhiteStyle = false }: ThemeToggleProps) {
-  const { setTheme, theme } = useTheme()
-  const { t } = useTranslation()
+  const { setTheme, theme } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <DropdownMenu>
@@ -22,18 +27,20 @@ export function ThemeToggle({ useWhiteStyle = false }: ThemeToggleProps) {
           variant="outline"
           size="icon"
           className={cn(
-            "h-8 w-8 rounded-full transition-all duration-300 group",
+            'h-8 w-8 rounded-full transition-all duration-300 group',
             useWhiteStyle
-              ? "border-white hover:border-white/80 hover:bg-white/10"
-              : "border-primary/20 hover:border-primary/40 hover:bg-primary/5"
+              ? 'border-white hover:border-white/80 hover:bg-white/10'
+              : 'border-primary/20 hover:border-primary/40 hover:bg-primary/5'
           )}
         >
-          <Sun className={cn(
-            "h-4 w-4 rotate-0 scale-100 transition-all duration-500 dark:-rotate-90 dark:scale-0",
-            useWhiteStyle ? "text-black group-hover:text-white" : ""
-          )} />
+          <Sun
+            className={cn(
+              'h-4 w-4 rotate-0 scale-100 transition-all duration-500 dark:-rotate-90 dark:scale-0',
+              useWhiteStyle ? 'text-black group-hover:text-white' : ''
+            )}
+          />
           <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all duration-500 dark:rotate-0 dark:scale-100" />
-          <span className="sr-only">{t("toggleTheme")}</span>
+          <span className="sr-only">{t('toggleTheme')}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -42,34 +49,34 @@ export function ThemeToggle({ useWhiteStyle = false }: ThemeToggleProps) {
         className="z-[60] w-[180px] bg-card/95 backdrop-blur-lg border-border/50 shadow-lg rounded-xl p-1 animate-in fade-in-0 zoom-in-95 duration-100"
       >
         <DropdownMenuItem
-          onClick={() => setTheme("light")}
+          onClick={() => setTheme('light')}
           className={cn(
-            "flex items-center gap-2 rounded-lg cursor-pointer transition-colors duration-200",
-            theme === "light" ? "bg-primary/10 text-primary font-medium" : "hover:bg-primary/5",
+            'flex items-center gap-2 rounded-lg cursor-pointer transition-colors duration-200',
+            theme === 'light' ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-primary/5'
           )}
         >
           <div className="size-7 rounded-md bg-primary/10 flex items-center justify-center">
             <Sun className="h-4 w-4 text-primary" />
           </div>
-          {t("lightTheme")}
+          {t('lightTheme')}
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => setTheme("dark")}
+          onClick={() => setTheme('dark')}
           className={cn(
-            "flex items-center gap-2 rounded-lg cursor-pointer transition-colors duration-200",
-            theme === "dark" ? "bg-primary/10 text-primary font-medium" : "hover:bg-primary/5",
+            'flex items-center gap-2 rounded-lg cursor-pointer transition-colors duration-200',
+            theme === 'dark' ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-primary/5'
           )}
         >
           <div className="size-7 rounded-md bg-primary/10 flex items-center justify-center">
             <Moon className="h-4 w-4 text-primary" />
           </div>
-          {t("darkTheme")}
+          {t('darkTheme')}
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => setTheme("system")}
+          onClick={() => setTheme('system')}
           className={cn(
-            "flex items-center gap-2 rounded-lg cursor-pointer transition-colors duration-200",
-            theme === "system" ? "bg-primary/10 text-primary font-medium" : "hover:bg-primary/5",
+            'flex items-center gap-2 rounded-lg cursor-pointer transition-colors duration-200',
+            theme === 'system' ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-primary/5'
           )}
         >
           <div className="size-7 rounded-md bg-primary/10 flex items-center justify-center">
@@ -90,10 +97,9 @@ export function ThemeToggle({ useWhiteStyle = false }: ThemeToggleProps) {
               <line x1="12" x2="12" y1="17" y2="21" />
             </svg>
           </div>
-          {t("systemTheme")}
+          {t('systemTheme')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }
-

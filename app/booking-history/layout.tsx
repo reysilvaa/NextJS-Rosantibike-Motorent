@@ -1,4 +1,3 @@
-import type { Metadata } from "next"
 import { generateMetadata } from '@/lib/seo/config';
 import { generateKeywords } from '@/lib/seo/keywords';
 
@@ -16,10 +15,6 @@ export const metadata = generateMetadata({
   },
 });
 
-export default function BookingHistoryLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function BookingHistoryLayout({ children }: { children: React.ReactNode }) {
   return children;
-} 
+}

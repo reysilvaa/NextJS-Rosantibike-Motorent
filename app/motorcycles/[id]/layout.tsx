@@ -1,11 +1,12 @@
-import { Metadata } from "next"
-import { generateMetadata as baseSeoMetadata } from '@/lib/seo/config'
-import { generateKeywords } from '@/lib/seo/keywords'
+import { Metadata } from 'next';
+
+import { generateMetadata as baseSeoMetadata } from '@/lib/seo/config';
+import { generateKeywords } from '@/lib/seo/keywords';
 
 interface MotorcycleDetailPageProps {
   params: {
-    id: string
-  }
+    id: string;
+  };
 }
 
 export async function generateMetadata({ params }: MotorcycleDetailPageProps): Promise<Metadata> {
@@ -15,9 +16,9 @@ export async function generateMetadata({ params }: MotorcycleDetailPageProps): P
     return baseSeoMetadata({
       title: `Motorcycle Details - Rosanti Bike Rental`,
       description: `Detailed information about our premium motorcycle. Check specifications, features, and book this motorcycle for your next adventure.`,
-      keywords: generateKeywords('motorcycle-detail', { 
+      keywords: generateKeywords('motorcycle-detail', {
         title: `Motorcycle Details - Rosanti Bike Rental`,
-        additionalKeywords: [params.id]
+        additionalKeywords: [params.id],
       }),
       openGraph: {
         url: `https://rosantibike.com/motorcycles/${params.id}`,
@@ -28,8 +29,8 @@ export async function generateMetadata({ params }: MotorcycleDetailPageProps): P
         index: true,
         follow: true,
       },
-    })
-  } catch (error) {
+    });
+  } catch {
     return baseSeoMetadata({
       title: 'Motorcycle - Rosanti Bike Rental',
       description: 'Explore our premium motorcycle collection',
@@ -38,14 +39,10 @@ export async function generateMetadata({ params }: MotorcycleDetailPageProps): P
         index: true,
         follow: true,
       },
-    })
+    });
   }
 }
 
-export default function MotorcycleDetailLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function MotorcycleDetailLayout({ children }: { children: React.ReactNode }) {
   return children;
-} 
+}

@@ -1,29 +1,33 @@
-import { useState, useEffect } from "react"
-import { format, parse } from "date-fns"
-import type { DateRange } from "react-day-picker"
-import { useSocketContext } from "@/contexts/socket-context"
-import { useMotorcycleTypes } from "@/hooks/use-motorcycles"
+import { format, parse } from 'date-fns';
+import { useEffect, useState } from 'react';
+import type { DateRange } from 'react-day-picker';
 
-export function useAvailabilitySearch(initialStartDate?: string | null, initialEndDate?: string | null) {
-  const { data: motorcycleTypes, isLoading: isLoadingTypes } = useMotorcycleTypes()
-  const [dateRange, setDateRange] = useState<DateRange | undefined>()
-  const [motorcycleType, setMotorcycleType] = useState<string | undefined>()
-  
+import { useSocketContext } from '@/contexts/socket-context';
+import { useMotorcycleTypes } from '@/hooks/use-motorcycles';
+
+export function useAvailabilitySearch(
+  initialStartDate?: string | null,
+  initialEndDate?: string | null
+) {
+  const { data: motorcycleTypes, isLoading: isLoadingTypes } = useMotorcycleTypes();
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [motorcycleType, setMotorcycleType] = useState<string | undefined>();
+
   // Socket connection
-  const { isConnected, joinRoom } = useSocketContext()
+  const { isConnected, joinRoom } = useSocketContext();
 
   // Initialize dates from props
   useEffect(() => {
     if (initialStartDate && initialEndDate) {
       try {
-        const fromDate = parse(initialStartDate, "yyyy-MM-dd", new Date());
-        const toDate = parse(initialEndDate, "yyyy-MM-dd", new Date());
+        const fromDate = parse(initialStartDate, 'yyyy-MM-dd', new Date());
+        const toDate = parse(initialEndDate, 'yyyy-MM-dd', new Date());
         setDateRange({
           from: fromDate,
-          to: toDate
+          to: toDate,
         });
       } catch (e) {
-        console.error("Error parsing initial dates", e);
+        console.error('Error parsing initial dates', e);
       }
     }
   }, [initialStartDate, initialEndDate]);
@@ -31,19 +35,22 @@ export function useAvailabilitySearch(initialStartDate?: string | null, initialE
   // Join socket room
   useEffect(() => {
     if (isConnected) {
-      joinRoom("availability");
+      joinRoom('availability');
     }
   }, [isConnected, joinRoom]);
 
-  const handleSearch = (onSearch?: (startDate: string, endDate: string, jenisMotorId?: string) => void) => {
+  const handleSearch = (
+    onSearch?: (startDate: string, endDate: string, jenisMotorId?: string) => void
+  ) => {
     if (!dateRange?.from || !dateRange?.to) {
-      console.warn("Start and end date are required")
-      return
+      console.warn('Start and end date are required');
+      return;
     }
 
-    const formattedStartDate = format(dateRange.from, "yyyy-MM-dd");
-    const formattedEndDate = format(dateRange.to, "yyyy-MM-dd");
-    const selectedMotorcycleType = motorcycleType && motorcycleType !== "all" ? motorcycleType : undefined;
+    const formattedStartDate = format(dateRange.from, 'yyyy-MM-dd');
+    const formattedEndDate = format(dateRange.to, 'yyyy-MM-dd');
+    const selectedMotorcycleType =
+      motorcycleType && motorcycleType !== 'all' ? motorcycleType : undefined;
 
     if (onSearch) {
       onSearch(formattedStartDate, formattedEndDate, selectedMotorcycleType);
@@ -52,9 +59,9 @@ export function useAvailabilitySearch(initialStartDate?: string | null, initialE
     return {
       startDate: formattedStartDate,
       endDate: formattedEndDate,
-      motorcycleType: selectedMotorcycleType
-    }
-  }
+      motorcycleType: selectedMotorcycleType,
+    };
+  };
 
   return {
     dateRange,
@@ -64,6 +71,6 @@ export function useAvailabilitySearch(initialStartDate?: string | null, initialE
     motorcycleTypes,
     isLoadingTypes,
     isConnected,
-    handleSearch
-  }
-} 
+    handleSearch,
+  };
+}

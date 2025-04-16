@@ -1,24 +1,23 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/components/ui/use-toast";
-import BookingForm from "@/components/features/booking/booking-form";
-import { fetchMotorcycleUnitById } from "@/lib/network/api";
-import { MotorcycleUnit } from "@/lib/types";
-import { Loader2 } from "lucide-react";
+import { Loader2 } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
+import BookingForm from '@/components/features/booking/booking-form';
+import { useToast } from '@/components/ui/use-toast';
+import { fetchMotorcycleUnitById } from '@/lib/network/api';
+import { MotorcycleUnit } from '@/lib/types';
 
 export default function BookingPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
-  
+
   const unitId = searchParams.get('unitId');
   const startDateParam = searchParams.get('startDate');
   const endDateParam = searchParams.get('endDate');
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const [motorcycle, setMotorcycle] = useState<MotorcycleUnit | null>(null);
   const [startDate, setStartDate] = useState<Date | null>(null);
@@ -27,44 +26,44 @@ export default function BookingPage() {
   useEffect(() => {
     if (!unitId || !startDateParam || !endDateParam || unitId === 'undefined') {
       toast({
-        title: "Parameter tidak lengkap",
-        description: "Silakan pilih motor dari halaman ketersediaan",
-        variant: "destructive",
+        title: 'Parameter tidak lengkap',
+        description: 'Silakan pilih motor dari halaman ketersediaan',
+        variant: 'destructive',
       });
-      router.push("/availability");
+      router.push('/availability');
       return;
     }
-    
+
     setStartDate(new Date(startDateParam));
     setEndDate(new Date(endDateParam));
-    
+
     const loadMotorcycle = async () => {
       try {
         setIsLoading(true);
         if (unitId === 'undefined' || !unitId.trim()) {
-          throw new Error("ID motor tidak valid");
+          throw new Error('ID motor tidak valid');
         }
-        console.log("Mencoba mengambil data motor dengan ID:", unitId);
+        console.log('Mencoba mengambil data motor dengan ID:', unitId);
         const data = await fetchMotorcycleUnitById(unitId);
-        console.log("Data motor berhasil didapatkan:", data);
+        console.log('Data motor berhasil didapatkan:', data);
         setMotorcycle(data);
       } catch (error: any) {
-        console.error("Error fetching motorcycle:", error);
-        const errorMessage = error?.message || "Terjadi kesalahan saat memuat data motor";
+        console.error('Error fetching motorcycle:', error);
+        const errorMessage = error?.message || 'Terjadi kesalahan saat memuat data motor';
         toast({
-          title: "Gagal memuat data",
+          title: 'Gagal memuat data',
           description: errorMessage,
-          variant: "destructive",
+          variant: 'destructive',
         });
         // Redirect setelah 3 detik
         setTimeout(() => {
-          router.push("/availability");
+          router.push('/availability');
         }, 3000);
       } finally {
         setIsLoading(false);
       }
     };
-    
+
     loadMotorcycle();
   }, [unitId, startDateParam, endDateParam, router, toast]);
 
@@ -102,13 +101,9 @@ export default function BookingPage() {
             Silakan lengkapi formulir di bawah untuk melanjutkan pemesanan
           </p>
         </div>
-        
-        <BookingForm 
-          motorcycle={motorcycle} 
-          startDate={startDate} 
-          endDate={endDate}
-        />
+
+        <BookingForm motorcycle={motorcycle} startDate={startDate} endDate={endDate} />
       </div>
     </div>
   );
-} 
+}

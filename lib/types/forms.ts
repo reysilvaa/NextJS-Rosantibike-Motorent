@@ -1,51 +1,50 @@
-import { StatusMotor } from './enums'
-import { MotorcycleType } from './motorcycle'
+import { StatusMotor } from './enums';
 
 export interface AvailabilitySearchParams {
-  tanggalMulai: string
-  tanggalSelesai: string
-  jenisMotorId?: string
+  tanggalMulai: string;
+  tanggalSelesai: string;
+  jenisMotorId?: string;
 }
 
 export interface TransactionFormData {
-  namaPenyewa: string
-  noWhatsapp: string
-  unitId: string
-  tanggalMulai: string
-  tanggalSelesai: string
-  jamMulai: string
-  jamSelesai: string
-  jasHujan?: number
-  helm?: number
-  totalBiaya?: number
+  namaPenyewa: string;
+  noWhatsapp: string;
+  unitId: string;
+  tanggalMulai: string;
+  tanggalSelesai: string;
+  jamMulai: string;
+  jamSelesai: string;
+  jasHujan?: number;
+  helm?: number;
+  totalBiaya?: number;
   // Mempertahankan properti frontend untuk backward compatibility
-  namaCustomer?: string
-  noHP?: string
-  alamat?: string
-  nomorKTP?: string
-  unitMotorId?: string
+  namaCustomer?: string;
+  noHP?: string;
+  alamat?: string;
+  nomorKTP?: string;
+  unitMotorId?: string;
 }
 
 export interface BackendUnitAvailability {
-  unitId: string
-  platNomor: string
+  unitId: string;
+  platNomor: string;
   jenisMotor: {
-    id: string
-    merk: string
-    model: string
-    cc: number
-  }
-  hargaSewa: number
-  status: StatusMotor
+    id: string;
+    merk: string;
+    model: string;
+    cc: number;
+  };
+  hargaSewa: number;
+  status: StatusMotor;
   availability: {
-    date: string
-    isAvailable: boolean
-  }[]
+    date: string;
+    isAvailable: boolean;
+  }[];
 }
 
 export interface AvailabilityResponse {
-  startDate: string
-  endDate: string
-  totalUnits: number
-  units: BackendUnitAvailability[]
-} 
+  startDate: string;
+  endDate: string;
+  totalUnits: number;
+  units: BackendUnitAvailability[];
+}

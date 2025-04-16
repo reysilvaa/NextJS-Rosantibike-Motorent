@@ -1,20 +1,18 @@
-"use client"
+'use client';
 
-import BlogList from "@/components/blog/blog-list"
-import BlogSidebar from "@/components/blog/blog-sidebar"
-import { useTranslation } from "@/i18n/hooks"
+import BlogList from '@/components/blog/blog-list';
+import BlogSidebar from '@/components/blog/blog-sidebar';
+import { useTranslation } from '@/i18n/hooks';
 
 export default function BlogPageContent() {
-  const { t } = useTranslation()
-  
+  const { t } = useTranslation();
+
   return (
     <div className="container mx-auto px-4 py-20">
       <div className="max-w-6xl mx-auto">
         <div className="mb-10">
-          <h1 className="text-4xl font-bold mb-6">{t("blog")}</h1>
-          <p className="text-gray-400 max-w-3xl">
-            {t("blogDescription")}
-          </p>
+          <h1 className="text-4xl font-bold mb-6">{t('blog')}</h1>
+          <p className="text-gray-400 max-w-3xl">{t('blogDescription')}</p>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
@@ -27,5 +25,5 @@ export default function BlogPageContent() {
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}

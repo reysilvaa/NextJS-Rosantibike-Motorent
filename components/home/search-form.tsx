@@ -1,11 +1,12 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { Calendar, BikeIcon, Search } from 'lucide-react'
-import { useTranslation } from "@/i18n/hooks"
-import { MotorcycleType } from "@/lib/types/motorcycle"
+import { motion } from 'framer-motion';
+import { BikeIcon, Calendar, Search } from 'lucide-react';
+import { useState } from 'react';
+
+import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/i18n/hooks';
+import { MotorcycleType } from '@/lib/types/motorcycle';
 
 interface SearchFormProps {
   motorcycleTypes: MotorcycleType[];
@@ -19,28 +20,28 @@ interface SearchFormState {
 }
 
 export default function SearchForm({ motorcycleTypes, isLoading }: SearchFormProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
   const [searchForm, setSearchForm] = useState<SearchFormState>({
-    motorcycleTypeId: "",
-    pickupDate: "",
-    returnDate: ""
-  })
+    motorcycleTypeId: '',
+    pickupDate: '',
+    returnDate: '',
+  });
 
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setSearchForm(prev => ({
       ...prev,
-      [name]: value
-    }))
-  }
+      [name]: value,
+    }));
+  };
 
   // Handle form submission
   const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     // Redirect to motorcycles page with search params
-    window.location.href = `/motorcycles?typeId=${searchForm.motorcycleTypeId}&pickup=${searchForm.pickupDate}&return=${searchForm.returnDate}`
-  }
+    window.location.href = `/motorcycles?typeId=${searchForm.motorcycleTypeId}&pickup=${searchForm.pickupDate}&return=${searchForm.returnDate}`;
+  };
 
   return (
     <motion.form
@@ -51,27 +52,31 @@ export default function SearchForm({ motorcycleTypes, isLoading }: SearchFormPro
       className="bg-white/10 backdrop-blur-md p-6 rounded-xl border border-white/20 shadow-2xl"
       onSubmit={handleSearch}
     >
-      <h3 className="text-white text-xl font-bold mb-4">{t("quickSearch") || "Quick Search"}</h3>
-      
+      <h3 className="text-white text-xl font-bold mb-4">{t('quickSearch') || 'Quick Search'}</h3>
+
       <div className="space-y-4">
         <div>
           <label className="block text-white/80 text-sm font-medium mb-1">
-            {t("jenisMotor") || "Jenis Motor"}
+            {t('jenisMotor') || 'Jenis Motor'}
           </label>
           <div className="relative">
             <BikeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 h-5 w-5" />
-            <select 
+            <select
               className="w-full bg-white/20 border border-white/30 rounded-lg py-2 pl-10 pr-3 text-white appearance-none focus:outline-none focus:ring-2 focus:ring-primary"
               name="motorcycleTypeId"
               value={searchForm.motorcycleTypeId}
               onChange={handleInputChange}
               required
             >
-              <option value="" disabled className="bg-gray-800 text-white">Pilih Motor</option>
+              <option value="" disabled className="bg-gray-800 text-white">
+                Pilih Motor
+              </option>
               {isLoading ? (
-                <option value="" disabled className="bg-gray-800 text-white">Loading...</option>
+                <option value="" disabled className="bg-gray-800 text-white">
+                  Loading...
+                </option>
               ) : (
-                motorcycleTypes.map((motor) => (
+                motorcycleTypes.map(motor => (
                   <option key={motor.id} value={motor.id} className="bg-gray-800 text-white">
                     {motor.merk} {motor.model} - {motor.cc}cc
                   </option>
@@ -80,16 +85,16 @@ export default function SearchForm({ motorcycleTypes, isLoading }: SearchFormPro
             </select>
           </div>
         </div>
-        
+
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-white/80 text-sm font-medium mb-1">
-              {t("pickupDate") || "Pickup Date"}
+              {t('pickupDate') || 'Pickup Date'}
             </label>
             <div className="relative">
               <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 h-5 w-5" />
-              <input 
-                type="date" 
+              <input
+                type="date"
                 className="w-full bg-white/20 border border-white/30 rounded-lg py-2 pl-10 pr-3 text-white appearance-none focus:outline-none focus:ring-2 focus:ring-primary"
                 name="pickupDate"
                 value={searchForm.pickupDate}
@@ -98,15 +103,15 @@ export default function SearchForm({ motorcycleTypes, isLoading }: SearchFormPro
               />
             </div>
           </div>
-          
+
           <div>
             <label className="block text-white/80 text-sm font-medium mb-1">
-              {t("returnDate") || "Return Date"}
+              {t('returnDate') || 'Return Date'}
             </label>
             <div className="relative">
               <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 h-5 w-5" />
-              <input 
-                type="date" 
+              <input
+                type="date"
                 className="w-full bg-white/20 border border-white/30 rounded-lg py-2 pl-10 pr-3 text-white appearance-none focus:outline-none focus:ring-2 focus:ring-primary"
                 name="returnDate"
                 value={searchForm.returnDate}
@@ -116,12 +121,12 @@ export default function SearchForm({ motorcycleTypes, isLoading }: SearchFormPro
             </div>
           </div>
         </div>
-        
+
         <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white">
           <Search className="mr-2 h-4 w-4" />
-          {t("search") || "Search"}
+          {t('search') || 'Search'}
         </Button>
       </div>
     </motion.form>
-  )
-} 
+  );
+}

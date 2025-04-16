@@ -6,10 +6,12 @@ export interface ViewportConfig {
   maximumScale?: number;
   userScalable?: boolean;
   viewportFit?: 'auto' | 'contain' | 'cover';
-  themeColor?: string | Array<{
-    media: string;
-    color: string;
-  }>;
+  themeColor?:
+    | string
+    | Array<{
+        media: string;
+        color: string;
+      }>;
   colorScheme?: 'normal' | 'light' | 'dark' | 'light dark' | 'dark light';
 }
 
@@ -21,7 +23,7 @@ export const defaultViewportConfig: ViewportConfig = {
   viewportFit: 'cover',
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: 'white' },
-    { media: '(prefers-color-scheme: dark)', color: 'black' }
+    { media: '(prefers-color-scheme: dark)', color: 'black' },
   ],
 };
 
@@ -35,6 +37,6 @@ export const generateViewport = (config: Partial<ViewportConfig> = {}): Viewport
     userScalable: mergedConfig.userScalable,
     viewportFit: mergedConfig.viewportFit,
     themeColor: mergedConfig.themeColor,
-    colorScheme: mergedConfig.colorScheme
+    colorScheme: mergedConfig.colorScheme,
   };
-}; 
+};

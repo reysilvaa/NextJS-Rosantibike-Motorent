@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils/utils";
+import { cn } from '@/lib/utils/utils';
 
 interface PageHeaderProps {
   title: string;
@@ -16,12 +16,10 @@ export function PageHeader({
   return (
     <div className="bg-gradient-to-b from-accent to-background">
       <div className="container mx-auto px-4 py-20">
-        <div className={cn("py-10", className)}>
-          <h1 className="text-4xl font-bold mb-6 text-foreground">
-            {title}
-          </h1>
+        <div className={cn('py-10', className)}>
+          <h1 className="text-4xl font-bold mb-6 text-foreground">{title}</h1>
           {description && (
-            <p className={cn("text-foreground/75 max-w-3xl", descriptionClassName)}>
+            <p className={cn('text-foreground/75 max-w-3xl', descriptionClassName)}>
               {description}
             </p>
           )}
@@ -29,9 +27,10 @@ export function PageHeader({
       </div>
     </div>
   );
-} 
+}
 //terapkan header menjadi seperti ini
-{/* <div className="container mx-auto px-4 py-20">
+{
+  /* <div className="container mx-auto px-4 py-20">
 <div className="max-w-4xl mx-auto">
   <div className="mb-10">
     <h1 className="text-4xl font-bold mb-4">Riwayat Booking</h1>
@@ -39,4 +38,5 @@ export function PageHeader({
       Lacak dan lihat semua riwayat pemesanan motor Anda dengan mudah. Masukkan nomor telepon yang digunakan saat
       pemesanan.
     </p>
-  </div> */}
+  </div> */
+}

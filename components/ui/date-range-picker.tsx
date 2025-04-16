@@ -1,27 +1,24 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import { format } from "date-fns"
-import { DateRange } from "react-day-picker"
-import { CalendarIcon } from "@radix-ui/react-icons"
-import { cn } from "@/lib/utils/utils"
-import { Calendar } from "@/components/ui/calendar"
-import { Button } from "@/components/ui/button"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { useTranslation } from "@/i18n/hooks"
-import { useMediaQuery } from "@/hooks/common/use-media-query"
+import { CalendarIcon } from '@radix-ui/react-icons';
+import { format } from 'date-fns';
+import * as React from 'react';
+import { DateRange } from 'react-day-picker';
+
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useMediaQuery } from '@/hooks/common/use-media-query';
+import { useTranslation } from '@/i18n/hooks';
+import { cn } from '@/lib/utils/utils';
 
 // Core props for all date range pickers
 interface CoreDateRangePickerProps {
-  dateRange: DateRange | undefined
-  onDateRangeChange: (range: DateRange | undefined) => void
-  className?: string
-  disabledDates?: (date: Date) => boolean
-  numberOfMonths?: number
+  dateRange: DateRange | undefined;
+  onDateRangeChange: (range: DateRange | undefined) => void;
+  className?: string;
+  disabledDates?: (date: Date) => boolean;
+  numberOfMonths?: number;
 }
 
 // Core calendar component
@@ -29,10 +26,13 @@ function CoreCalendar({
   dateRange,
   onDateRangeChange,
   disabledDates,
-  numberOfMonths = 2
-}: Pick<CoreDateRangePickerProps, "dateRange" | "onDateRangeChange" | "disabledDates" | "numberOfMonths">) {
-  const defaultDisabledDates = (date: Date) => date < new Date()
-  const disableDates = disabledDates || defaultDisabledDates
+  numberOfMonths = 2,
+}: Pick<
+  CoreDateRangePickerProps,
+  'dateRange' | 'onDateRangeChange' | 'disabledDates' | 'numberOfMonths'
+>) {
+  const defaultDisabledDates = (date: Date) => date < new Date();
+  const disableDates = disabledDates || defaultDisabledDates;
 
   return (
     <Calendar
@@ -45,7 +45,7 @@ function CoreCalendar({
       disabled={disableDates}
       className="rounded-lg border border-border bg-card p-2 w-full"
     />
-  )
+  );
 }
 
 // Inline variant (default)
@@ -54,16 +54,16 @@ export function DateRangePicker({
   onDateRangeChange,
   className,
   disabledDates,
-  numberOfMonths: customNumberOfMonths
+  numberOfMonths: customNumberOfMonths,
 }: CoreDateRangePickerProps) {
-  const { t } = useTranslation()
-  const isDesktop = useMediaQuery("(min-width: 768px)")
-  
+  const { _t } = useTranslation();
+  const isDesktop = useMediaQuery('(min-width: 768px)');
+
   // Determine the number of months based on screen size unless specified
-  const numberOfMonths = customNumberOfMonths || (isDesktop ? 2 : 1)
-  
+  const numberOfMonths = customNumberOfMonths || (isDesktop ? 2 : 1);
+
   return (
-    <div className={cn("grid gap-2", className)}>
+    <div className={cn('grid gap-2', className)}>
       <div className="flex justify-center w-full">
         <div className="w-full flex justify-center">
           <CoreCalendar
@@ -76,11 +76,11 @@ export function DateRangePicker({
       </div>
       {dateRange?.from && dateRange?.to && (
         <p className="text-sm text-muted-foreground text-center">
-          {format(dateRange.from, "PPP")} - {format(dateRange.to, "PPP")}
+          {format(dateRange.from, 'PPP')} - {format(dateRange.to, 'PPP')}
         </p>
       )}
     </div>
-  )
+  );
 }
 
 // Popover variant
@@ -89,32 +89,31 @@ export function DateRangePickerPopover({
   onDateRangeChange,
   className,
   disabledDates,
-  numberOfMonths: customNumberOfMonths
+  numberOfMonths: customNumberOfMonths,
 }: CoreDateRangePickerProps) {
-  const isDesktop = useMediaQuery("(min-width: 768px)")
-  const numberOfMonths = customNumberOfMonths || (isDesktop ? 2 : 1)
-  
+  const isDesktop = useMediaQuery('(min-width: 768px)');
+  const numberOfMonths = customNumberOfMonths || (isDesktop ? 2 : 1);
+
   return (
-    <div className={cn("grid gap-2", className)}>
+    <div className={cn('grid gap-2', className)}>
       <Popover>
         <PopoverTrigger asChild>
           <Button
             id="date"
-            variant={"outline"}
+            variant={'outline'}
             className={cn(
-              "w-[300px] justify-start text-left font-normal",
-              !dateRange && "text-muted-foreground"
+              'w-[300px] justify-start text-left font-normal',
+              !dateRange && 'text-muted-foreground'
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             {dateRange?.from ? (
               dateRange.to ? (
                 <>
-                  {format(dateRange.from, "dd/MM/yyyy")} -{" "}
-                  {format(dateRange.to, "dd/MM/yyyy")}
+                  {format(dateRange.from, 'dd/MM/yyyy')} - {format(dateRange.to, 'dd/MM/yyyy')}
                 </>
               ) : (
-                format(dateRange.from, "dd/MM/yyyy")
+                format(dateRange.from, 'dd/MM/yyyy')
               )
             ) : (
               <span>Pilih tanggal</span>
@@ -131,5 +130,5 @@ export function DateRangePickerPopover({
         </PopoverContent>
       </Popover>
     </div>
-  )
-} 
+  );
+}

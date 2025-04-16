@@ -1,10 +1,11 @@
-"use client";
+'use client';
 
 import { notFound } from 'next/navigation';
-import { fetchBlogPostBySlug } from '@/lib/network/api';
-import BlogPostDetail from '@/components/blog/blog-post-detail';
-import type { BlogPost } from '@/lib/types/blog';
 import { useEffect, useState } from 'react';
+
+import BlogPostDetail from '@/components/blog/blog-post-detail';
+import { fetchBlogPostBySlug } from '@/lib/network/api';
+import type { BlogPost } from '@/lib/types/blog';
 
 interface BlogPostPageProps {
   params: {
@@ -30,7 +31,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
         setIsLoading(false);
       }
     }
-    
+
     loadPost();
   }, [slug]);
 

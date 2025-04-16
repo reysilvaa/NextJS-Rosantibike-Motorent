@@ -1,8 +1,7 @@
-"use client"
+'use client';
 
-import MotorcyclesPageContent from "@/components/motorcycles/motorcycles-page-content"
+import MotorcyclesPageContent from '@/components/motorcycles/motorcycles-page-content';
 
 export default function MotorcyclesPage() {
-  return <MotorcyclesPageContent />
+  return <MotorcyclesPageContent />;
 }
-

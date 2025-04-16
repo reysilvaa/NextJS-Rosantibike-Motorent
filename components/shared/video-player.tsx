@@ -1,6 +1,7 @@
-"use client";
+'use client';
 
 import React, { useEffect, useRef } from 'react';
+
 import { useVideoContext } from '@/contexts/video-context';
 
 interface VideoPlayerProps {
@@ -26,7 +27,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   controls = true,
   width = '100%',
   height = 'auto',
-  objectFit = 'contain'
+  objectFit = 'contain',
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { registerVideo, unregisterVideo, isPageVisible } = useVideoContext();
@@ -34,17 +35,17 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   // Daftarkan video ke VideoContext
   useEffect(() => {
     const videoElement = videoRef.current;
-    
+
     if (videoElement) {
       // Tambahkan audio track kosong untuk menghindari pause otomatis oleh browser
       if (!videoElement.muted) {
         // Jika video tidak di-mute, pastikan ada audio track
         addSilentAudioTrack(videoElement);
       }
-      
+
       // Daftarkan video ke context
       registerVideo(videoElement);
-      
+
       // Cleanup saat komponen unmount
       return () => {
         unregisterVideo(videoElement);
@@ -55,19 +56,19 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   // Pantau perubahan visibilitas halaman
   useEffect(() => {
     const videoElement = videoRef.current;
-    
+
     if (videoElement && autoPlay) {
       if (isPageVisible) {
         try {
           // Gunakan muted untuk memastikan video bisa autoplay
           videoElement.muted = true;
-          
+
           const playPromise = videoElement.play();
-          
+
           if (playPromise !== undefined) {
             playPromise.catch(error => {
               console.warn('Error saat mencoba autoplay video:', error);
-              
+
               // Jika error terkait interaksi user, tambahkan pesan atau UI untuk interaksi
               if (error.name === 'NotAllowedError') {
                 // Tambahkan overlay atau pesan di sini jika diperlukan
@@ -85,27 +86,27 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   }, [isPageVisible, autoPlay]);
 
   // Fungsi untuk menambahkan silent audio track
-  const addSilentAudioTrack = (video: HTMLVideoElement) => {
+  const addSilentAudioTrack = (_video: HTMLVideoElement) => {
     try {
       // Buat audio context
       const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
       if (!AudioContext) return;
-      
+
       const audioCtx = new AudioContext();
       const oscillator = audioCtx.createOscillator();
       const gainNode = audioCtx.createGain();
-      
+
       // Set gain ke hampir 0 (silent)
       gainNode.gain.value = 0.001;
-      
+
       // Hubungkan oscillator ke gain node dan ke destination
       oscillator.connect(gainNode);
       gainNode.connect(audioCtx.destination);
-      
+
       // Mulai oscillator dengan frekuensi sangat rendah
       oscillator.frequency.value = 1; // 1Hz, hampir tidak terdengar
       oscillator.start(0);
-      
+
       // Stop setelah 1 detik
       setTimeout(() => {
         oscillator.stop();
@@ -126,14 +127,14 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
       muted={muted}
       controls={controls}
       playsInline // Penting untuk iOS
-      style={{ 
-        width, 
-        height, 
-        objectFit 
+      style={{
+        width,
+        height,
+        objectFit,
       }}
-      onError={(e) => console.error('Video error:', e)}
+      onError={e => console.error('Video error:', e)}
     />
   );
 };
 
-export default VideoPlayer; 
+export default VideoPlayer;

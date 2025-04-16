@@ -1,73 +1,75 @@
-"use client"
+'use client';
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from "react"
-import { apiClient } from "@/lib/network/api"
-import { toast } from "@/hooks/common/use-toast" // Pastikan path ini sesuai
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+
+import { toast } from '@/hooks/common/use-toast'; // Pastikan path ini sesuai
+import { apiClient } from '@/lib/network/api';
 
 export interface MotorcycleFilters {
-  search: string
-  ccRange: [number, number]
-  yearRange: [number, number]
-  brands: string[] // ini sebenarnya adalah field 'merk' di model JenisMotor
-  startDate?: string
-  endDate?: string
+  search: string;
+  ccRange: [number, number];
+  yearRange: [number, number];
+  brands: string[]; // ini sebenarnya adalah field 'merk' di model JenisMotor
+  startDate?: string;
+  endDate?: string;
 }
 
 // Interface Brand mewakili data dari field 'merk' di model JenisMotor
 interface Brand {
-  id: string
-  merk: string
+  id: string;
+  merk: string;
 }
 
 interface MotorcycleFilterContextType {
-  filters: MotorcycleFilters
-  setFilters: React.Dispatch<React.SetStateAction<MotorcycleFilters>>
-  updateFilter: <K extends keyof MotorcycleFilters>(key: K, value: MotorcycleFilters[K]) => void
-  resetFilters: () => void
-  availableBrands: Brand[]
-  isLoading: boolean
+  filters: MotorcycleFilters;
+  setFilters: React.Dispatch<React.SetStateAction<MotorcycleFilters>>;
+  updateFilter: <K extends keyof MotorcycleFilters>(key: K, value: MotorcycleFilters[K]) => void;
+  resetFilters: () => void;
+  availableBrands: Brand[];
+  isLoading: boolean;
 }
 
 const defaultFilters: MotorcycleFilters = {
-  search: "",
+  search: '',
   ccRange: [0, 1500],
   yearRange: [2010, new Date().getFullYear()],
-  brands: []
-}
+  brands: [],
+};
 
 // Data merek motor statis sebagai fallback
 const staticBrands: Brand[] = [
-  { id: "honda", merk: "Honda" },
-  { id: "yamaha", merk: "Yamaha" },
-  { id: "suzuki", merk: "Suzuki" },
-  { id: "kawasaki", merk: "Kawasaki" },
-  { id: "vespa", merk: "Vespa" },
-  { id: "harley", merk: "Harley Davidson" },
-  { id: "ducati", merk: "Ducati" },
-  { id: "bmw", merk: "BMW" },
-  { id: "ktm", merk: "KTM" }
-]
+  { id: 'honda', merk: 'Honda' },
+  { id: 'yamaha', merk: 'Yamaha' },
+  { id: 'suzuki', merk: 'Suzuki' },
+  { id: 'kawasaki', merk: 'Kawasaki' },
+  { id: 'vespa', merk: 'Vespa' },
+  { id: 'harley', merk: 'Harley Davidson' },
+  { id: 'ducati', merk: 'Ducati' },
+  { id: 'bmw', merk: 'BMW' },
+  { id: 'ktm', merk: 'KTM' },
+];
 
-const MotorcycleFilterContext = createContext<MotorcycleFilterContextType | undefined>(undefined)
+const MotorcycleFilterContext = createContext<MotorcycleFilterContextType | undefined>(undefined);
 
 export function MotorcycleFilterProvider({ children }: { children: ReactNode }) {
-  const [filters, setFilters] = useState<MotorcycleFilters>(defaultFilters)
-  const [availableBrands, setAvailableBrands] = useState<Brand[]>(staticBrands)
-  const [isLoading, setIsLoading] = useState(false)
+  const [filters, setFilters] = useState<MotorcycleFilters>(defaultFilters);
+  const [availableBrands, setAvailableBrands] = useState<Brand[]>(staticBrands);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchOptions = async () => {
-      setIsLoading(true)
+      setIsLoading(true);
       try {
         // Ambil merek-merek motor yang tersedia dari endpoint yang benar
         // Gunakan endpoint yang benar dan tambahkan timeout yang lebih panjang
         const brandsResponse = await apiClient.get('/unit-motor/brands', {
           timeout: 30000, // Tingkatkan timeout
-          baseURL: typeof window !== 'undefined' && window.location.hostname === 'localhost'
-            ? 'https://api.rosantibikemotorent.com'
-            : undefined,
-          headers: { 
-            'Content-Type': 'application/json' 
+          baseURL:
+            typeof window !== 'undefined' && window.location.hostname === 'localhost'
+              ? 'https://api.rosantibikemotorent.com'
+              : undefined,
+          headers: {
+            'Content-Type': 'application/json',
           },
           // Tambahkan konfigurasi untuk mengatasi masalah CORS
           withCredentials: false,
@@ -75,91 +77,88 @@ export function MotorcycleFilterProvider({ children }: { children: ReactNode }) 
           maxRedirects: 5,
           maxContentLength: 50 * 1000 * 1000, // 50 MB
           // Proxy false di lingkungan tertentu
-          proxy: false
-        })
-        
-        console.log('Brands response:', brandsResponse)
-        
+          proxy: false,
+        });
+
+        console.log('Brands response:', brandsResponse);
+
         if (brandsResponse?.data?.data) {
-          setAvailableBrands(brandsResponse.data.data)
+          setAvailableBrands(brandsResponse.data.data);
         } else if (brandsResponse?.data) {
           // Fallback jika strukturnya berbeda
-          setAvailableBrands(brandsResponse.data)
+          setAvailableBrands(brandsResponse.data);
         }
       } catch (error: any) {
-        console.error('Error fetching brand options:', error)
-        
+        console.error('Error fetching brand options:', error);
+
         // Menampilkan pesan error yang lebih informatif
         if (error.code === 'ERR_NETWORK' || error.name === 'AxiosError') {
-          console.warn('Network error, menggunakan data brands statis')
+          console.warn('Network error, menggunakan data brands statis');
           // Tambahkan toast notification
           toast({
             title: 'Peringatan Koneksi',
             description: 'Tidak dapat terhubung ke server. Menggunakan data merek statis.',
-            variant: 'default'
-          })
+            variant: 'default',
+          });
           // Tetap gunakan data statis (sudah diinisialisasi di state)
         } else if (error.response) {
           // Error dari server dengan respons
-          console.error('Server error:', error.response.status, error.response.data)
+          console.error('Server error:', error.response.status, error.response.data);
           toast({
             title: 'Error Server',
             description: `Server error: ${error.response.status}`,
-            variant: 'destructive'
-          })
+            variant: 'destructive',
+          });
         } else if (error.request) {
           // Error tanpa respons dari server
-          console.error('No response from server')
+          console.error('No response from server');
           toast({
             title: 'Tidak Ada Respons',
             description: 'Server tidak merespons. Menggunakan data merek statis.',
-            variant: 'default'
-          })
+            variant: 'default',
+          });
         }
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchOptions()
-  }, [])
+    fetchOptions();
+  }, []);
 
-  const updateFilter = <K extends keyof MotorcycleFilters>(
-    key: K,
-    value: MotorcycleFilters[K]
-  ) => {
+  const updateFilter = <K extends keyof MotorcycleFilters>(key: K, value: MotorcycleFilters[K]) => {
     setFilters(prev => ({
       ...prev,
-      [key]: value
-    }))
-  }
+      [key]: value,
+    }));
+  };
 
   const resetFilters = () => {
-    setFilters(defaultFilters)
-  }
+    setFilters(defaultFilters);
+  };
 
   return (
-    <MotorcycleFilterContext.Provider 
-      value={{ 
-        filters, 
-        setFilters, 
-        updateFilter, 
+    <MotorcycleFilterContext.Provider
+      value={{
+        filters,
+        setFilters,
+        updateFilter,
         resetFilters,
         availableBrands,
-        isLoading
+        isLoading,
       }}
     >
       {children}
     </MotorcycleFilterContext.Provider>
-  )
+  );
 }
 
 export function useMotorcycleFilters() {
-  const context = useContext(MotorcycleFilterContext)
-  
+  const context = useContext(MotorcycleFilterContext);
+
   if (context === undefined) {
-    throw new Error("useMotorcycleFilters must be used within a MotorcycleFilterProvider")
+    throw new Error('useMotorcycleFilters must be used within a MotorcycleFilterProvider');
   }
-  
-  return context
-} 
+
+  return context;
+}

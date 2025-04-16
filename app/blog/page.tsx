@@ -1,8 +1,7 @@
-"use client"
+'use client';
 
-import BlogPageContent from "@/components/blog/blog-page-content"
+import BlogPageContent from '@/components/blog/blog-page-content';
 
 export default function BlogPage() {
-  return <BlogPageContent />
+  return <BlogPageContent />;
 }
-

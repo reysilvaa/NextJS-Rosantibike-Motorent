@@ -1,15 +1,15 @@
-"use client";
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+'use client';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { toast } from 'sonner';
-import { 
-  getSocket, 
-  joinRoom, 
-  leaveRoom, 
+
+import {
   emitEvent,
-  listenEvent, 
-  disconnect,
-  SocketEvents as SocketEventsType
+  getSocket,
+  joinRoom,
+  leaveRoom,
+  listenEvent,
+  SocketEvents as SocketEventsType,
 } from '../lib/sockets/socket';
 
 // Interface untuk nilai context
@@ -42,10 +42,10 @@ interface SocketProviderProps {
 }
 
 // Provider component
-export const SocketProvider: React.FC<SocketProviderProps> = ({ 
-  children, 
+export const SocketProvider: React.FC<SocketProviderProps> = ({
+  children,
   enableNotifications = true,
-  defaultRooms = []
+  defaultRooms = [],
 }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -54,7 +54,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
   useEffect(() => {
     const socketInstance = getSocket();
     setSocket(socketInstance);
-    
+
     const handleConnect = () => {
       setIsConnected(true);
       if (enableNotifications) {
@@ -63,23 +63,23 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
           duration: 2000,
         });
       }
-      
+
       // Join default rooms
       defaultRooms.forEach(room => joinRoom(room));
     };
-    
+
     const handleDisconnect = (reason: string) => {
       setIsConnected(false);
-      
+
       if (enableNotifications) {
         const messages: Record<string, string> = {
           'io server disconnect': 'Terputus oleh server, mencoba menghubungkan kembali...',
           'io client disconnect': 'Koneksi diputus',
           'ping timeout': 'Timeout koneksi server, mencoba menghubungkan kembali...',
           'transport close': 'Koneksi tertutup, mencoba menghubungkan kembali...',
-          'transport error': 'Error jaringan, mencoba menghubungkan kembali...'
+          'transport error': 'Error jaringan, mencoba menghubungkan kembali...',
         };
-        
+
         const message = messages[reason] || `Koneksi terputus: ${reason}`;
         toast.error(message, {
           id: 'socket-disconnected',
@@ -87,7 +87,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
         });
       }
     };
-    
+
     const handleError = (error: Error) => {
       console.error('Socket error:', error);
       if (enableNotifications) {
@@ -97,22 +97,22 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
         });
       }
     };
-    
+
     if (socketInstance) {
       socketInstance.on('connect', handleConnect);
       socketInstance.on('disconnect', handleDisconnect);
       socketInstance.on('error', handleError);
       socketInstance.on('connect_error', handleError);
-      
+
       // Setup ping/pong heartbeat
       socketInstance.on('ping', () => {
         socketInstance.emit('pong', { timestamp: new Date().toISOString() });
       });
-      
+
       // Set initial state
       setIsConnected(socketInstance.connected);
     }
-    
+
     return () => {
       if (socketInstance) {
         socketInstance.off('connect', handleConnect);
@@ -120,7 +120,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
         socketInstance.off('error', handleError);
         socketInstance.off('connect_error', handleError);
         socketInstance.off('ping');
-        
+
         // Leave default rooms
         defaultRooms.forEach(room => leaveRoom(room));
       }
@@ -165,7 +165,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
           description: 'Mencoba menghubungkan kembali ke server...',
         });
       }
-      
+
       if (!navigator.onLine) {
         if (enableNotifications) {
           toast.error('Tidak Ada Koneksi Internet', {
@@ -174,7 +174,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
         }
         return;
       }
-      
+
       socket.connect();
     }
   };
@@ -190,15 +190,11 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
     reconnect: manualReconnect,
   };
 
-  return (
-    <SocketContext.Provider value={value}>
-      {children}
-    </SocketContext.Provider>
-  );
+  return <SocketContext.Provider value={value}>{children}</SocketContext.Provider>;
 };
 
 // Hook untuk menggunakan socket
 export const useSocketContext = () => useContext(SocketContext);
 
 // Export enum untuk kemudahan
-export { SocketEventsType as SocketEvents }; 
+export { SocketEventsType as SocketEvents };

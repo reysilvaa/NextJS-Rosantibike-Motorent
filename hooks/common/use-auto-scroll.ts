@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useEffect, useRef, useState } from 'react';
 
 interface UseAutoScrollOptions {
   shouldScroll: boolean;
@@ -22,9 +22,9 @@ export function useAutoScroll({
     if (shouldScroll && !isLoading && hasData) {
       // Scroll to results after a short delay to allow for rendering
       setTimeout(() => {
-        resultsRef.current?.scrollIntoView({ behavior: "smooth" });
+        resultsRef.current?.scrollIntoView({ behavior: 'smooth' });
         setShowResultIndicator(true);
-        
+
         // Hide the indicator after specified duration
         setTimeout(() => {
           setShowResultIndicator(false);
@@ -37,4 +37,4 @@ export function useAutoScroll({
     resultsRef,
     showResultIndicator,
   };
-} 
+}

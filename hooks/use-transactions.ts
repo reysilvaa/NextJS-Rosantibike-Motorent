@@ -1,8 +1,16 @@
-import { useState, useEffect, useCallback } from 'react';
-import { fetchTransactions, fetchTransactionById, fetchTransactionHistory, createTransaction, completeTransaction } from '@/lib/api';
+import { useCallback, useEffect, useState } from 'react';
+
+import {
+  completeTransaction,
+  createTransaction,
+  fetchTransactionById,
+  fetchTransactionHistory,
+  fetchTransactions,
+} from '@/lib/api';
+import type { Transaction, TransactionFormData } from '@/lib/types';
+
 import { useLoading } from './common/use-loading';
 import { toast } from './common/use-toast';
-import type { Transaction, TransactionFormData } from '@/lib/types';
 
 export function useTransactions(filter?: Record<string, any>) {
   const [data, setData] = useState<Transaction[]>([]);
@@ -65,7 +73,7 @@ export function useTransaction(id?: string) {
 
   const fetchData = useCallback(async () => {
     if (!id) return;
-    
+
     try {
       const result = await withLoading(fetchTransactionById(id));
       setData(result);
@@ -91,29 +99,32 @@ export function useCreateTransaction() {
   const { isLoading, withLoading } = useLoading(false);
   const [error, setError] = useState<string | null>(null);
 
-  const execute = useCallback(async (data: TransactionFormData) => {
-    try {
-      const result = await withLoading(createTransaction(data));
-      
-      toast({
-        title: "Transaksi Berhasil",
-        description: "Transaksi berhasil dibuat",
-      });
-      
-      return result;
-    } catch (err: any) {
-      const errorMsg = err.message || 'Gagal membuat transaksi';
-      setError(errorMsg);
-      
-      toast({
-        title: "Transaksi Gagal",
-        description: errorMsg,
-        variant: "destructive",
-      });
-      
-      throw err;
-    }
-  }, [withLoading]);
+  const execute = useCallback(
+    async (data: TransactionFormData) => {
+      try {
+        const result = await withLoading(createTransaction(data));
+
+        toast({
+          title: 'Transaksi Berhasil',
+          description: 'Transaksi berhasil dibuat',
+        });
+
+        return result;
+      } catch (err: any) {
+        const errorMsg = err.message || 'Gagal membuat transaksi';
+        setError(errorMsg);
+
+        toast({
+          title: 'Transaksi Gagal',
+          description: errorMsg,
+          variant: 'destructive',
+        });
+
+        throw err;
+      }
+    },
+    [withLoading]
+  );
 
   return { execute, isLoading, error };
 }
@@ -122,29 +133,32 @@ export function useCompleteTransaction() {
   const { isLoading, withLoading } = useLoading(false);
   const [error, setError] = useState<string | null>(null);
 
-  const execute = useCallback(async (id: string) => {
-    try {
-      const result = await withLoading(completeTransaction(id));
-      
-      toast({
-        title: "Transaksi Selesai",
-        description: "Transaksi berhasil diselesaikan",
-      });
-      
-      return result;
-    } catch (err: any) {
-      const errorMsg = err.message || 'Gagal menyelesaikan transaksi';
-      setError(errorMsg);
-      
-      toast({
-        title: "Gagal Menyelesaikan Transaksi",
-        description: errorMsg,
-        variant: "destructive",
-      });
-      
-      throw err;
-    }
-  }, [withLoading]);
+  const execute = useCallback(
+    async (id: string) => {
+      try {
+        const result = await withLoading(completeTransaction(id));
+
+        toast({
+          title: 'Transaksi Selesai',
+          description: 'Transaksi berhasil diselesaikan',
+        });
+
+        return result;
+      } catch (err: any) {
+        const errorMsg = err.message || 'Gagal menyelesaikan transaksi';
+        setError(errorMsg);
+
+        toast({
+          title: 'Gagal Menyelesaikan Transaksi',
+          description: errorMsg,
+          variant: 'destructive',
+        });
+
+        throw err;
+      }
+    },
+    [withLoading]
+  );
 
   return { execute, isLoading, error };
-} 
+}

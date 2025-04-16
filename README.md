@@ -7,19 +7,19 @@ Aplikasi ini mendukung multi-bahasa dengan menggunakan i18next. Berikut adalah p
 ### 1. Menggunakan Terjemahan di Komponen
 
 ```tsx
-"use client"
+'use client';
 
-import { useTranslation } from "@/i18n/hooks"
+import { useTranslation } from '@/i18n/hooks';
 
 export function MyComponent() {
-  const { t } = useTranslation()
-  
+  const { t } = useTranslation();
+
   return (
     <div>
-      <h1>{t("welcomeMessage")}</h1>
-      <p>{t("someDescription")}</p>
+      <h1>{t('welcomeMessage')}</h1>
+      <p>{t('someDescription')}</p>
     </div>
-  )
+  );
 }
 ```
 
@@ -28,6 +28,7 @@ export function MyComponent() {
 Untuk menambahkan terjemahan baru:
 
 1. Tambahkan kunci dan nilai terjemahan di file:
+
    - `/frontend/i18n/locales/id.json` untuk Bahasa Indonesia
    - `/frontend/i18n/locales/en.json` untuk Bahasa Inggris
 
@@ -40,8 +41,8 @@ Untuk menambahkan terjemahan baru:
 // "welcome": "Halo, {name}!" (di id.json)
 // "welcome": "Hello, {name}!" (di en.json)
 
-const { t } = useTranslation()
-const greeting = t("welcome", { name: "John" }) // Hasil: "Hello, John!" atau "Halo, John!"
+const { t } = useTranslation();
+const greeting = t('welcome', { name: 'John' }); // Hasil: "Hello, John!" atau "Halo, John!"
 ```
 
 ### 4. Perubahan Bahasa
@@ -73,25 +74,28 @@ Pastikan Anda menerapkan terjemahan ke komponen-komponen berikut:
 ### 6. Cara Mengimplementasikan ke Komponen Yang Belum Diterjemahkan
 
 1. Import hook `useTranslation`:
+
    ```tsx
-   import { useTranslation } from "@/i18n/hooks"
+   import { useTranslation } from '@/i18n/hooks';
    ```
 
 2. Gunakan hook di komponen Anda:
+
    ```tsx
-   const { t } = useTranslation()
+   const { t } = useTranslation();
    ```
 
 3. Ganti semua string statis dengan fungsi `t()`:
+
    ```tsx
    // Sebelum:
    <h1>Judul Halaman</h1>
-   
+
    // Sesudah:
    <h1>{t("pageTitle")}</h1>
    ```
 
-4. Tambahkan kunci terjemahan ke file bahasa di `/frontend/i18n/locales/` 
+4. Tambahkan kunci terjemahan ke file bahasa di `/frontend/i18n/locales/`
 
 ## Translation Status
 
@@ -111,4 +115,4 @@ Pastikan Anda menerapkan terjemahan ke komponen-komponen berikut:
 - [x] Blog/PostList
 - [x] Blog/PostDetail
 
-*Note: Check the box [x] when the component has been translated.* 
+_Note: Check the box [x] when the component has been translated._

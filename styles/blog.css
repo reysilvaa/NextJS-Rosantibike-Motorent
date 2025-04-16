@@ -1,3 +1,9 @@
+/* 
+ * Modul CSS untuk styling konten blog 
+ * - File ini diimpor dalam app/globals.css
+ * - Berisi aturan khusus untuk elemen blog (headings, paragraf, daftar, dll.)
+ */
+
 /* Blog Content Styles */
 .blog-content {
   color: var(--foreground);

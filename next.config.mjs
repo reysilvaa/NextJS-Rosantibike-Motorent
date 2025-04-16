@@ -1,12 +1,6 @@
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-
 // Import bundle analyzer
-import withBundleAnalyzer from '@next/bundle-analyzer';
-
-const bundleAnalyzer = withBundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true',
-});
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -14,7 +8,7 @@ const __dirname = dirname(__filename);
 let userConfig = undefined
 try {
   userConfig = await import('./v0-user-next.config')
-} catch (e) {
+} catch (/** @type {any} */ _unused) {
   // ignore error
 }
 
@@ -291,4 +285,16 @@ function mergeConfig(nextConfig, userConfig) {
   }
 }
 
-export default bundleAnalyzer(nextConfig)
+// Export nextConfig with analyzer if available
+let exportedConfig = nextConfig;
+
+try {
+  const withBundleAnalyzer = (await import('@next/bundle-analyzer')).default({
+    enabled: process.env.ANALYZE === 'true',
+  });
+  exportedConfig = withBundleAnalyzer(nextConfig);
+} catch (_unused) {
+  // Fallback to regular config if bundle analyzer is not available
+}
+
+export default exportedConfig;

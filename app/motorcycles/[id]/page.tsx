@@ -1,17 +1,18 @@
-"use client";
+'use client';
 
-import { notFound } from "next/navigation"
-import MotorcycleDetail from "@/components/motorcycles/motorcycle-detail"
-import { useEffect, useState } from "react";
+import { notFound } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
+import MotorcycleDetail from '@/components/motorcycles/motorcycle-detail';
 
 interface MotorcycleDetailPageProps {
   params: {
-    id: string
-  }
+    id: string;
+  };
 }
 
 export default function MotorcycleDetailPage({ params }: MotorcycleDetailPageProps) {
-  const [id, setId] = useState<string>("");
+  const [id, setId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -49,5 +50,5 @@ export default function MotorcycleDetailPage({ params }: MotorcycleDetailPagePro
         <MotorcycleDetail id={id} />
       </div>
     </div>
-  )
-} 
+  );
+}

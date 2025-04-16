@@ -1,7 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
-import { fetchBlogPosts, fetchBlogPostById, fetchBlogPostBySlug } from '@/lib/network/api';
-import { useLoading } from '../common/use-loading';
+import { useCallback, useEffect, useState } from 'react';
+
+import { fetchBlogPostById, fetchBlogPostBySlug, fetchBlogPosts } from '@/lib/network/api';
 import type { BlogPost, BlogTag } from '@/lib/types/blog';
+
+import { useLoading } from '../common/use-loading';
 
 interface BlogMeta {
   totalItems: number;
@@ -12,7 +14,13 @@ interface BlogMeta {
   tags: BlogTag[];
 }
 
-export function useBlogPosts(page = 1, limit = 10, search?: string, status?: string, kategori?: string) {
+export function useBlogPosts(
+  page = 1,
+  limit = 10,
+  search?: string,
+  status?: string,
+  kategori?: string
+) {
   const [data, setData] = useState<BlogPost[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [meta, setMeta] = useState<BlogMeta>({
@@ -28,7 +36,7 @@ export function useBlogPosts(page = 1, limit = 10, search?: string, status?: str
   const fetchData = useCallback(async () => {
     try {
       const result = await withLoading(fetchBlogPosts(page, limit, search, status, kategori));
-      
+
       if (result && typeof result === 'object' && 'data' in result && Array.isArray(result.data)) {
         setData(result.data);
         if ('meta' in result && result.meta) {
@@ -47,7 +55,7 @@ export function useBlogPosts(page = 1, limit = 10, search?: string, status?: str
       } else {
         setData([]);
       }
-      
+
       setError(null);
     } catch (err: any) {
       setError(err.message || 'Gagal memuat blog posts');
@@ -100,4 +108,4 @@ export function useBlogPost(id?: string, slug?: string) {
   }, [fetchData]);
 
   return { data, isLoading, error, refetch };
-} 
+}

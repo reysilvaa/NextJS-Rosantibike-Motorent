@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+
 import { fetchBlogPostBySlug } from '@/lib/network/api';
 import { generateMetadata as baseSeoMetadata } from '@/lib/seo/config';
 import { generateKeywords } from '@/lib/seo/keywords';
@@ -18,8 +19,8 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
       return baseSeoMetadata({
         title: 'Article Not Found - Rosanti Bike Rental',
         description: 'The article you are looking for could not be found.',
-        keywords: generateKeywords('not-found', { 
-          additionalKeywords: ['blog article', params.slug] 
+        keywords: generateKeywords('not-found', {
+          additionalKeywords: ['blog article', params.slug],
         }),
         robots: {
           index: true,
@@ -32,7 +33,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
       title: `${post.judul} - Rosanti Bike Rental Blog`,
       description: post.konten.slice(0, 160) || post.judul,
       keywords: generateKeywords('blog', {
-        additionalKeywords: [...post.tags.map(tag => tag.tag.nama), post.judul]
+        additionalKeywords: [...post.tags.map(tag => tag.tag.nama), post.judul],
       }),
       openGraph: {
         url: `https://rosantibikemotorent.com/blog/${post.slug}`,
@@ -57,10 +58,6 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   }
 }
 
-export default function BlogPostLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function BlogPostLayout({ children }: { children: React.ReactNode }) {
   return children;
-} 
+}

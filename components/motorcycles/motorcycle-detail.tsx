@@ -1,12 +1,15 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { format } from "date-fns"
-import { Calendar } from "@/components/ui/calendar"
-import { Button } from "@/components/ui/button"
+import { format } from 'date-fns';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
 import {
   Card,
   CardContent,
@@ -14,17 +17,15 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { Skeleton } from "@/components/ui/skeleton"
-import { fetchMotorcycleTypeById, checkAvailability } from "@/lib/network/api"
-import { motion } from "framer-motion"
-import type { MotorcycleType, MotorcycleUnit } from "@/lib/types/motorcycle"
-import { StatusMotor } from "@/lib/types/enums"
-import { useSocketContext, SocketEvents } from "@/contexts/socket-context"
-import { toast } from "@/components/ui/use-toast"
-import { useTranslation } from "@/i18n/hooks"
+} from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from '@/components/ui/use-toast';
+import { SocketEvents, useSocketContext } from '@/contexts/socket-context';
+import { useTranslation } from '@/i18n/hooks';
+import { checkAvailability, fetchMotorcycleTypeById } from '@/lib/network/api';
+import { StatusMotor } from '@/lib/types/enums';
+import type { MotorcycleType, MotorcycleUnit } from '@/lib/types/motorcycle';
 
 // Extend MotorcycleType for additional properties
 interface ExtendedMotorcycleType extends MotorcycleType {
@@ -33,40 +34,40 @@ interface ExtendedMotorcycleType extends MotorcycleType {
 }
 
 // Placeholder statis yang dijamin ada di folder public
-const MOTORCYCLE_PLACEHOLDER = "/motorcycle-placeholder.svg"
+const MOTORCYCLE_PLACEHOLDER = '/motorcycle-placeholder.svg';
 
 export default function MotorcycleDetail({ id }: { id: string }) {
-  const { t } = useTranslation()
-  const router = useRouter()
-  const [motorcycle, setMotorcycle] = useState<ExtendedMotorcycleType | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined)
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined)
-  const [formattedStartDate, setFormattedStartDate] = useState<string | undefined>(undefined)
-  const [formattedEndDate, setFormattedEndDate] = useState<string | undefined>(undefined)
-  const [imageSrc, setImageSrc] = useState<string>(MOTORCYCLE_PLACEHOLDER)
-  const [units, setUnits] = useState<MotorcycleUnit[]>([])
-  
+  const { t } = useTranslation();
+  const router = useRouter();
+  const [motorcycle, setMotorcycle] = useState<ExtendedMotorcycleType | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [formattedStartDate, setFormattedStartDate] = useState<string | undefined>(undefined);
+  const [formattedEndDate, setFormattedEndDate] = useState<string | undefined>(undefined);
+  const [imageSrc, setImageSrc] = useState<string>(MOTORCYCLE_PLACEHOLDER);
+  const [units, setUnits] = useState<MotorcycleUnit[]>([]);
+
   // State untuk ketersediaan
-  const [isCheckingAvailability, setIsCheckingAvailability] = useState(false)
-  const [availableUnits, setAvailableUnits] = useState<MotorcycleUnit[]>([])
-  const [showAvailability, setShowAvailability] = useState(false)
-  
+  const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
+  const [_availableUnits, setAvailableUnits] = useState<MotorcycleUnit[]>([]);
+  const [_showAvailability, setShowAvailability] = useState(false);
+
   // Socket connection untuk mendapatkan real-time updates
   const { isConnected, joinRoom, listen } = useSocketContext();
-  
+
   useEffect(() => {
     if (!isConnected) return;
-    
+
     // Join room untuk motor ini
     joinRoom(`motorcycle-${id}`);
-    
+
     // Setup listeners
     const unsubStatusUpdate = listen(SocketEvents.MOTOR_STATUS_UPDATE, handleMotorStatusUpdate);
     const unsubUnitUpdate = listen('unit-update', handleUnitUpdate);
     const unsubUnitDelete = listen('unit-delete', handleUnitDelete);
-    
+
     // Cleanup listeners on unmount
     return () => {
       unsubStatusUpdate();
@@ -79,72 +80,79 @@ export default function MotorcycleDetail({ id }: { id: string }) {
   function handleMotorStatusUpdate(data: any) {
     if (data && data.unitId) {
       // Update status pada unit yang sesuai
-      setUnits(prevUnits => prevUnits.map(unit => {
-        if (unit.id === data.unitId) {
-          // Toast notification untuk update status
-          const statusText = data.status === StatusMotor.TERSEDIA ? t("available").toLowerCase() : 
-                           data.status === StatusMotor.DISEWA ? t("rented").toLowerCase() : 
-                           data.status === StatusMotor.DIPESAN ? t("service").toLowerCase() : t("unavailable").toLowerCase();
-          
-          toast({
-            title: t("motorcycleStatusChanged"),
-            description: `${t("unit")} ${unit.platNomor} ${t("isNow")} ${statusText}`,
-            variant: data.status === StatusMotor.TERSEDIA ? "default" : "destructive"
-          })
-          
-          return { ...unit, status: data.status };
-        }
-        return unit;
-      }))
+      setUnits(prevUnits =>
+        prevUnits.map(unit => {
+          if (unit.id === data.unitId) {
+            // Toast notification untuk update status
+            const statusText =
+              data.status === StatusMotor.TERSEDIA
+                ? t('available').toLowerCase()
+                : data.status === StatusMotor.DISEWA
+                  ? t('rented').toLowerCase()
+                  : data.status === StatusMotor.DIPESAN
+                    ? t('service').toLowerCase()
+                    : t('unavailable').toLowerCase();
+
+            toast({
+              title: t('motorcycleStatusChanged'),
+              description: `${t('unit')} ${unit.platNomor} ${t('isNow')} ${statusText}`,
+              variant: data.status === StatusMotor.TERSEDIA ? 'default' : 'destructive',
+            });
+
+            return { ...unit, status: data.status };
+          }
+          return unit;
+        })
+      );
     }
   }
 
   // Handler untuk update informasi unit
   function handleUnitUpdate(updatedUnit: MotorcycleUnit) {
     if (!updatedUnit || !updatedUnit.id) return;
-    
+
     // Periksa apakah unit sudah ada dalam daftar
     const unitExists = units.some(unit => unit.id === updatedUnit.id);
-    
+
     if (unitExists) {
       // Update unit yang sudah ada
-      setUnits(prevUnits => prevUnits.map(unit => 
-        unit.id === updatedUnit.id ? { ...unit, ...updatedUnit } : unit
-      ));
-      
+      setUnits(prevUnits =>
+        prevUnits.map(unit => (unit.id === updatedUnit.id ? { ...unit, ...updatedUnit } : unit))
+      );
+
       toast({
-        title: t("motorcycleUnitUpdated"),
-        description: `${t("infoFor")} ${updatedUnit.platNomor} ${t("hasBeenUpdated")}`,
+        title: t('motorcycleUnitUpdated'),
+        description: `${t('infoFor')} ${updatedUnit.platNomor} ${t('hasBeenUpdated')}`,
       });
     } else {
       // Tambahkan unit baru jika jenisnya cocok dengan yang sedang dilihat
       if (updatedUnit.jenis?.id === id) {
         setUnits(prevUnits => [...prevUnits, updatedUnit]);
-        
+
         toast({
-          title: t("newMotorcycleUnit"),
-          description: `${t("newUnit")} ${updatedUnit.platNomor} ${t("hasBeenAdded")}`,
-          variant: "default"
+          title: t('newMotorcycleUnit'),
+          description: `${t('newUnit')} ${updatedUnit.platNomor} ${t('hasBeenAdded')}`,
+          variant: 'default',
         });
       }
     }
   }
 
   // Handler untuk penghapusan unit
-  function handleUnitDelete(deletedUnit: { id: string, platNomor?: string }) {
+  function handleUnitDelete(deletedUnit: { id: string; platNomor?: string }) {
     if (!deletedUnit || !deletedUnit.id) return;
-    
+
     // Cek apakah unit ada dalam daftar
     const unitToDelete = units.find(unit => unit.id === deletedUnit.id);
-    
+
     if (unitToDelete) {
       // Hapus unit dari daftar
       setUnits(prevUnits => prevUnits.filter(unit => unit.id !== deletedUnit.id));
-      
+
       toast({
-        title: t("motorcycleUnitDeleted"),
-        description: `${t("unit")} ${unitToDelete.platNomor || deletedUnit.platNomor || t("motorcycle")} ${t("hasBeenRemovedFromSystem")}`,
-        variant: "destructive"
+        title: t('motorcycleUnitDeleted'),
+        description: `${t('unit')} ${unitToDelete.platNomor || deletedUnit.platNomor || t('motorcycle')} ${t('hasBeenRemovedFromSystem')}`,
+        variant: 'destructive',
       });
     }
   }
@@ -152,62 +160,62 @@ export default function MotorcycleDetail({ id }: { id: string }) {
   useEffect(() => {
     const fetchMotorcycleDetail = async () => {
       try {
-        setIsLoading(true)
-        const data = await fetchMotorcycleTypeById(id)
-        
+        setIsLoading(true);
+        const data = await fetchMotorcycleTypeById(id);
+
         // Cek apakah data valid
         if (data) {
-          setMotorcycle(data)
-          
+          setMotorcycle(data);
+
           // Set image source dengan gambar dari API jika tersedia
           if (data.gambar) {
-            setImageSrc(data.gambar)
+            setImageSrc(data.gambar);
           }
-          
+
           // Jika unit motor tersedia langsung dalam respons API, simpan di state
           if (data.unitMotor && Array.isArray(data.unitMotor)) {
-            setUnits(data.unitMotor)
+            setUnits(data.unitMotor);
           }
-          
-          setError(null)
+
+          setError(null);
         } else {
           // Handle kasus data tidak ada
-          setError(t("motorcycleDataNotFound"))
+          setError(t('motorcycleDataNotFound'));
         }
       } catch (err: any) {
-        console.error("Error fetching motorcycle details:", err)
-        setError(err.message || t("failedToLoadMotorcycleDetails"))
+        console.error('Error fetching motorcycle details:', err);
+        setError(err.message || t('failedToLoadMotorcycleDetails'));
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchMotorcycleDetail()
-  }, [id, t])
+    fetchMotorcycleDetail();
+  }, [id, t]);
 
   useEffect(() => {
     if (startDate) {
-      setFormattedStartDate(format(startDate, "yyyy-MM-dd"))
+      setFormattedStartDate(format(startDate, 'yyyy-MM-dd'));
     } else {
-      setFormattedStartDate(undefined)
+      setFormattedStartDate(undefined);
     }
-  }, [startDate])
+  }, [startDate]);
 
   useEffect(() => {
     if (endDate) {
-      setFormattedEndDate(format(endDate, "yyyy-MM-dd"))
+      setFormattedEndDate(format(endDate, 'yyyy-MM-dd'));
     } else {
-      setFormattedEndDate(undefined)
+      setFormattedEndDate(undefined);
     }
-  }, [endDate])
+  }, [endDate]);
 
   // Fungsi untuk memeriksa ketersediaan motor
   const handleCheckAvailability = async () => {
     if (!startDate || !endDate) {
       toast({
-        title: t("error"),
-        description: t("dateRequired"),
-        variant: "destructive"
+        title: t('error'),
+        description: t('dateRequired'),
+        variant: 'destructive',
       });
       return;
     }
@@ -215,36 +223,36 @@ export default function MotorcycleDetail({ id }: { id: string }) {
     // Validasi tanggal mulai tidak boleh lebih besar dari tanggal selesai
     if (startDate > endDate) {
       toast({
-        title: t("dateError"),
-        description: t("invalidDateRange"),
-        variant: "destructive"
+        title: t('dateError'),
+        description: t('invalidDateRange'),
+        variant: 'destructive',
       });
       return;
     }
 
     try {
       setIsCheckingAvailability(true);
-      
+
       // Format tanggal dalam bentuk YYYY-MM-DD (tanpa waktu)
-      const formattedStartDate = format(startDate, "yyyy-MM-dd");
-      const formattedEndDate = format(endDate, "yyyy-MM-dd");
-      
+      const formattedStartDate = format(startDate, 'yyyy-MM-dd');
+      const formattedEndDate = format(endDate, 'yyyy-MM-dd');
+
       const searchParams = {
         tanggalMulai: formattedStartDate,
         tanggalSelesai: formattedEndDate,
-        jenisMotorId: id
+        jenisMotorId: id,
       };
-      
+
       // Tambahkan logging untuk membantu debug
-      console.log("Checking availability with params:", searchParams);
-      
+      console.log('Checking availability with params:', searchParams);
+
       // Ambil data ketersediaan dari API
       const response = await checkAvailability(searchParams);
-      console.log("API response:", response);
-      
+      console.log('API response:', response);
+
       // Siapkan array untuk unit yang tersedia
       let availableMotorcycles: any[] = [];
-      
+
       // Cek apakah respons berupa array langsung atau objek dengan properti units
       if (Array.isArray(response)) {
         availableMotorcycles = response;
@@ -254,46 +262,46 @@ export default function MotorcycleDetail({ id }: { id: string }) {
         if (responseObj.units && Array.isArray(responseObj.units)) {
           availableMotorcycles = responseObj.units;
         } else {
-          console.warn("Tidak menemukan array units dalam respons:", response);
+          console.warn('Tidak menemukan array units dalam respons:', response);
           setAvailableUnits([]);
           toast({
-            title: t("unavailable"),
-            description: t("noUnitsAvailableForSelectedDates"),
-            variant: "destructive"
+            title: t('unavailable'),
+            description: t('noUnitsAvailableForSelectedDates'),
+            variant: 'destructive',
           });
           setShowAvailability(true);
           return;
         }
       } else {
-        console.warn("Format respons API tidak dikenali:", response);
+        console.warn('Format respons API tidak dikenali:', response);
         setAvailableUnits([]);
         toast({
-          title: t("unavailable"),
-          description: t("noUnitsAvailableForSelectedDates"),
-          variant: "destructive"
+          title: t('unavailable'),
+          description: t('noUnitsAvailableForSelectedDates'),
+          variant: 'destructive',
         });
         setShowAvailability(true);
         return;
       }
-      
+
       // Update state dengan unit yang tersedia
       setAvailableUnits(availableMotorcycles);
       setShowAvailability(true);
-      
+
       // Tampilkan pesan jika tidak ada motor yang tersedia
       if (availableMotorcycles.length === 0) {
         toast({
-          title: t("unavailable"),
-          description: t("noUnitsAvailableForSelectedDates"),
-          variant: "destructive"
+          title: t('unavailable'),
+          description: t('noUnitsAvailableForSelectedDates'),
+          variant: 'destructive',
         });
       }
     } catch (error) {
-      console.error("Error checking availability:", error);
+      console.error('Error checking availability:', error);
       toast({
-        title: t("error"),
-        description: t("failedToCheckAvailability"),
-        variant: "destructive"
+        title: t('error'),
+        description: t('failedToCheckAvailability'),
+        variant: 'destructive',
       });
     } finally {
       setIsCheckingAvailability(false);
@@ -301,30 +309,33 @@ export default function MotorcycleDetail({ id }: { id: string }) {
   };
 
   const handleImageError = () => {
-    setImageSrc(MOTORCYCLE_PLACEHOLDER)
-  }
+    setImageSrc(MOTORCYCLE_PLACEHOLDER);
+  };
 
   const handleRent = (unitId: string) => {
     if (!startDate || !endDate) {
       toast({
-        title: "Pilih Tanggal",
-        description: "Harap pilih tanggal penyewaan terlebih dahulu",
+        title: 'Pilih Tanggal',
+        description: 'Harap pilih tanggal penyewaan terlebih dahulu',
       });
       return;
     }
-    
+
     if (!formattedStartDate || !formattedEndDate) return;
-    
+
     router.push(
       `/availability/booking?unitId=${unitId}&startDate=${formattedStartDate}&endDate=${formattedEndDate}`
-    )
-  }
+    );
+  };
 
   // Menghitung jumlah hari sewa
   const calculateDays = () => {
     if (!startDate || !endDate) return 1;
-    return Math.max(1, Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)))
-  }
+    return Math.max(
+      1,
+      Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
+    );
+  };
 
   if (isLoading) {
     return (
@@ -340,17 +351,17 @@ export default function MotorcycleDetail({ id }: { id: string }) {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (error || !motorcycle) {
     return (
       <div className="py-8 text-center">
         <h2 className="text-2xl font-bold mb-4">Error</h2>
-        <p className="text-destructive mb-4">{error || "Motor tidak ditemukan"}</p>
+        <p className="text-destructive mb-4">{error || 'Motor tidak ditemukan'}</p>
         <Button onClick={() => router.back()}>Kembali</Button>
       </div>
-    )
+    );
   }
 
   return (
@@ -380,8 +391,8 @@ export default function MotorcycleDetail({ id }: { id: string }) {
 
       {/* Socket Connection Status */}
       <div className="mb-4 flex items-center">
-        <Badge variant={isConnected ? "outline" : "destructive"} className="text-xs">
-          {isConnected ? "Live Updates Aktif" : "Live Updates Tidak Aktif"}
+        <Badge variant={isConnected ? 'outline' : 'destructive'} className="text-xs">
+          {isConnected ? 'Live Updates Aktif' : 'Live Updates Tidak Aktif'}
         </Badge>
       </div>
 
@@ -402,7 +413,9 @@ export default function MotorcycleDetail({ id }: { id: string }) {
           <h1 className="text-3xl font-bold mb-2">
             {motorcycle.merk} {motorcycle.model}
           </h1>
-          {motorcycle.tahun && <p className="text-muted-foreground mb-4">Tahun: {motorcycle.tahun}</p>}
+          {motorcycle.tahun && (
+            <p className="text-muted-foreground mb-4">Tahun: {motorcycle.tahun}</p>
+          )}
 
           <Separator className="my-4" />
 
@@ -428,7 +441,7 @@ export default function MotorcycleDetail({ id }: { id: string }) {
                     mode="single"
                     selected={startDate}
                     onSelect={setStartDate}
-                    disabled={(date) => date < new Date()}
+                    disabled={date => date < new Date()}
                     className="border border-border rounded-md p-3"
                   />
                 </div>
@@ -438,19 +451,19 @@ export default function MotorcycleDetail({ id }: { id: string }) {
                     mode="single"
                     selected={endDate}
                     onSelect={setEndDate}
-                    disabled={(date) => !startDate || date < startDate}
+                    disabled={date => !startDate || date < startDate}
                     className="border border-border rounded-md p-3"
                   />
                 </div>
               </div>
             </CardContent>
             <CardFooter>
-              <Button 
-                className="w-full" 
+              <Button
+                className="w-full"
                 onClick={handleCheckAvailability}
                 disabled={!startDate || !endDate || isCheckingAvailability}
               >
-                {isCheckingAvailability ? "Memeriksa..." : "Periksa Ketersediaan"}
+                {isCheckingAvailability ? 'Memeriksa...' : 'Periksa Ketersediaan'}
               </Button>
             </CardFooter>
           </Card>
@@ -503,17 +516,15 @@ export default function MotorcycleDetail({ id }: { id: string }) {
           Unit Motor Tersedia
           {startDate && endDate && (
             <span className="ml-2 text-sm font-normal text-muted-foreground">
-              ({format(startDate, "dd/MM/yyyy")} - {format(endDate, "dd/MM/yyyy")})
+              ({format(startDate, 'dd/MM/yyyy')} - {format(endDate, 'dd/MM/yyyy')})
             </span>
           )}
         </h2>
-        
+
         {units.length === 0 ? (
           <Card className="bg-card/50 border-border">
             <CardContent className="pt-6">
-              <p className="text-muted-foreground">
-                Tidak ada unit tersedia saat ini
-              </p>
+              <p className="text-muted-foreground">Tidak ada unit tersedia saat ini</p>
             </CardContent>
           </Card>
         ) : (
@@ -530,14 +541,19 @@ export default function MotorcycleDetail({ id }: { id: string }) {
                     <div className="flex justify-between items-center">
                       <CardTitle className="text-xl">
                         {unit.platNomor}
-                        {unit.warna && <span className="ml-2 text-muted-foreground">({unit.warna})</span>}
+                        {unit.warna && (
+                          <span className="ml-2 text-muted-foreground">({unit.warna})</span>
+                        )}
                       </CardTitle>
-                      <Badge 
+                      <Badge
                         className={
-                          unit.status === StatusMotor.TERSEDIA ? "bg-success/20 text-success hover:bg-success/30" :
-                          unit.status === StatusMotor.DISEWA ? "bg-accent/20 text-accent hover:bg-accent/30" :
-                          unit.status === StatusMotor.DIPESAN ? "bg-warning/20 text-warning hover:bg-warning/30" :
-                          "bg-destructive/20 text-destructive hover:bg-destructive/30"
+                          unit.status === StatusMotor.TERSEDIA
+                            ? 'bg-success/20 text-success hover:bg-success/30'
+                            : unit.status === StatusMotor.DISEWA
+                              ? 'bg-accent/20 text-accent hover:bg-accent/30'
+                              : unit.status === StatusMotor.DIPESAN
+                                ? 'bg-warning/20 text-warning hover:bg-warning/30'
+                                : 'bg-destructive/20 text-destructive hover:bg-destructive/30'
                         }
                       >
                         {unit.status}
@@ -546,34 +562,39 @@ export default function MotorcycleDetail({ id }: { id: string }) {
                   </CardHeader>
                   <CardContent>
                     <p className="text-foreground/80 mb-2">
-                      Rp {Number(unit.hargaSewa).toLocaleString("id-ID")} / hari
+                      Rp {Number(unit.hargaSewa).toLocaleString('id-ID')} / hari
                     </p>
-                    
+
                     {startDate && endDate && (
                       <>
                         <Separator className="my-4" />
                         <div className="flex justify-between items-center">
                           <div>
-                            <p className="text-muted-foreground text-sm">Total untuk {calculateDays()} hari:</p>
+                            <p className="text-muted-foreground text-sm">
+                              Total untuk {calculateDays()} hari:
+                            </p>
                             <p className="text-xl font-bold">
-                              Rp {(Number(unit.hargaSewa) * calculateDays()).toLocaleString("id-ID")}
+                              Rp{' '}
+                              {(Number(unit.hargaSewa) * calculateDays()).toLocaleString('id-ID')}
                             </p>
                           </div>
-                          
-                          <Button 
-                            variant="default" 
+
+                          <Button
+                            variant="default"
                             disabled={unit.status !== StatusMotor.TERSEDIA}
                             onClick={() => handleRent(unit.id)}
                           >
-                            {unit.status === StatusMotor.TERSEDIA ? "Sewa Sekarang" : "Tidak Tersedia"}
+                            {unit.status === StatusMotor.TERSEDIA
+                              ? 'Sewa Sekarang'
+                              : 'Tidak Tersedia'}
                           </Button>
                         </div>
                       </>
                     )}
-                    
+
                     {(!startDate || !endDate) && (
-                      <Button 
-                        className="w-full mt-4" 
+                      <Button
+                        className="w-full mt-4"
                         variant="outline"
                         onClick={handleCheckAvailability}
                       >
@@ -588,5 +609,5 @@ export default function MotorcycleDetail({ id }: { id: string }) {
         )}
       </div>
     </motion.div>
-  )
-} 
+  );
+}
