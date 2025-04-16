@@ -4,7 +4,7 @@
   "private": true,
   "packageManager": "pnpm@10.8.1+sha512.c50088ba998c67b8ca8c99df8a5e02fd2ae2e2b29aaf238feaa9e124248d3f48f9fb6db2424949ff901cffbb5e0f0cc1ad6aedb602cd29450751d11c35023677",
   "scripts": {
-    "dev": "next dev -p 3001 --turbopack",
+    "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start -p 3001",
     "lint": "next lint",
@@ -16,6 +16,7 @@
     "@emotion/is-prop-valid": "latest",
     "@googlemaps/js-api-loader": "latest",
     "@hookform/resolvers": "^3.9.1",
+    "@next/bundle-analyzer": "^15.3.0",
     "@radix-ui/react-accordion": "^1.2.2",
     "@radix-ui/react-alert-dialog": "^1.1.4",
     "@radix-ui/react-aspect-ratio": "^1.1.1",
@@ -49,6 +50,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "1.0.4",
+    "core.js": "^0.4.2",
     "date-fns": "^3.0.0",
     "embla-carousel-react": "8.5.1",
     "framer-motion": "latest",
@@ -59,7 +61,7 @@
     "lucide-react": "^0.454.0",
     "next": "latest",
     "next-i18next": "^15.4.2",
-    "next-themes": "^0.4.4",
+    "next-themes": "^0.4.6",
     "react": "^18",
     "react-day-picker": "8.10.1",
     "react-dom": "^18",
@@ -83,6 +85,5 @@
     "postcss": "^8",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
-  },
-  "packageManager": "pnpm@10.8.1+sha512.c50088ba998c67b8ca8c99df8a5e02fd2ae2e2b29aaf238feaa9e124248d3f48f9fb6db2424949ff901cffbb5e0f0cc1ad6aedb602cd29450751d11c35023677"
+  }
 }

@@ -92,3 +92,47 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Responsive Media Queries */
+@media (max-width: 640px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+@media (min-width: 1025px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+/* Improved Responsiveness for Images */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Print Media Query */
+@media print {
+  body {
+    font-size: 12pt;
+    color: black;
+    background: white;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+}

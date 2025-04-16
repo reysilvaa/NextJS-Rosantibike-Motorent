@@ -37,6 +37,7 @@ interface SlideType {
   title: string;
   subtitle: string;
   badge?: string;
+  imageAlt?: string;
 }
 
 export default function Hero() {
@@ -60,6 +61,7 @@ export default function Hero() {
       title: t("heroSlide1Title") || "Jelajahi Keindahan dengan Motor Matic",
       subtitle: t("heroSlide1Subtitle") || "Pengalaman wisata nyaman dengan motor matic berkualitas",
       badge: "Popular",
+      imageAlt: "Motor matic untuk wisata di Malang - Honda Vario 125"
     },
     {
       videoUrl:
@@ -67,6 +69,7 @@ export default function Hero() {
       title: t("heroSlide2Title") || "Liburan Lebih Fleksibel dengan Motor Sewaan",
       subtitle: t("heroSlide2Subtitle") || "Jangkau tempat wisata tersembunyi dengan bebas dan praktis",
       badge: "New",
+      imageAlt: "Liburan dengan motor sewaan di Malang - Yamaha NMAX"
     },
     {
       videoUrl:
@@ -74,6 +77,7 @@ export default function Hero() {
       title: t("heroSlide3Title") || "Harga Terjangkau, Kualitas Terjamin",
       subtitle: t("heroSlide3Subtitle") || "Nikmati tarif sewa kompetitif dengan pelayanan premium",
       badge: "Best Value",
+      imageAlt: "Rental motor berkualitas dengan harga terjangkau di Malang"
     },
     {
       videoUrl:
@@ -81,6 +85,7 @@ export default function Hero() {
       title: t("heroSlide4Title") || "Paket Wisata Motor Matic Hemat",
       subtitle: t("heroSlide4Subtitle") || "Kombinasi sewa motor dan panduan wisata untuk pengalaman terbaik",
       badge: "Featured",
+      imageAlt: "Paket wisata hemat dengan motor matic di Malang"
     },
     {
       videoUrl:
@@ -88,6 +93,7 @@ export default function Hero() {
       title: t("heroSlide5Title") || "Berkeliling Kota dengan Nyaman",
       subtitle: t("heroSlide5Subtitle") || "Motor matic irit dan mudah dikendarai untuk wisata perkotaan",
       badge: "Trending",
+      imageAlt: "Berkeliling kota Malang dengan motor matic yang nyaman dan irit"
     },
   ]
 
@@ -200,6 +206,7 @@ export default function Hero() {
                   disableRemotePlayback
                   onLoadStart={() => handleVideoLoadStart(index)}
                   onCanPlay={() => handleVideoCanPlay(index)}
+                  aria-label={slide.imageAlt || `Video slide ${index + 1}`}
                 />
                 <div className={`absolute inset-0 ${theme === "light" ? "bg-black/65" : "bg-black/50"}`} />
               </div>
