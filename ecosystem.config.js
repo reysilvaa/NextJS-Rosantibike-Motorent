@@ -1,10 +1,10 @@
-// Konfigurasi PM2 untuk frontend - format CommonJS
+// Konfigurasi PM2 untuk frontend - format CommonJS (menggunakan module.exports)
 module.exports = {
   apps: [
     {
       name: 'rental-frontend',
-      script: 'node_modules/next/dist/bin/next',
-      args: 'start -p 3001',
+      script: 'npm',
+      args: 'run start',
       cwd: './',
       instances: 'max',
       exec_mode: 'cluster',
