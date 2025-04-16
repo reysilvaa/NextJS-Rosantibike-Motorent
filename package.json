@@ -17,7 +17,13 @@
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
     "sort-imports": "eslint . --ext .js,.jsx,.ts,.tsx --fix --rule \"simple-import-sort/imports: error\" --rule \"simple-import-sort/exports: error\"",
     "fix:unused": "node scripts/fix-unused-vars.js",
-    "fix:all": "pnpm format && pnpm lint:fix && pnpm sort-imports"
+    "fix:all": "pnpm format && pnpm lint:fix && pnpm sort-imports",
+    "pm2:start": "pm2 start ecosystem.cjs",
+    "pm2:stop": "pm2 stop ecosystem.cjs",
+    "pm2:restart": "pm2 restart ecosystem.cjs",
+    "pm2:reload": "pm2 reload ecosystem.cjs",
+    "pm2:status": "pm2 status",
+    "pm2:logs": "pm2 logs"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "latest",

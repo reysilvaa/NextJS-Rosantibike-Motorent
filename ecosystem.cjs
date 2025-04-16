@@ -1,5 +1,5 @@
-// Konfigurasi PM2 untuk frontend - format ESM
-export default {
+// Konfigurasi PM2 untuk frontend - format CommonJS
+module.exports = {
   apps: [
     {
       name: 'rental-frontend',
@@ -16,4 +16,4 @@ export default {
       },
     },
   ],
-};
+}; 
