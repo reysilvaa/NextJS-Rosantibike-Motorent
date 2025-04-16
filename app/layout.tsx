@@ -5,6 +5,7 @@ import Navbar from "@/components/layout/navbar"
 import Footer from "@/components/layout/footer"
 import { Providers } from "./providers"
 import { inter } from "./fonts"
+import { metadata as seoMetadata } from './metadata'
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -19,6 +20,7 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
+  ...seoMetadata,
   title: "Rosantibike Motorent",
   description: "Rental motor terpercaya dengan harga terjangkau dan layanan terbaik di Malang",
   icons: {

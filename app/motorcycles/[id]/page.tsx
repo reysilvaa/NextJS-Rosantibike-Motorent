@@ -1,8 +1,8 @@
-import { Metadata } from "next"
+"use client";
+
 import { notFound } from "next/navigation"
 import MotorcycleDetail from "@/components/motorcycles/motorcycle-detail"
-import { generateMetadata as baseSeoMetadata } from '@/lib/seo/config'
-import { generateKeywords } from '@/lib/seo/keywords'
+import { useEffect, useState } from "react";
 
 interface MotorcycleDetailPageProps {
   params: {
@@ -10,47 +10,37 @@ interface MotorcycleDetailPageProps {
   }
 }
 
-export async function generateMetadata({ params }: MotorcycleDetailPageProps): Promise<Metadata> {
-  try {
-    // You can fetch motorcycle data here to generate dynamic metadata
-    // For now, using a simpler approach with the ID
-    return baseSeoMetadata({
-      title: `Motorcycle Details - Rosanti Bike Rental`,
-      description: `Detailed information about our premium motorcycle. Check specifications, features, and book this motorcycle for your next adventure.`,
-      keywords: generateKeywords('motorcycle-detail', { 
-        title: `Motorcycle Details - Rosanti Bike Rental`,
-        additionalKeywords: [params.id]
-      }),
-      openGraph: {
-        url: `https://rosantibike.com/motorcycles/${params.id}`,
-        images: ['/images/motorcycle-detail-og.jpg'],
-        type: 'article',
-      },
-      robots: {
-        index: true,
-        follow: true,
-      },
-    })
-  } catch (error) {
-    return baseSeoMetadata({
-      title: 'Motorcycle - Rosanti Bike Rental',
-      description: 'Explore our premium motorcycle collection',
-      keywords: generateKeywords('motorcycle-detail'),
-      robots: {
-        index: true,
-        follow: true,
-      },
-    })
-  }
-}
+export default function MotorcycleDetailPage({ params }: MotorcycleDetailPageProps) {
+  const [id, setId] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
 
-export default async function MotorcycleDetailPage({ params }: MotorcycleDetailPageProps) {
-  // Await params untuk menghindari error "params should be awaited before using its properties"
-  const resolvedParams = await Promise.resolve(params)
-  const { id } = resolvedParams
+  useEffect(() => {
+    // Mengambil id dari params
+    if (params && params.id) {
+      setId(params.id);
+      setIsLoading(false);
+    } else {
+      notFound();
+    }
+  }, [params]);
+
+  if (isLoading) {
+    return (
+      <div className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
+            <div className="h-64 bg-gray-200 rounded mb-4"></div>
+            <div className="h-8 bg-gray-200 rounded w-1/2 mb-4"></div>
+            <div className="h-32 bg-gray-200 rounded mb-4"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!id) {
-    notFound()
+    return null; // Akan di-handle oleh notFound
   }
 
   return (

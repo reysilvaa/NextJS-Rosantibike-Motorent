@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   } catch (error) {
     console.error('Error generating metadata:', error);
     return baseSeoMetadata({
-      title: 'Blog Post - Rosanti Bike Rental',
+      title: 'Blog Post - Rosantibikemotorent',
       description: 'Read our latest blog post about motorcycles and adventures.',
       keywords: generateKeywords('blog'),
       robots: {
@@ -55,4 +55,12 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
       },
     });
   }
+}
+
+export default function BlogPostLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return children;
 } 

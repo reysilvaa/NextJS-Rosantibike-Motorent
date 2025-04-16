@@ -1,7 +1,10 @@
+"use client";
+
 import { notFound } from 'next/navigation';
 import { fetchBlogPostBySlug } from '@/lib/network/api';
 import BlogPostDetail from '@/components/blog/blog-post-detail';
 import type { BlogPost } from '@/lib/types/blog';
+import { useEffect, useState } from 'react';
 
 interface BlogPostPageProps {
   params: {
@@ -9,12 +12,34 @@ interface BlogPostPageProps {
   };
 }
 
-export default async function BlogPostPage({ params }: BlogPostPageProps) {
+export default function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = params;
-  const post = await fetchBlogPostBySlug(slug);
+  const [post, setPost] = useState<BlogPost | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadPost() {
+      try {
+        const postData = await fetchBlogPostBySlug(slug);
+        setPost(postData);
+        if (!postData) notFound();
+      } catch (error) {
+        console.error('Error loading blog post:', error);
+        notFound();
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    
+    loadPost();
+  }, [slug]);
+
+  if (isLoading) {
+    return <div className="pb-16 pt-16">Loading...</div>;
+  }
 
   if (!post) {
-    notFound();
+    return null; // Akan di-handle oleh notFound
   }
 
   return (
