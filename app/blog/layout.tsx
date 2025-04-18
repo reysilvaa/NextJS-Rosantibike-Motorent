@@ -3,14 +3,19 @@ import { generateKeywords } from '@/lib/seo/keywords';
 
 export const metadata = generateMetadata({
   title: 'Blog - Rosanti Bike Rental',
-  description: 'Explore motorcycle riding tips, travel guides, and adventure stories on our blog.',
+  description:
+    'Read our latest articles about motorcycles, travel tips, and rental information. Stay updated with Rosanti Bike Rental.',
   keywords: generateKeywords('blog'),
   openGraph: {
-    url: 'https://rosantibikemotorent.com/blog',
+    url: 'https://rosantibike.com/blog',
     images: ['/images/blog-og.jpg'],
   },
   robots: {
     index: true,
     follow: true,
   },
-}); 
+});
+
+export default function BlogLayout({ children }: { children: React.ReactNode }) {
+  return children;
+}

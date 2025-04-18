@@ -1,5 +1,6 @@
-import { MetadataRoute } from 'next'
-import { fetchAllMotorcycles, fetchAllBlogPosts } from '@/lib/network/api'
+import { MetadataRoute } from 'next';
+
+import { fetchAllBlogPosts, fetchAllMotorcycles } from '@/lib/network/api';
 
 type SitemapItem = {
   url: string;
@@ -11,7 +12,7 @@ type SitemapItem = {
 // Helper function to ensure a valid slug
 function ensureValidSlug(str: string | undefined | null, fallback: string): string {
   if (!str) return fallback;
-  
+
   // Remove special characters and spaces, replace with dashes
   return str
     .toLowerCase()
@@ -23,8 +24,8 @@ function ensureValidSlug(str: string | undefined | null, fallback: string): stri
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Base URL for the site
-  const baseUrl = 'https://rosantibikemotorent.com'
-  
+  const baseUrl = 'https://rosantibikemotorent.com';
+
   // Static routes
   const staticRoutes: SitemapItem[] = [
     '/', // home
@@ -36,10 +37,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/booking-history/',
     '/booking-success/',
     '/motorcycles/',
-  ].map((route) => ({
+  ].map(route => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
-    changeFrequency: 'daily' as const,
+    changeFrequency: route === '/' ? 'always' : 'hourly', // Ditingkatkan: home page 'always', halaman lain 'hourly'
     priority: route === '/' ? 1 : 0.9, // home page has highest priority
   }));
 
@@ -49,12 +50,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const blogPosts = await fetchAllBlogPosts();
     blogRoutes = blogPosts
       .filter(post => post) // Filter out any null/undefined posts
-      .map((post) => {
+      .map(post => {
         const slug = post.slug ? post.slug : ensureValidSlug(post.judul, `post-${post.id}`);
         return {
           url: `${baseUrl}/blog/${slug}/`,
           lastModified: new Date(post.updatedAt || post.createdAt || new Date()),
-          changeFrequency: 'weekly' as const,
+          changeFrequency: 'daily', // Ditingkatkan dari 'weekly' ke 'daily'
           priority: 0.8,
         };
       });
@@ -68,14 +69,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const motorcycles = await fetchAllMotorcycles();
     motorcycleRoutes = motorcycles
       .filter(motorcycle => motorcycle) // Filter out any null/undefined motorcycles
-      .map((motorcycle) => {
-        const slug = motorcycle.slug 
-          ? motorcycle.slug 
+      .map(motorcycle => {
+        const slug = motorcycle.slug
+          ? motorcycle.slug
           : ensureValidSlug(`${motorcycle.merk} ${motorcycle.model}`, `motor-${motorcycle.id}`);
         return {
           url: `${baseUrl}/motorcycles/${slug}/`,
           lastModified: new Date(motorcycle.updatedAt || motorcycle.createdAt || new Date()),
-          changeFrequency: 'weekly' as const,
+          changeFrequency: 'daily', // Ditingkatkan dari 'weekly' ke 'daily'
           priority: 0.7,
         };
       });
@@ -83,9 +84,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error('Error fetching motorcycles for sitemap:', error);
   }
 
-  return [
-    ...staticRoutes,
-    ...blogRoutes,
-    ...motorcycleRoutes,
-  ];
-} 
+  return [...staticRoutes, ...blogRoutes, ...motorcycleRoutes];
+}

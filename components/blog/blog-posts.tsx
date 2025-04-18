@@ -1,21 +1,22 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { useBlogPosts } from "@/hooks/blog/use-blog";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
-import { formatDate } from "@/lib/utils";
-import { Calendar, Search, Tag } from "lucide-react";
-import { useTranslation } from "@/i18n/hooks";
+import { Calendar, Search, Tag } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useState } from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useBlogPosts } from '@/hooks/blog/use-blog';
+import { useTranslation } from '@/i18n/hooks';
+import { formatDate } from '@/lib/utils';
 
 export function BlogPosts() {
   const { t } = useTranslation();
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const { data: posts, isLoading, meta } = useBlogPosts(currentPage, 6, search);
 
@@ -35,20 +36,20 @@ export function BlogPosts() {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="search"
-              placeholder={t("searchArticles")}
+              placeholder={t('searchArticles')}
               className="pl-10 bg-background/50 border-input"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={e => setSearch(e.target.value)}
             />
           </div>
-          <Button type="submit">{t("search")}</Button>
+          <Button type="submit">{t('search')}</Button>
         </form>
       </div>
 
       {/* Loading State */}
       {isLoading && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map((index) => (
+          {[1, 2, 3, 4, 5, 6].map(index => (
             <Card key={index} className="bg-card/50 border-border overflow-hidden">
               <div className="h-48 relative">
                 <Skeleton className="h-full w-full rounded-none" />
@@ -73,9 +74,9 @@ export function BlogPosts() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
             <Tag className="h-8 w-8 text-primary" />
           </div>
-          <h3 className="text-xl font-medium mb-2">{t("noArticlesFound")}</h3>
-          <p className="text-muted-foreground mb-6">{t("tryAnotherSearch")}</p>
-          <Button onClick={() => setSearch("")}>{t("clearSearch")}</Button>
+          <h3 className="text-xl font-medium mb-2">{t('noArticlesFound')}</h3>
+          <p className="text-muted-foreground mb-6">{t('tryAnotherSearch')}</p>
+          <Button onClick={() => setSearch('')}>{t('clearSearch')}</Button>
         </div>
       )}
 
@@ -83,24 +84,20 @@ export function BlogPosts() {
       {!isLoading && posts.length > 0 && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {posts.map((post) => (
-              <Link
-                key={post.id}
-                href={`/blog/${post.slug}`}
-                className="h-full"
-              >
+            {posts.map(post => (
+              <Link key={post.id} href={`/blog/${post.slug}`} className="h-full">
                 <Card className="bg-card/60 border-border overflow-hidden hover:border-primary/30 hover:bg-card/80 transition-all h-full hover:shadow-md hover:shadow-primary/5 group">
                   <div className="h-48 relative bg-muted overflow-hidden">
-                    {(post.thumbnail || post.featuredImage) ? (
+                    {post.thumbnail || post.featuredImage ? (
                       <Image
-                        src={post.thumbnail || post.featuredImage || "/placeholder.svg"}
+                        src={post.thumbnail || post.featuredImage || '/placeholder.svg'}
                         alt={post.judul}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                        {t("noImage")}
+                        {t('noImage')}
                       </div>
                     )}
                   </div>
@@ -139,19 +136,15 @@ export function BlogPosts() {
                   onClick={() => setCurrentPage(currentPage - 1)}
                   className="border-border bg-card/50"
                 >
-                  {t("previous")}
+                  {t('previous')}
                 </Button>
                 <div className="flex items-center space-x-1">
-                  {Array.from({ length: meta.totalPages }, (_, i) => i + 1).map((page) => (
+                  {Array.from({ length: meta.totalPages }, (_, i) => i + 1).map(page => (
                     <Button
                       key={page}
-                      variant={currentPage === page ? "default" : "outline"}
+                      variant={currentPage === page ? 'default' : 'outline'}
                       onClick={() => setCurrentPage(page)}
-                      className={
-                        currentPage === page
-                          ? ""
-                          : "border-border bg-card/50"
-                      }
+                      className={currentPage === page ? '' : 'border-border bg-card/50'}
                       size="sm"
                     >
                       {page}
@@ -164,7 +157,7 @@ export function BlogPosts() {
                   onClick={() => setCurrentPage(currentPage + 1)}
                   className="border-border bg-card/50"
                 >
-                  {t("next")}
+                  {t('next')}
                 </Button>
               </div>
             </div>
@@ -173,4 +166,4 @@ export function BlogPosts() {
       )}
     </div>
   );
-} 
+}

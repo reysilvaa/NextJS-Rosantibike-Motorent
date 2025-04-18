@@ -10,21 +10,21 @@
  */
 export function stripHtmlTags(htmlContent: string, maxLength?: number): string {
   if (!htmlContent) return '';
-  
+
   // Create a temporary div element to parse HTML
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = htmlContent;
-  
+
   // Get the text content without HTML tags
   let plainText = tempDiv.textContent || tempDiv.innerText || '';
-  
+
   // Trim whitespace and limit length if requested
   plainText = plainText.trim();
-  
+
   if (maxLength && plainText.length > maxLength) {
     plainText = plainText.substring(0, maxLength) + '...';
   }
-  
+
   return plainText;
 }
 
@@ -40,14 +40,14 @@ export function createBlogExcerpt(content: string, maxLength: number = 150): str
     // Simple regex-based HTML tag removal for server-side
     const plainText = content.replace(/<[^>]*>/g, '');
     const trimmed = plainText.trim();
-    
+
     if (trimmed.length <= maxLength) {
       return trimmed;
     }
-    
+
     return trimmed.substring(0, maxLength) + '...';
   }
-  
+
   return stripHtmlTags(content, maxLength);
 }
 
@@ -59,16 +59,15 @@ export function createBlogExcerpt(content: string, maxLength: number = 150): str
  */
 export function calculateReadingTime(content: string, wordsPerMinute: number = 200): number {
   // Strip HTML tags first
-  const plainText = typeof document !== 'undefined' 
-    ? stripHtmlTags(content)
-    : content.replace(/<[^>]*>/g, '');
-    
+  const plainText =
+    typeof document !== 'undefined' ? stripHtmlTags(content) : content.replace(/<[^>]*>/g, '');
+
   // Count words (split by whitespace)
   const wordCount = plainText.split(/\s+/).length;
-  
+
   // Calculate reading time
   const readingTime = Math.ceil(wordCount / wordsPerMinute);
-  
+
   // Return at least 1 minute
   return Math.max(1, readingTime);
-} 
+}

@@ -1,33 +1,33 @@
-import { useState, useCallback } from "react"
+import { useCallback, useState } from 'react';
 
 export function useLoading(initialState: boolean = false) {
-  const [isLoading, setIsLoading] = useState(initialState)
+  const [isLoading, setIsLoading] = useState(initialState);
 
   const startLoading = useCallback(() => {
-    setIsLoading(true)
-  }, [])
+    setIsLoading(true);
+  }, []);
 
   const stopLoading = useCallback(() => {
-    setIsLoading(false)
-  }, [])
+    setIsLoading(false);
+  }, []);
 
   const withLoading = useCallback(
     async <T>(promise: Promise<T>): Promise<T> => {
       try {
-        startLoading()
-        const result = await promise
-        return result
+        startLoading();
+        const result = await promise;
+        return result;
       } finally {
-        stopLoading()
+        stopLoading();
       }
     },
     [startLoading, stopLoading]
-  )
+  );
 
   return {
     isLoading,
     startLoading,
     stopLoading,
     withLoading,
-  }
-} 
+  };
+}

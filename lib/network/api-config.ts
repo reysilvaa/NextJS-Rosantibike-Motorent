@@ -4,7 +4,7 @@ export const API_CONFIG = {
   API_TIMEOUT: 60000,
   DEFAULT_HEADERS: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json'
+    Accept: 'application/json',
   },
   ENDPOINTS: {
     AUTH_LOGIN: '/auth/login',
@@ -15,20 +15,20 @@ export const API_CONFIG = {
     TRANSAKSI_HISTORY: '/transaksi/history',
     TRANSAKSI_USER: '/transaksi/user',
     TRANSAKSI_SEARCH: '/transaksi/search',
-    BLOG: '/blog'
-  }
+    BLOG: '/blog',
+  },
 };
 
 // Helper to get authentication header
 export function getAuthHeader(): Record<string, string> {
   const headers: Record<string, string> = {};
-  
+
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('auth_token');
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
   }
-  
+
   return headers;
-} 
+}

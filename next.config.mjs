@@ -1,15 +1,16 @@
-let userConfig = undefined
-try {
-  userConfig = await import('./v0-user-next.config')
-} catch (e) {
-  // ignore error
-}
-
-import { fileURLToPath } from 'url';
+// Import bundle analyzer
 import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+let userConfig = undefined
+try {
+  userConfig = await import('./v0-user-next.config')
+} catch (/** @type {any} */ _unused) {
+  // ignore error
+}
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -22,6 +23,10 @@ const nextConfig = {
   },
   images: {
     unoptimized: false,
+    minimumCacheTTL: 60,
+    formats: ['image/avif', 'image/webp'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     remotePatterns: [
       {
         protocol: 'https',
@@ -43,11 +48,28 @@ const nextConfig = {
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
+  outputFileTracingExcludes: {
+    '*': [
+      'node_modules/@swc/core-linux-x64-gnu',
+      'node_modules/@swc/core-linux-x64-musl',
+      'node_modules/@esbuild/linux-x64',
+    ],
+  },
   experimental: {
     webpackBuildWorker: true,
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
-    optimizePackageImports: ['react-icons', 'date-fns', 'lodash'],
+    optimizePackageImports: [
+      '@radix-ui/react-icons',
+      'lucide-react',
+      'date-fns',
+      'framer-motion',
+      'react-hook-form',
+      'embla-carousel-react',
+      '@radix-ui',
+      'recharts'
+    ],
+    optimisticClientCache: true,
   },
   turbopack: {
     // Konfigurasi loader untuk Turbopack
@@ -81,6 +103,69 @@ const nextConfig = {
       test: /\.(svg|png|jpg|jpeg|gif|ico|webp)$/i,
       type: 'asset/resource',
     });
+
+    // Optimize bundle size
+    config.optimization = {
+      ...config.optimization,
+      runtimeChunk: 'single',
+      splitChunks: {
+        chunks: 'all',
+        maxInitialRequests: Infinity,
+        minSize: 20000,
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name(module) {
+              // Protect against null module.context
+              if (!module.context) return 'npm.unknown';
+              
+              const match = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/);
+              if (!match) return 'npm.unknown';
+              
+              const packageName = match[1];
+              
+              // Separate larger packages (match these with popular deps from package.json)
+              if ([
+                'framer-motion', 
+                'react-icons', 
+                'date-fns', 
+                'recharts',
+                'axios',
+                'embla-carousel-react',
+                'lucide-react',
+                'socket.io-client',
+                'video.js',
+                'react-hook-form',
+                'zod',
+                'i18next'
+              ].includes(packageName)) {
+                return `npm.${packageName}`;
+              }
+              
+              // Group all radix-ui components together
+              if (packageName.startsWith('@radix-ui')) {
+                return 'npm.radix-ui';
+              }
+
+              // otherwise bundle smaller packages together
+              return `npm.bundle`;
+            },
+          },
+        },
+      },
+    };
+    
+    // Alias setup in webpack
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': join(__dirname),
+      '@components': join(__dirname, 'components'),
+      '@app': join(__dirname, 'app'),
+      '@lib': join(__dirname, 'lib'),
+      '@hooks': join(__dirname, 'hooks'),
+      '@contexts': join(__dirname, 'contexts'),
+      '@styles': join(__dirname, 'styles'),
+    };
     
     return config;
   },
@@ -150,7 +235,29 @@ const nextConfig = {
             key: 'Access-Control-Allow-Headers',
             value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
           },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
         ],
+      },
+      {
+        source: '/public/fonts/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          }
+        ]
+      },
+      {
+        source: '/public/images/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          }
+        ]
       },
     ];
   },
@@ -178,4 +285,16 @@ function mergeConfig(nextConfig, userConfig) {
   }
 }
 
-export default nextConfig
+// Export nextConfig with analyzer if available
+let exportedConfig = nextConfig;
+
+try {
+  const withBundleAnalyzer = (await import('@next/bundle-analyzer')).default({
+    enabled: process.env.ANALYZE === 'true',
+  });
+  exportedConfig = withBundleAnalyzer(nextConfig);
+} catch (_unused) {
+  // Fallback to regular config if bundle analyzer is not available
+}
+
+export default exportedConfig;

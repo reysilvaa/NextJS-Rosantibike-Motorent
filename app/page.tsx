@@ -1,34 +1,22 @@
-import Hero from "@/components/home/hero"
-import FeaturedMotorcycles from "@/components/home/featured-motorcycles"
-import HowItWorks from "@/components/home/how-it-works"
-import Testimonials from "@/components/home/testimonials"
-import BlogPreview from "@/components/home/blog-preview"
-import ContactSection from "@/components/home/contact-section"
-import AvailabilityPreview from "@/components/home/availability-preview"
-import { VideoContextProvider } from "@/contexts/video-context"
-import { generateMetadata } from '@/lib/seo/config';
-import { generateKeywords } from '@/lib/seo/keywords';
+'use client';
 
-export const metadata = generateMetadata({
-  title: 'Rosanti Bike - Premium Motorcycle Rental Service',
-  description: 'Experience the best motorcycle rental service in town. Choose from our wide range of high-quality bikes for your next adventure.',
-  keywords: generateKeywords('home'),
-  openGraph: {
-    url: 'https://rosantibike.com',
-    images: ['/images/home-og.jpg'],
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-});
+import AvailabilityPreview from '@/components/home/availability-preview';
+import BlogPreview from '@/components/home/blog-preview';
+import ContactSection from '@/components/home/contact-section';
+import FeaturedMotorcycles from '@/components/home/featured-motorcycles';
+import Hero from '@/components/home/hero';
+import HowItWorks from '@/components/home/how-it-works';
+import Testimonials from '@/components/home/testimonials';
+import { VideoContextProvider } from '@/contexts/video-context';
 
 export default function Home() {
   return (
     <div className="flex flex-col w-full">
+      <h1 className="sr-only">Rosantibike Motorent - Rental Motor Terbaik di Malang</h1>
       <VideoContextProvider>
         <Hero />
       </VideoContextProvider>
+      <h2 className="sr-only">Layanan Rental Motor Premium di Malang dengan Harga Terjangkau</h2>
       <FeaturedMotorcycles />
       <HowItWorks />
       <AvailabilityPreview />
@@ -36,6 +24,5 @@ export default function Home() {
       <BlogPreview />
       <ContactSection />
     </div>
-  )
+  );
 }
-

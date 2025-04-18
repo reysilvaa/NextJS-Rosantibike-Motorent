@@ -1,16 +1,16 @@
-import { Loader2 } from "lucide-react";
+import { Loader2 } from 'lucide-react';
 
 interface LoadingProps {
-  size?: "sm" | "md" | "lg";
+  size?: 'sm' | 'md' | 'lg';
   text?: string;
   className?: string;
 }
 
-export function Loading({ size = "md", text, className = "" }: LoadingProps) {
+export function Loading({ size = 'md', text, className = '' }: LoadingProps) {
   const sizeMap = {
-    sm: "h-4 w-4",
-    md: "h-6 w-6",
-    lg: "h-8 w-8"
+    sm: 'h-4 w-4',
+    md: 'h-6 w-6',
+    lg: 'h-8 w-8',
   };
 
   return (
@@ -19,4 +19,4 @@ export function Loading({ size = "md", text, className = "" }: LoadingProps) {
       {text && <span>{text}</span>}
     </div>
   );
-} 
+}

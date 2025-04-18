@@ -1,6 +1,7 @@
-"use client";
+'use client';
 
-import React, { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react';
+import React, { createContext, ReactNode, useContext, useEffect, useRef, useState } from 'react';
+
 import { useSocketContext } from './socket-context';
 
 // Interface untuk nilai context
@@ -17,6 +18,8 @@ interface VideoContextValue {
   isPageVisible: boolean;
   useVideoFallback: boolean;
   setUseVideoFallback: (value: boolean) => void;
+  registerVideo: (video: HTMLVideoElement) => void;
+  unregisterVideo: (video: HTMLVideoElement) => void;
 }
 
 // Buat context dengan nilai default
@@ -33,6 +36,8 @@ const VideoContext = createContext<VideoContextValue>({
   isPageVisible: true,
   useVideoFallback: false,
   setUseVideoFallback: () => {},
+  registerVideo: () => {},
+  unregisterVideo: () => {},
 });
 
 // Props untuk provider
@@ -41,19 +46,19 @@ interface VideoContextProviderProps {
   autoPlay?: boolean;
   muted?: boolean;
   loop?: boolean;
-  playWhenVisible?: boolean;
-  playWhenSocketConnected?: boolean;
+  _playWhenVisible?: boolean;
+  _playWhenSocketConnected?: boolean;
   slideDuration?: number;
 }
 
-export const VideoContextProvider: React.FC<VideoContextProviderProps> = ({ 
+export const VideoContextProvider: React.FC<VideoContextProviderProps> = ({
   children,
   autoPlay = true,
   muted = true,
   loop = true,
-  playWhenVisible = true,
-  playWhenSocketConnected = false,
-  slideDuration = 8000
+  _playWhenVisible = true,
+  _playWhenSocketConnected = false,
+  slideDuration = 8000,
 }) => {
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -62,34 +67,35 @@ export const VideoContextProvider: React.FC<VideoContextProviderProps> = ({
   const [error, setError] = useState<Error | null>(null);
   const [isPageVisible, setIsPageVisible] = useState(true);
   const [useVideoFallback, setUseVideoFallback] = useState(() => {
-    if (typeof window !== 'undefined') {
-      // Enhanced mobile detection with better fallback logic
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      const isLowEndDevice = /(Android|iPhone|iPad).*?AppleWebKit(?!.*Safari)/i.test(navigator.userAgent);
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
-      const isAndroid = /Android/.test(navigator.userAgent);
-      
-      // Always use fallback for iOS devices
-      if (isIOS) return true;
-      
-      // For Android, check if it's a low-end device
-      if (isAndroid && isLowEndDevice) return true;
-      
-      return false;
-    }
+    // Default: video akan digunakan di semua perangkat
     return false;
+
+    // Kode fallback lama dimatikan:
+    // if (typeof window !== 'undefined') {
+    //   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    //   const isLowEndDevice = /(Android|iPhone|iPad).*?AppleWebKit(?!.*Safari)/i.test(navigator.userAgent);
+    //   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    //   const isAndroid = /Android/.test(navigator.userAgent);
+    //
+    //   if (isIOS) return true;
+    //
+    //   if (isAndroid && isLowEndDevice) return true;
+    //
+    //   return false;
+    // }
+    // return false;
   });
   const playPromiseRefs = useRef<Array<Promise<void> | null>>([]);
   const slideIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  
-  const { isConnected: isSocketConnected } = useSocketContext();
+
+  const { isConnected: _isSocketConnected } = useSocketContext();
 
   // Handle page visibility
   useEffect(() => {
     const handleVisibilityChange = () => {
       const visible = document.visibilityState === 'visible';
       setIsPageVisible(visible);
-      
+
       // If page becomes visible again and slideshow is paused, restart it
       if (visible && slideIntervalRef.current === null && !useVideoFallback) {
         startSlideshow();
@@ -107,7 +113,7 @@ export const VideoContextProvider: React.FC<VideoContextProviderProps> = ({
 
   const startSlideshow = () => {
     if (slideIntervalRef.current !== null) return;
-    
+
     slideIntervalRef.current = setInterval(() => {
       setCurrentSlide(prev => (prev + 1) % videoRefs.current.length);
     }, slideDuration);
@@ -136,45 +142,52 @@ export const VideoContextProvider: React.FC<VideoContextProviderProps> = ({
         currentVideo.setAttribute('x5-video-player-type', 'h5');
         currentVideo.setAttribute('x5-video-player-fullscreen', 'false');
         currentVideo.setAttribute('x5-video-orientation', 'portraint');
-        
+
         // Add preload attribute for better mobile performance
         currentVideo.setAttribute('preload', 'auto');
-        
+
         // Set mobile-specific styles
         currentVideo.style.width = '100%';
         currentVideo.style.height = 'auto';
         currentVideo.style.objectFit = 'cover';
-        
-        if (autoPlay && isPageVisible && !useVideoFallback) {
+
+        if (autoPlay && isPageVisible) {
           // For mobile, always start muted
           currentVideo.muted = true;
-          
+
           const playPromise = currentVideo.play();
           if (playPromise !== undefined) {
             playPromiseRefs.current[currentSlide] = playPromise;
-            playPromise.then(() => {
-              setIsPlaying(true);
-              setIsLoaded(true);
-            }).catch(err => {
-              console.warn('Video autoplay failed:', err);
-              // Try with muted if autoplay failed
-              if (!currentVideo.muted) {
-                currentVideo.muted = true;
-                const mutedPlayPromise = currentVideo.play();
-                if (mutedPlayPromise !== undefined) {
-                  mutedPlayPromise.catch(() => {
-                    setUseVideoFallback(true);
-                  });
+            playPromise
+              .then(() => {
+                setIsPlaying(true);
+                setIsLoaded(true);
+              })
+              .catch(err => {
+                console.warn('Video autoplay failed:', err);
+                // Try with muted if autoplay failed
+                if (!currentVideo.muted) {
+                  currentVideo.muted = true;
+                  const mutedPlayPromise = currentVideo.play();
+                  if (mutedPlayPromise !== undefined) {
+                    mutedPlayPromise.catch(e => {
+                      console.error('Fallback muted play failed:', e);
+                      // Matikan fallback agar tetap menggunakan video
+                      // setUseVideoFallback(true);
+                    });
+                  }
+                } else {
+                  console.error('Video failed to play even when muted');
+                  // Matikan fallback agar tetap menggunakan video
+                  // setUseVideoFallback(true);
                 }
-              } else {
-                setUseVideoFallback(true);
-              }
-            });
+              });
           }
         }
       } catch (err) {
         console.error('Error during video setup:', err);
-        setUseVideoFallback(true);
+        // Matikan fallback agar tetap menggunakan video
+        // setUseVideoFallback(true);
       }
     };
 
@@ -189,12 +202,13 @@ export const VideoContextProvider: React.FC<VideoContextProviderProps> = ({
     const handleError = (e: Event) => {
       console.error('Video error:', e);
       setError(new Error(`Video loading error`));
-      setUseVideoFallback(true);
+      // Matikan fallback agar tetap menggunakan video
+      // setUseVideoFallback(true);
     };
 
     // Set data attribute for identification
     currentVideo.dataset.index = currentSlide.toString();
-    
+
     // Add event listeners
     currentVideo.addEventListener('loadeddata', handleLoadedData);
     currentVideo.addEventListener('error', handleError);
@@ -207,7 +221,8 @@ export const VideoContextProvider: React.FC<VideoContextProviderProps> = ({
     }
 
     // Initial setup
-    if (currentVideo.readyState >= 3) { // HAVE_FUTURE_DATA or higher
+    if (currentVideo.readyState >= 3) {
+      // HAVE_FUTURE_DATA or higher
       setupVideo();
     }
 
@@ -237,7 +252,7 @@ export const VideoContextProvider: React.FC<VideoContextProviderProps> = ({
   useEffect(() => {
     videoRefs.current.forEach((video, index) => {
       if (!video) return;
-      
+
       if (index === currentSlide) {
         // Current slide - try to play if conditions are right
         if (isPageVisible && !useVideoFallback) {
@@ -268,7 +283,7 @@ export const VideoContextProvider: React.FC<VideoContextProviderProps> = ({
   const play = (index: number) => {
     const video = videoRefs.current[index];
     if (!video) return;
-    
+
     try {
       playPromiseRefs.current[index] = video.play();
     } catch (err) {
@@ -279,18 +294,20 @@ export const VideoContextProvider: React.FC<VideoContextProviderProps> = ({
   const pause = (index: number) => {
     const video = videoRefs.current[index];
     if (!video) return;
-    
+
     try {
       if (playPromiseRefs.current[index]) {
-        playPromiseRefs.current[index]?.then(() => {
-          video.pause();
-        }).catch(() => {
-          try {
+        playPromiseRefs.current[index]
+          ?.then(() => {
             video.pause();
-          } catch (err) {
-            console.warn('Error pausing video:', err);
-          }
-        });
+          })
+          .catch(() => {
+            try {
+              video.pause();
+            } catch (err) {
+              console.warn('Error pausing video:', err);
+            }
+          });
       } else {
         video.pause();
       }
@@ -302,12 +319,20 @@ export const VideoContextProvider: React.FC<VideoContextProviderProps> = ({
   const togglePlay = (index: number) => {
     const video = videoRefs.current[index];
     if (!video) return;
-    
+
     if (video.paused) {
       play(index);
     } else {
       pause(index);
     }
+  };
+
+  const registerVideo = (video: HTMLVideoElement) => {
+    videoRefs.current.push(video);
+  };
+
+  const unregisterVideo = (video: HTMLVideoElement) => {
+    videoRefs.current = videoRefs.current.filter(v => v !== video);
   };
 
   const value: VideoContextValue = {
@@ -322,16 +347,14 @@ export const VideoContextProvider: React.FC<VideoContextProviderProps> = ({
     togglePlay,
     isPageVisible,
     useVideoFallback,
-    setUseVideoFallback
+    setUseVideoFallback,
+    registerVideo,
+    unregisterVideo,
   };
 
-  return (
-    <VideoContext.Provider value={value}>
-      {children}
-    </VideoContext.Provider>
-  );
+  return <VideoContext.Provider value={value}>{children}</VideoContext.Provider>;
 };
 
 export const useVideoContext = () => useContext(VideoContext);
 
-export default VideoContext; 
+export default VideoContext;

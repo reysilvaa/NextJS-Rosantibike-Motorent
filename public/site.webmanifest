@@ -1,21 +1,53 @@
 {
-  "name": "Rosanti Bike Motorent",
-  "short_name": "Rosanti Motor",
+  "name": "Rosantibike Motorent",
+  "short_name": "Rosantibike",
+  "description": "Rental motor terpercaya dengan harga terjangkau dan layanan terbaik di Malang",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1A1A1A",
+  "theme_color": "#1A1A1A",
   "icons": [
     {
-      "src": "/android-chrome-192x192.png",
-      "sizes": "192x192",
+      "src": "/web-app-manifest-192x192.png",
       "type": "image/png",
-      "purpose": "maskable"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
-      "src": "/android-chrome-512x512.png",
-      "sizes": "512x512",
+      "src": "/web-app-manifest-512x512.png",
       "type": "image/png",
-      "purpose": "maskable"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff",
-  "display": "standalone"
+  "orientation": "portrait-primary",
+  "categories": ["travel", "transportation", "rental"],
+  "shortcuts": [
+    {
+      "name": "Lihat Motor",
+      "short_name": "Motor",
+      "description": "Lihat daftar motor yang tersedia",
+      "url": "/motorcycles",
+      "icons": [
+        {
+          "src": "/favicon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Cek Ketersediaan",
+      "short_name": "Ketersediaan",
+      "description": "Cek ketersediaan motor",
+      "url": "/availability",
+      "icons": [
+        {
+          "src": "/favicon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
 }
