@@ -191,8 +191,8 @@ const nextConfig = {
           basePath: false,
         },
         {
-          source: '/notifications/:path*',
-          destination: `${apiUrl}/notifications/:path*`,
+          source: '/realtime/:path*',
+          destination: `${apiUrl}/realtime/:path*`,
           basePath: false,
         },
       ]
