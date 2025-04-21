@@ -212,7 +212,7 @@ export async function checkAvailability(
       console.log('Filtering by motorcycle type ID:', params.jenisMotorId);
     }
 
-    const endpoint = `${API_CONFIG.ENDPOINTS.UNIT_MOTOR_AVAILABILITY}?${queryParams.toString()}`;
+    const endpoint = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.UNIT_MOTOR_AVAILABILITY}?${queryParams.toString()}`;
 
     // Cek cache sebelum melakukan request
     const cacheKey = endpoint;

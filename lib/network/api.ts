@@ -81,7 +81,12 @@ apiClient.interceptors.response.use(
 
 // Helper function for API requests
 async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const url = `${API_CONFIG.BASE_URL}${endpoint}`;
+  const baseUrl = API_CONFIG.BASE_URL || '';
+  // Pastikan endpoint tidak menambahkan / di awal jika BASE_URL sudah diakhiri dengan /
+  const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const url = baseUrl.endsWith('/') 
+    ? `${baseUrl}${normalizedEndpoint.substring(1)}` 
+    : `${baseUrl}${normalizedEndpoint}`;
 
   // Default headers
   const headers: Record<string, string> = {
@@ -93,7 +98,7 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
   console.log(`Requesting ${url} with method ${options.method || 'GET'}`);
 
   try {
-    if (!API_CONFIG.BASE_URL) {
+    if (!baseUrl) {
       console.error('API_CONFIG.BASE_URL tidak terdefinisi. Periksa konfigurasi .env');
       throw new Error('URL API tidak terkonfigurasi dengan benar. Harap periksa file .env');
     }

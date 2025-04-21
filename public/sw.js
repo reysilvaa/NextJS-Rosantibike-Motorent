@@ -91,7 +91,7 @@ self.addEventListener('fetch', event => {
 
   // Skip cross-origin requests
   if (url.origin !== self.location.origin) {
-    return;
+    return; // Tidak menangani permintaan cross-origin sama sekali
   }
 
   // Skip non-GET requests
