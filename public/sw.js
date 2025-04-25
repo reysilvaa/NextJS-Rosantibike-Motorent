@@ -6,6 +6,7 @@ const IMAGE_CACHE = 'rosantibike-images-v1';
 // List asset yang akan di-cache saat service worker dipasang
 const urlsToCache = [
   '/',
+  '/offline.html',
   '/site.webmanifest',
   '/favicon.ico',
   '/favicon.svg',
@@ -18,6 +19,9 @@ const urlsToCache = [
   '/fonts/inter-var.woff2',
   // Tambahkan CSS kritikal jika ada
   '/styles.css',
+  // Logo untuk offline page
+  '/logo/logo1.svg',
+  '/logo/logo2.svg',
 ];
 
 // Asset kritikal yang harus tersedia di halaman beranda
@@ -61,6 +65,11 @@ self.addEventListener('install', event => {
       .open(CACHE_NAME)
       .then(async (cache) => {
         console.log('Cache dibuka');
+        // Pastikan offline.html selalu terinstall
+        await cache.add('/offline.html').catch(err => {
+          console.warn('Gagal meng-cache offline.html:', err);
+        });
+        
         // Gunakan metode yang lebih baik untuk caching - tidak akan gagal jika 1 file tidak ada
         const result = await cacheUrls(cache, urlsToCache);
         console.log(`Berhasil cache ${result.success} file, gagal ${result.failed} file`);
@@ -190,7 +199,14 @@ self.addEventListener('fetch', event => {
           return response;
         })
         .catch(() => {
-          return caches.match(request);
+          return caches.match(request)
+            .then(cachedResponse => {
+              if (cachedResponse) {
+                return cachedResponse;
+              }
+              // Jika offline dan tidak ada cache, tampilkan offline page
+              return caches.match('/offline.html');
+            });
         })
     );
     return;
@@ -287,7 +303,7 @@ self.addEventListener('fetch', event => {
           })
           .catch(() => {
             // Jika offline dan tidak ada di cache, tampilkan offline page
-            return caches.match('/');
+            return caches.match('/offline.html');
           });
 
         // Gunakan cache jika ada sementara fetch berjalan
@@ -314,7 +330,50 @@ self.addEventListener('fetch', event => {
         return response;
       })
       .catch(() => {
-        return caches.match(request);
+        return caches.match(request)
+          .then(cachedResponse => {
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+            // Saat tidak ada koneksi dan content tidak di cache, tampilkan halaman offline
+            if (request.mode === 'navigate') {
+              return caches.match('/offline.html');
+            }
+            return new Response('Network error happened', {
+              status: 408,
+              headers: { 'Content-Type': 'text/plain' },
+            });
+          });
       })
   );
+});
+
+// Handle pesan dari klien
+self.addEventListener('message', (event) => {
+  // Periksa apakah pesan adalah untuk skip waiting
+  if (event.data === 'skipWaiting') {
+    self.skipWaiting();
+  }
+});
+
+// Tambahkan event fetch khusus untuk manifest
+self.addEventListener('fetch', (event) => {
+  if (
+    event.request.url.endsWith('/site.webmanifest') ||
+    event.request.url.endsWith('/manifest.json')
+  ) {
+    // Cache manifest file secara konsisten
+    event.respondWith(
+      caches.open(CACHE_NAME).then((cache) => {
+        return fetch(event.request)
+          .then((response) => {
+            cache.put(event.request, response.clone());
+            return response;
+          })
+          .catch(() => {
+            return cache.match(event.request);
+          });
+      })
+    );
+  }
 });

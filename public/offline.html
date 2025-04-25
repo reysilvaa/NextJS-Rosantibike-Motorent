@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#F97316">
+  <title>Offline - Rosantibike Motorent</title>
+  <link rel="manifest" href="./site.webmanifest">
+  <link rel="icon" href="./logo/logo1.svg">
+  <link rel="icon" type="image/svg+xml" href="./logo/logo1.svg">
+  <link rel="apple-touch-icon" href="./logo/logo1.svg">
+  <style>
+    :root {
+      --background: 0 0% 100%;
+      --foreground: 0 0% 5%;
+      --card: 0 0% 98%;
+      --card-foreground: 0 0% 5%;
+      --popover: 0 0% 100%;
+      --popover-foreground: 0 0% 5%;
+      --primary: 0 0% 10%;
+      --primary-foreground: 0 0% 98%;
+      --secondary: 0 0% 95%;
+      --secondary-foreground: 0 0% 10%;
+      --muted: 0 0% 95%;
+      --muted-foreground: 0 0% 40%;
+      --accent: 0 0% 90%;
+      --accent-foreground: 0 0% 10%;
+      --destructive: 0 62.8% 30.6%;
+      --destructive-foreground: 0 0% 98%;
+      --border: 0 0% 85%;
+      --input: 0 0% 85%;
+      --ring: 0 0% 70%;
+      --radius: 0.5rem;
+      --bg-gradient-start: 0 0% 100%;
+      --bg-gradient-end: 0 0% 98%;
+      --bg-gradient-mid: 0 0% 99%;
+      --bg-gradient-accent: 0 0% 95%;
+      --gradient-start: 0 0% 100%;
+      --gradient-mid: 0 0% 95%;
+      --gradient-end: 0 0% 90%;
+    }
+    
+    .dark {
+      --background: 0 0% 0%;
+      --foreground: 0 0% 98%;
+      --card: 0 0% 5%;
+      --card-foreground: 0 0% 98%;
+      --popover: 0 0% 5%;
+      --popover-foreground: 0 0% 98%;
+      --primary: 0 0% 100%;
+      --primary-foreground: 0 0% 0%;
+      --secondary: 0 0% 15%;
+      --secondary-foreground: 0 0% 98%;
+      --muted: 0 0% 15%;
+      --muted-foreground: 0 0% 65%;
+      --accent: 0 0% 15%;
+      --accent-foreground: 0 0% 98%;
+      --destructive: 0 62.8% 30.6%;
+      --destructive-foreground: 0 0% 98%;
+      --border: 0 0% 20%;
+      --input: 0 0% 20%;
+      --ring: 0 0% 100%;
+      --bg-gradient-start: 0 0% 0%;
+      --bg-gradient-end: 0 0% 3%;
+      --bg-gradient-mid: 0 0% 1.5%;
+      --bg-gradient-accent: 0 0% 5%;
+      --gradient-start: 0 0% 0%;
+      --gradient-mid: 0 0% 5%;
+      --gradient-end: 0 0% 10%;
+    }
+    
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color-scheme: dark;
+      }
+      body {
+        color-scheme: dark;
+      }
+      html:not(.light) body {
+        --background: 0 0% 0%;
+        --foreground: 0 0% 98%;
+        --card: 0 0% 5%;
+        --card-foreground: 0 0% 98%;
+        --primary: 0 0% 100%;
+        --primary-foreground: 0 0% 0%;
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background-color: hsl(var(--background));
+      color: hsl(var(--foreground));
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 1rem;
+      transition: background-color 0.3s, color 0.3s;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow: hidden; /* Prevent scrollbars during animation */
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(
+        circle at 50% 50%,
+        hsl(var(--bg-gradient-accent) / 0.5) 0%,
+        transparent 50%
+      );
+      pointer-events: none;
+      z-index: 0;
+      transition: opacity 300ms ease;
+      animation: pulseGradient 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulseGradient {
+      0% {
+        opacity: 0.3;
+        transform: scale(1);
+      }
+      100% {
+        opacity: 0.7;
+        transform: scale(1.2);
+      }
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 600px;
+      padding: 2.5rem;
+      background-color: hsl(var(--card));
+      color: hsl(var(--card-foreground));
+      border-radius: var(--radius);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid hsl(var(--border));
+      animation: containerFloat 1s ease-out forwards;
+      overflow: hidden;
+    }
+
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        45deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.05) 50%,
+        transparent 100%
+      );
+      animation: shine 3s infinite linear;
+      pointer-events: none;
+    }
+
+    @keyframes containerFloat {
+      0% { 
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      100% { 
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes shine {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    .logo-container {
+      margin-bottom: 2.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      animation: logoReveal 1.2s ease-out forwards;
+    }
+
+    @keyframes logoReveal {
+      0% {
+        opacity: 0;
+        transform: scale(0.8) translateY(-20px);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .logo {
+      width: 140px;
+      height: auto;
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .logo:hover {
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .logo-light {
+      display: block;
+    }
+
+    .logo-dark {
+      display: none;
+    }
+
+    .dark .logo-light {
+      display: none;
+    }
+
+    .dark .logo-dark {
+      display: block;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+      color: hsl(var(--primary));
+      animation: slideInFromLeft 0.8s ease-out forwards;
+      position: relative;
+    }
+
+    @keyframes slideInFromLeft {
+      0% {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    p {
+      margin-bottom: 1.5rem;
+      line-height: 1.7;
+      color: hsl(var(--muted-foreground));
+      font-size: 1.1rem;
+      animation: fadeInUp 1s ease-out forwards;
+      opacity: 0;
+    }
+
+    p:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem 2rem;
+      background-color: hsl(var(--primary));
+      color: hsl(var(--primary-foreground));
+      border-radius: var(--radius);
+      font-weight: 600;
+      font-size: 1.1rem;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      border: none;
+      margin-top: 1rem;
+      animation: buttonPop 1s ease-out forwards;
+      opacity: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    @keyframes buttonPop {
+      0% {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      70% {
+        opacity: 1;
+        transform: scale(1.1);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .button::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: -100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+      );
+      transition: 0.5s;
+    }
+
+    .button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 7px 20px hsla(var(--primary), 0.3);
+    }
+
+    .button:hover::after {
+      left: 100%;
+    }
+
+    .button:active {
+      transform: translateY(-1px);
+    }
+
+    .footer {
+      margin-top: 2.5rem;
+      font-size: 0.95rem;
+      color: hsl(var(--muted-foreground));
+      opacity: 0;
+      animation: fadeIn 1s ease-out 1s forwards;
+      padding-top: 1.5rem;
+      border-top: 1px solid hsl(var(--border));
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    /* Floating particles animation */
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: hsl(var(--primary) / 0.1);
+      border-radius: 50%;
+      animation: float 20s infinite linear;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(0) translateX(0);
+        opacity: 0;
+      }
+      50% {
+        opacity: 0.5;
+      }
+      100% {
+        transform: translateY(-100vh) translateX(100vw);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="particles" id="particles"></div>
+  <div class="container">
+    <div class="logo-container">
+      <img src="./logo/logo2.svg" alt="Rosantibike Motorent" class="logo logo-light">
+      <img src="./logo/logo1.svg" alt="Rosantibike Motorent" class="logo logo-dark">
+    </div>
+    <h1>Koneksi Terputus</h1>
+    <p>Sepertinya Anda sedang offline. Periksa koneksi internet Anda dan coba kembali.</p>
+    <p>Beberapa fitur Rosantibike Motorent tetap tersedia secara offline.</p>
+    <button class="button" onclick="window.location.href='/'">Coba Lagi</button>
+    <div class="footer">
+      &copy; Rosantibike Motorent - Rental Motor Berkualitas di Malang
+    </div>
+  </div>
+
+  <script>
+    // Periksa kembali koneksi jika tersedia
+    window.addEventListener('online', () => {
+      window.location.reload();
+    });
+    
+    // Cek apakah aplikasi diinstal sebagai PWA
+    if (window.matchMedia('(display-mode: standalone)').matches || 
+        window.navigator.standalone === true) {
+      document.querySelector('.footer').textContent += ' - PWA Mode';
+    }
+
+    // Add floating particles
+    function createParticles() {
+      const container = document.getElementById('particles');
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + 'vw';
+        particle.style.top = Math.random() * 100 + 'vh';
+        particle.style.animationDuration = (15 + Math.random() * 15) + 's';
+        particle.style.animationDelay = (Math.random() * 2) + 's';
+        container.appendChild(particle);
+      }
+    }
+
+    // Initialize particles
+    createParticles();
+
+    // Recreate particles periodically
+    setInterval(() => {
+      const container = document.getElementById('particles');
+      container.innerHTML = '';
+      createParticles();
+    }, 20000);
+
+    // Deteksi preferensi tema
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (prefersDark) {
+      document.body.classList.add('dark');
+    }
+    
+    // Listener untuk perubahan tema
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      if (e.matches) {
+        document.body.classList.add('dark');
+      } else {
+        document.body.classList.remove('dark');
+      }
+    });
+  </script>
+</body>
+</html>
