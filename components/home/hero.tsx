@@ -114,13 +114,9 @@ export default function Hero() {
 
   // Force using image fallback on mobile to improve performance
   useEffect(() => {
-    // Check if device is likely mobile
-    const isMobile =
-      window.innerWidth < 768 ||
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-    if (isMobile && !useVideoFallback) {
-      setUseVideoFallback(true);
+    // Pastikan video diputar untuk semua perangkat
+    if (useVideoFallback) {
+      setUseVideoFallback(false);
     }
   }, [useVideoFallback, setUseVideoFallback]);
 
@@ -282,6 +278,45 @@ export default function Hero() {
     }));
   };
 
+  // Set custom attributes for mobile video playback
+  useEffect(() => {
+    // Iterasi semua video yang sudah dimuat
+    loadedVideos.forEach(index => {
+      const video = videoRefs.current[index];
+      if (video) {
+        // Tambahkan atribut khusus untuk pemutaran di browser mobile
+        video.setAttribute('webkit-playsinline', 'true');
+        video.setAttribute('x5-playsinline', 'true');
+        video.setAttribute('x5-video-player-type', 'h5');
+        video.setAttribute('x5-video-player-fullscreen', 'false');
+        video.setAttribute('x5-video-orientation', 'portraint');
+        
+        // Set playback rate untuk performa lebih baik
+        video.playbackRate = 1.0;
+        
+        // Pastikan video dimuat dengan prioritas tinggi untuk slide saat ini
+        if (index === currentSlide) {
+          video.setAttribute('importance', 'high');
+        }
+        
+        // Force restart video jika sudah dimuat
+        if (video.readyState >= 2 && index === currentSlide) {
+          video.currentTime = 0;
+          try {
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+              playPromise.catch(error => {
+                console.info('Video playback error:', error);
+              });
+            }
+          } catch (error) {
+            console.warn('Error playing video:', error);
+          }
+        }
+      }
+    });
+  }, [loadedVideos, videoRefs, currentSlide]);
+
   return (
     <section className="relative h-screen w-full overflow-hidden">
       {/* Video Slides */}
@@ -297,45 +332,38 @@ export default function Hero() {
               index === currentSlide ? 'opacity-100' : 'opacity-0 pointer-events-none'
             }`}
           >
-            {useVideoFallback ? (
-              <div className="absolute inset-0 bg-gray-900">
-                <div
-                  className={`absolute inset-0 ${theme === 'light' ? 'bg-black/75' : 'bg-black/60'}`}
-                />
-              </div>
-            ) : (
-              <div className="absolute inset-0 w-full h-full">
-                {/* Background color sebagai pengganti placeholder */}
-                <div
-                  className={`absolute inset-0 bg-gray-900 transition-opacity duration-500 ${
-                    videoLoading[index] ? 'opacity-100' : 'opacity-0'
-                  }`}
-                />
+            <div className="absolute inset-0 w-full h-full">
+              {/* Background color sebagai pengganti placeholder */}
+              <div
+                className={`absolute inset-0 bg-gray-900 transition-opacity duration-500 ${
+                  videoLoading[index] ? 'opacity-100' : 'opacity-0'
+                }`}
+              />
 
-                <video
-                  ref={el => {
-                    videoRefs.current[index] = el;
-                  }}
-                  src={slide.videoUrl}
-                  className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
-                  style={{
-                    opacity: videoLoading[index] ? 0 : 1,
-                  }}
-                  muted
-                  playsInline
-                  loop
-                  preload={index === currentSlide ? 'auto' : 'none'} // Hanya preload video saat ini
-                  disablePictureInPicture
-                  disableRemotePlayback
-                  onLoadStart={() => handleVideoLoadStart(index)}
-                  onCanPlay={() => handleVideoCanPlay(index)}
-                  aria-label={slide.imageAlt || `Video slide ${index + 1}`}
-                />
-                <div
-                  className={`absolute inset-0 ${theme === 'light' ? 'bg-black/65' : 'bg-black/50'}`}
-                />
-              </div>
-            )}
+              <video
+                ref={el => {
+                  videoRefs.current[index] = el;
+                }}
+                src={slide.videoUrl}
+                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+                style={{
+                  opacity: videoLoading[index] ? 0 : 1,
+                }}
+                muted
+                playsInline
+                loop
+                autoPlay={index === currentSlide}
+                preload={index === currentSlide ? 'auto' : 'none'} // Hanya preload video saat ini
+                disablePictureInPicture
+                disableRemotePlayback
+                onLoadStart={() => handleVideoLoadStart(index)}
+                onCanPlay={() => handleVideoCanPlay(index)}
+                aria-label={slide.imageAlt || `Video slide ${index + 1}`}
+              />
+              <div
+                className={`absolute inset-0 ${theme === 'light' ? 'bg-black/65' : 'bg-black/50'}`}
+              />
+            </div>
           </div>
         );
       })}
