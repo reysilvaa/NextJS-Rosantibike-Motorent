@@ -14,6 +14,9 @@ export const metadata = generateMetadata({
     index: true,
     follow: true,
   },
+  alternates: {
+    canonical: 'https://rosantibikemotorent.com/motorcycles',
+  }
 });
 
 export default function MotorcyclesLayout({ children }: { children: React.ReactNode }) {

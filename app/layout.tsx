@@ -58,6 +58,12 @@ export default function RootLayout({
           content="Rosantibike Motorent menyediakan layanan rental motor premium di Malang dengan harga terjangkau. Motor berkualitas untuk petualangan Anda di seluruh kota Malang."
         />
 
+
+        <link
+          rel="canonical"
+          href="https://rosantibikemotorent.com"
+        />
+
         {/* Preconnect dan DNS prefetch untuk optimasi */}
         <link
           rel="preconnect"

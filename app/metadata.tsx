@@ -28,4 +28,7 @@ export const metadata = generateMetadata({
     index: true,
     follow: true,
   },
+  alternates: {
+    canonical: 'https://rosantibikemotorent.com',
+  }
 });

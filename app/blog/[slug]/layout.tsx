@@ -26,13 +26,16 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
           index: true,
           follow: true,
         },
+        alternates: {
+          canonical: `https://rosantibikemotorent.com/blog/${params.slug}`,
+        },
       });
     }
 
     return baseSeoMetadata({
-      title: `${post.judul} - Rosanti Bike Rental Blog`,
+      title: `${post.judul} - Rosantibike Motorent Blog`,
       description: post.konten.slice(0, 160) || post.judul,
-      keywords: generateKeywords('blog', {
+      keywords: generateKeywords('blog-detail', {
         additionalKeywords: [...post.tags.map(tag => tag.tag.nama), post.judul],
       }),
       openGraph: {
@@ -43,16 +46,22 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
         index: true,
         follow: true,
       },
+      alternates: {
+        canonical: `https://rosantibikemotorent.com/blog/${post.slug}`,
+      },
     });
   } catch (error) {
     console.error('Error generating metadata:', error);
     return baseSeoMetadata({
-      title: 'Blog Post - Rosantibikemotorent',
+      title: 'Blog Post - Rosantibike Motorent',
       description: 'Read our latest blog post about motorcycles and adventures.',
-      keywords: generateKeywords('blog'),
+      keywords: generateKeywords('blog-detail'),
       robots: {
         index: true,
         follow: true,
+      },
+      alternates: {
+        canonical: `https://rosantibikemotorent.com/blog/${params.slug}`,
       },
     });
   }

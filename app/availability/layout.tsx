@@ -2,9 +2,9 @@ import { generateMetadata } from '@/lib/seo/config';
 import { generateKeywords } from '@/lib/seo/keywords';
 
 export const metadata = generateMetadata({
-  title: 'Check Availability - Rosantibike Motorent',
+  title: 'Check Availability - Rosantibike Rental',
   description:
-    'Check the availability of motorcycles for your desired rental dates and book your ride with Rosantibike Motorent.',
+    'Check the availability of motorcycles for your desired rental dates and book your ride with Rosantiike Rental.',
   keywords: generateKeywords('availability', {
     additionalKeywords: ['cek ketersediaan motor', 'booking motor', 'jadwal rental'],
   }),
@@ -16,6 +16,9 @@ export const metadata = generateMetadata({
     index: true,
     follow: true,
   },
+  alternates: {
+    canonical: 'https://rosantibikemotorent.com/availability',
+  }
 });
 
 export default function AvailabilityLayout({ children }: { children: React.ReactNode }) {
