@@ -24,10 +24,6 @@ export default function Navbar() {
 
   // Kondisi untuk mengubah style navbar sesuai home page
   const shouldUseWhiteStyle = isLightTheme && !isScrolled && isHomePage;
-  
-  // Gunakan logo1.svg untuk style putih (home tanpa scroll), logo2.svg untuk lainnya
-  // Ini memberikan pola penggunaan logo yang lebih mudah diprediksi
-  const logoSrc = shouldUseWhiteStyle ? '/logo/logo1.svg' : '/logo/logo2.svg';
 
   useEffect(() => {
     // Using requestAnimationFrame for smoother performance
@@ -107,12 +103,19 @@ export default function Navbar() {
             )}
           >
             <Image
-              src={logoSrc}
+              src={
+                isHomePage
+                  ? isLightTheme
+                    ? isScrolled
+                      ? '/logo/logo2.svg'
+                      : '/logo/logo1.svg'
+                    : '/logo/logo1.svg'
+                  : '/logo/logo2.svg'
+              }
               alt="Rosantibike Motorent"
               width={120}
               height={40}
               className="h-10 w-auto"
-              priority={true} // Prioritas tinggi untuk logo
             />
             <span
               className={cn(
@@ -200,7 +203,13 @@ export default function Navbar() {
                   </div>
                   <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
                     <Image
-                      src="/logo/logo2.svg" /* Selalu menggunakan logo2.svg di mobile menu */
+                      src={
+                        isHomePage
+                          ? isScrolled
+                            ? '/logo/logo2.svg'
+                            : '/logo/logo1.svg'
+                          : '/logo/logo2.svg'
+                      }
                       alt="RosantiBike Motorent"
                       width={96}
                       height={32}
