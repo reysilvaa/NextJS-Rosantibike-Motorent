@@ -32,16 +32,46 @@ function isValidCacheUrl(url) {
   return url.startsWith('http:') || url.startsWith('https:');
 }
 
+// Helper untuk caching yang lebih baik - tidak gagal jika 1 file tidak tersedia
+async function cacheUrls(cache, urls) {
+  const failedUrls = [];
+  
+  await Promise.all(
+    urls.map(async (url) => {
+      try {
+        await cache.add(url);
+      } catch (error) {
+        console.warn(`Gagal meng-cache: ${url}`, error);
+        failedUrls.push(url);
+      }
+    })
+  );
+  
+  return {
+    success: urls.length - failedUrls.length,
+    failed: failedUrls.length,
+    failedUrls
+  };
+}
+
 // Pemasangan service worker
 self.addEventListener('install', event => {
   event.waitUntil(
     caches
       .open(CACHE_NAME)
-      .then(cache => {
+      .then(async (cache) => {
         console.log('Cache dibuka');
-        return cache.addAll(urlsToCache);
+        // Gunakan metode yang lebih baik untuk caching - tidak akan gagal jika 1 file tidak ada
+        const result = await cacheUrls(cache, urlsToCache);
+        console.log(`Berhasil cache ${result.success} file, gagal ${result.failed} file`);
+        return result;
       })
       .then(() => self.skipWaiting()) // Aktifkan langsung SW baru
+      .catch(error => {
+        console.error('Gagal menginstall service worker:', error);
+        // Tetap lanjutkan instalasi meskipun gagal cache
+        return self.skipWaiting();
+      })
   );
 });
 
@@ -98,7 +128,14 @@ async function cacheImage(request, response) {
 // Strategi cache-first untuk asset statis, network-first untuk API
 self.addEventListener('fetch', event => {
   const request = event.request;
-  const url = new URL(request.url);
+  let url;
+  
+  try {
+    url = new URL(request.url);
+  } catch (error) {
+    // URL tidak valid, abaikan
+    return;
+  }
 
   // Skip permintaan dengan skema yang tidak valid (chrome-extension, dll)
   if (!isValidCacheUrl(request.url)) {
@@ -133,14 +170,19 @@ self.addEventListener('fetch', event => {
           caches.open(CACHE_NAME).then(cache => {
             CRITICAL_HOME_ASSETS.forEach(asset => {
               // Pastikan asset adalah URL yang valid
-              if (isValidCacheUrl(new URL(asset, self.location.origin).href)) {
-                fetch(asset)
-                  .then(assetResponse => {
-                    cache.put(new Request(asset), assetResponse);
-                  })
-                  .catch(() => {
-                    // Ignore errors
-                  });
+              try {
+                const assetUrl = new URL(asset, self.location.origin).href;
+                if (isValidCacheUrl(assetUrl)) {
+                  fetch(asset)
+                    .then(assetResponse => {
+                      cache.put(new Request(asset), assetResponse);
+                    })
+                    .catch(() => {
+                      // Ignore errors
+                    });
+                }
+              } catch (error) {
+                console.warn(`URL tidak valid: ${asset}`);
               }
             });
           });

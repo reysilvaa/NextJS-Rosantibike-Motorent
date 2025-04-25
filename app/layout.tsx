@@ -74,9 +74,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
 
-        {/* Preload critical resources */}
-        <link rel="preload" href="/logo/logo1.svg" as="image" type="image/svg+xml" />
-        <link rel="preload" href="/logo/logo2.svg" as="image" type="image/svg+xml" />
+
 
         {/* Service Worker Registration - Menggunakan event listener untuk tidak blocking */}
         <script
