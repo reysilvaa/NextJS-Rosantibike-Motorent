@@ -1,12 +1,11 @@
-# Allow all crawlers
+# Allow all user agents
 User-agent: *
 Allow: /
 
 # Sitemap location
 Sitemap: https://rosantibikemotorent.com/sitemap.xml
 
-# Disallow admin and private areas
-Disallow: /admin/
+# Disallow specific routes
 Disallow: /api/
-Disallow: /_next/
-Disallow: /static/ 
+Disallow: /dashboard/
+Disallow: /admin/ 

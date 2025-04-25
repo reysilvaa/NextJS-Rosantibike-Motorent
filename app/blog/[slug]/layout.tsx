@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 
     if (!post) {
       return baseSeoMetadata({
-        title: 'Article Not Found - Rosanti Bike Rental',
+        title: 'Article Not Found - Rosantibike Motorent',
         description: 'The article you are looking for could not be found.',
         keywords: generateKeywords('not-found', {
           additionalKeywords: ['blog article', params.slug],

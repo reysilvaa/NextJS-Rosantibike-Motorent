@@ -2,9 +2,9 @@ import { generateMetadata } from '@/lib/seo/config';
 import { generateKeywords } from '@/lib/seo/keywords';
 
 export const metadata = generateMetadata({
-  title: 'Contact Us - Rosanti Bike Rental',
+  title: 'Contact Us - Rosantibike Motorent',
   description:
-    "Get in touch with Rosanti Bike Rental. We're here to help you with your motorcycle rental needs and answer any questions you may have.",
+    "Get in touch with Rosantibike Motorent. We're here to help you with your motorcycle rental needs and answer any questions you may have.",
   keywords: generateKeywords('contact'),
   openGraph: {
     url: 'https://rosantibikemotorent.com/contact',

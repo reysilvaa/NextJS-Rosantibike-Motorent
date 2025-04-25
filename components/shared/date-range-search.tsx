@@ -29,7 +29,7 @@ export default function DateRangeSearch({
   initialDateFrom,
   initialDateTo,
   cardClassName,
-  _usePopover = false,
+  usePopover = true,
 }: DateRangeSearchProps) {
   const { t } = useTranslation();
   const [dateRange, setDateRange] = useState<DateRange | undefined>();

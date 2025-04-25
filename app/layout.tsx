@@ -5,6 +5,7 @@ import type React from 'react';
 
 import Footer from '@/components/layout/footer';
 import Navbar from '@/components/layout/navbar';
+import SchemaOrg from '@/components/shared/schema-org';
 
 import { inter } from './fonts';
 import { metadata as seoMetadata } from './metadata';
@@ -24,7 +25,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   ...seoMetadata,
-  title: 'Rosantibike Motorent',
+  title: 'Rosantibike Motorent | Rental Motor Berkualitas di Malang',
   description: 'Rental motor terpercaya dengan harga terjangkau dan layanan terbaik di Malang',
   icons: {
     icon: [
@@ -54,7 +55,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-orientations" content="portrait" />
         <meta
           name="description"
-          content="Rental motor terpercaya dengan harga terjangkau dan layanan terbaik di Malang"
+          content="Rosantibike Motorent menyediakan layanan rental motor premium di Malang dengan harga terjangkau. Motor berkualitas untuk petualangan Anda di seluruh kota Malang."
         />
 
         {/* Preconnect dan DNS prefetch untuk optimasi */}
@@ -93,6 +94,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen flex flex-col antialiased font-sans">
         <Providers>
+          <SchemaOrg />
           <Navbar />
           <main className="flex-grow">{children}</main>
           <Footer />

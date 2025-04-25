@@ -45,7 +45,7 @@ export const defaultSeoConfig: SeoConfig = {
   metadataBase: 'https://rosantibikemotorent.com',
   openGraph: {
     type: 'website',
-    siteName: 'Rosanti Bike',
+    siteName: 'Rosantibike',
     images: ['/images/og-image.jpg'],
   },
   twitter: {
