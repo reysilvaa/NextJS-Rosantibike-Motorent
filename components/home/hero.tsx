@@ -5,7 +5,7 @@ import { ArrowRight, ChevronRight, Search } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -59,6 +59,9 @@ export default function Hero() {
   const [isLoading, setIsLoading] = useState(true);
   const [_imagesLoaded, _setImagesLoaded] = useState(false);
   const [videoLoading, setVideoLoading] = useState<{ [key: number]: boolean }>({ 0: true });
+  
+  // Menyimpan promise pemutaran video yang sedang aktif
+  const playPromisesRef = useRef<{[key: number]: Promise<void> | null}>({});
 
   // Definisi slides
   const slides: SlideType[] = [
@@ -176,6 +179,93 @@ export default function Hero() {
       return prev;
     });
   }, [currentSlide, slides.length]);
+
+  // Menangani perubahan slide dengan menjaga pemutaran video
+  useEffect(() => {
+    // Pertama, pastikan video current slide diputar
+    const currentVideo = videoRefs.current[currentSlide];
+    
+    if (currentVideo && !useVideoFallback) {
+      // Putar video dengan aman menggunakan Promise
+      try {
+        const playPromise = currentVideo.play();
+        
+        // Hanya jika browser mengembalikan Promise, simpan untuk referensi
+        if (playPromise !== undefined) {
+          playPromisesRef.current[currentSlide] = playPromise;
+          
+          // Handle jika pemutaran berhasil
+          playPromise.then(() => {
+            // Pemutaran berhasil
+            playPromisesRef.current[currentSlide] = null;
+          }).catch(error => {
+            // Abaikan AbortError karena kita sudah menanganinya
+            if (error.name !== 'AbortError') {
+              console.error('Video playback error:', error);
+            }
+            playPromisesRef.current[currentSlide] = null;
+          });
+        }
+      } catch (error) {
+        console.error('Error playing video:', error);
+      }
+    }
+    
+    // Cleanup: Pause video yang tidak aktif
+    return () => {
+      // Untuk semua video, cek jika ada yang bukan current slide
+      Object.keys(videoRefs.current).forEach(slideIndex => {
+        const index = Number(slideIndex);
+        if (index !== currentSlide) {
+          const video = videoRefs.current[index];
+          const playPromise = playPromisesRef.current[index];
+          
+          if (video) {
+            if (playPromise) {
+              // Jika masih ada Promise pemutaran yang aktif
+              playPromise
+                .then(() => {
+                  // Tunggu pemutaran selesai, baru pause
+                  video.pause();
+                })
+                .catch(() => {
+                  // Abaikan error
+                });
+            } else {
+              // Tidak ada Promise aktif, langsung pause
+              video.pause();
+            }
+          }
+        }
+      });
+    };
+  }, [currentSlide, useVideoFallback, videoRefs]);
+
+  // Cleanup ketika komponen unmount
+  useEffect(() => {
+    return () => {
+      // Pause semua video saat unmount untuk mencegah memory leak
+      Object.keys(videoRefs.current).forEach(slideIndex => {
+        const index = Number(slideIndex);
+        const video = videoRefs.current[index];
+        const playPromise = playPromisesRef.current[index];
+        
+        if (video) {
+          if (playPromise) {
+            playPromise
+              .then(() => {
+                video.pause();
+              })
+              .catch(() => {
+                // Abaikan error
+              });
+          } else {
+            video.pause();
+          }
+        }
+      });
+    };
+  }, [videoRefs]);
 
   // Handler video loaded
   const handleVideoLoadStart = (index: number) => {

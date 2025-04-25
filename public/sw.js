@@ -26,6 +26,12 @@ const CRITICAL_HOME_ASSETS = [
   '/_next/static/css/app/layout.css', // Adjust this path as needed
 ];
 
+// Helper untuk memvalidasi URL yang aman untuk di-cache
+function isValidCacheUrl(url) {
+  // Hanya cache HTTP/HTTPS URLs, tolak chrome-extension dan skema lainnya
+  return url.startsWith('http:') || url.startsWith('https:');
+}
+
 // Pemasangan service worker
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -66,6 +72,11 @@ function isHomePage(url) {
 
 // Cache gambar dengan cache terpisah dan TTL (1 minggu)
 async function cacheImage(request, response) {
+  // Pastikan URL valid untuk di-cache
+  if (!isValidCacheUrl(request.url)) {
+    return response;
+  }
+
   const cache = await caches.open(IMAGE_CACHE);
   const clonedResponse = response.clone();
   const headers = new Headers(clonedResponse.headers);
@@ -88,6 +99,11 @@ async function cacheImage(request, response) {
 self.addEventListener('fetch', event => {
   const request = event.request;
   const url = new URL(request.url);
+
+  // Skip permintaan dengan skema yang tidak valid (chrome-extension, dll)
+  if (!isValidCacheUrl(request.url)) {
+    return; // Tidak menangani permintaan dengan skema yang tidak valid
+  }
 
   // Skip cross-origin requests
   if (url.origin !== self.location.origin) {
@@ -116,13 +132,16 @@ self.addEventListener('fetch', event => {
           // Pre-cache critical home assets
           caches.open(CACHE_NAME).then(cache => {
             CRITICAL_HOME_ASSETS.forEach(asset => {
-              fetch(asset)
-                .then(assetResponse => {
-                  cache.put(new Request(asset), assetResponse);
-                })
-                .catch(() => {
-                  // Ignore errors
-                });
+              // Pastikan asset adalah URL yang valid
+              if (isValidCacheUrl(new URL(asset, self.location.origin).href)) {
+                fetch(asset)
+                  .then(assetResponse => {
+                    cache.put(new Request(asset), assetResponse);
+                  })
+                  .catch(() => {
+                    // Ignore errors
+                  });
+              }
             });
           });
 
@@ -174,7 +193,10 @@ self.addEventListener('fetch', event => {
               } else {
                 const responseToCache = fetchResponse.clone();
                 caches.open(RUNTIME_CACHE).then(cache => {
-                  cache.put(request, responseToCache);
+                  // Pastikan URL valid untuk di-cache
+                  if (isValidCacheUrl(request.url)) {
+                    cache.put(request, responseToCache);
+                  }
                 });
               }
             }
@@ -241,7 +263,10 @@ self.addEventListener('fetch', event => {
         if (response && response.status === 200 && request.method === 'GET') {
           const responseToCache = response.clone();
           caches.open(RUNTIME_CACHE).then(cache => {
-            cache.put(request, responseToCache);
+            // Tambahan pemeriksaan untuk URL yang valid
+            if (isValidCacheUrl(request.url)) {
+              cache.put(request, responseToCache);
+            }
           });
         }
         return response;
