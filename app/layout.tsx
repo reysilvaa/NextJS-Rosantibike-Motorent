@@ -12,6 +12,7 @@ import { inter } from './fonts';
 import { metadata as seoMetadata } from './metadata';
 import { Providers } from './providers';
 
+// Viewport untuk Next.js
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -57,88 +58,125 @@ export default function RootLayout({
   return (
     <html lang="id" suppressHydrationWarning className={inter.variable}>
       <head>
+        {/* Meta tags dasar untuk mobile */}
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Rosantibike Motorent" />
         <meta name="apple-touch-fullscreen" content="yes" />
-        <meta name="apple-mobile-web-app-orientations" content="portrait" />
-        <meta
-          name="description"
-          content="Rosantibike Motorent menyediakan layanan rental motor premium di Malang dengan harga terjangkau. Motor berkualitas untuk petualangan Anda di seluruh kota Malang."
-        />
-
-
+        
+        {/* Meta tags untuk SEO dan performa */}
+        <meta name="theme-color" content="#F97316" />
+        <meta name="application-name" content="Rosantibike Motorent" />
+        <meta name="msapplication-TileColor" content="#F97316" />
+        <meta name="msapplication-tap-highlight" content="no" />
+        <meta name="HandheldFriendly" content="true" />
+        
+        {/* Canonical URL */}
         <link
           rel="canonical"
           href="https://rosantibikemotorent.com"
         />
 
-        {/* Preconnect dan DNS prefetch untuk optimasi */}
-        <link
-          rel="preconnect"
-          href={process.env.NEXT_PUBLIC_WS_URL || ''}
-          crossOrigin="anonymous"
-        />
-        <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_WS_URL || ''} />
+        {/* Preconnect untuk meningkatkan performa */}
         <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
 
-        {/* PWA Apple touch icons */}
+        {/* PWA icons */}
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="apple-touch-startup-image" href="/apple-touch-icon.png" />
         
-        {/* Service Worker Registration - Menggunakan event listener untuk tidak blocking */}
+        {/* iOS splash screens yang dioptimalkan, fokus pada device populer */}
+        {/* iPhone 5, SE (1st gen) */}
+        <link
+          rel="apple-touch-startup-image"
+          media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)"
+          href="/web-app-manifest-512x512.png"
+        />
+        {/* iPhone 6, 6s, 7, 8, SE (2nd gen) */}
+        <link
+          rel="apple-touch-startup-image"
+          media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)"
+          href="/web-app-manifest-512x512.png"
+        />
+        {/* iPhone X, XS, 11 Pro, 12 mini, 13 mini */}
+        <link
+          rel="apple-touch-startup-image"
+          media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)"
+          href="/web-app-manifest-512x512.png"
+        />
+        {/* iPhone 11, XR */}
+        <link
+          rel="apple-touch-startup-image"
+          media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)"
+          href="/web-app-manifest-512x512.png"
+        />
+        {/* iPhone 11 Pro Max, XS Max */}
+        <link
+          rel="apple-touch-startup-image"
+          media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)"
+          href="/web-app-manifest-512x512.png"
+        />
+        {/* iPhone 12, 12 Pro, 13, 13 Pro, 14 */}
+        <link
+          rel="apple-touch-startup-image"
+          media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)"
+          href="/web-app-manifest-512x512.png"
+        />
+        {/* iPhone 12 Pro Max, 13 Pro Max, 14 Plus */}
+        <link
+          rel="apple-touch-startup-image"
+          media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)"
+          href="/web-app-manifest-512x512.png"
+        />
+        
+        {/* Service Worker Registration yang disederhanakan */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               if ('serviceWorker' in navigator) {
-                window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js').then(
-                    function(registration) {
-                      console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                      
-                      // Cek pembaruan Service Worker
-                      registration.addEventListener('updatefound', () => {
-                        const newWorker = registration.installing;
-                        newWorker.addEventListener('statechange', () => {
-                          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            // Beritahu pengguna bahwa ada update baru
+                window.addEventListener('load', async function() {
+                  try {
+                    const registration = await navigator.serviceWorker.register('/sw.js');
+                    console.log('SW berhasil terdaftar dengan scope: ', registration.scope);
+                    
+                    // Deteksi pembaruan
+                    registration.addEventListener('updatefound', () => {
+                      const newWorker = registration.installing;
+                      newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                          // Hanya tampilkan notifikasi saat tidak di mode seluler/lambat
+                          const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+                          if (!connection || (connection.effectiveType !== 'slow-2g' && connection.effectiveType !== '2g')) {
                             if (confirm('Pembaruan baru tersedia! Muat ulang sekarang?')) {
                               window.location.reload();
                             }
                           }
-                        });
+                        }
                       });
-                    },
-                    function(err) {
-                      console.log('ServiceWorker registration failed: ', err);
-                    }
-                  );
-                  
-                  // Penanganan Service Worker jika sudah teregistrasi
-                  navigator.serviceWorker.ready.then(registration => {
-                    console.log('Service Worker ready');
-                  });
-                });
-                
-                // Terima pesan dari Service Worker
-                navigator.serviceWorker.addEventListener('message', event => {
-                  if (event.data && event.data.type === 'RELOAD_PAGE') {
-                    window.location.reload();
+                    });
+                  } catch (err) {
+                    console.log('Pendaftaran SW gagal:', err);
                   }
-                });
-                
-                // Deteksi kendala koneksi
-                window.addEventListener('online', () => {
-                  console.log('Aplikasi kembali online');
-                  // Tambahkan notifikasi bahwa aplikasi kembali online jika diperlukan
-                });
-                
-                window.addEventListener('offline', () => {
-                  console.log('Aplikasi offline');
-                  // Tambahkan notifikasi bahwa aplikasi offline jika diperlukan
+                  
+                  // Deteksi kondisi offline sesuai realcase
+                  window.addEventListener('online', () => {
+                    // Hanya perbarui UI jika pengguna benar-benar melihat halaman
+                    if (document.visibilityState === 'visible') {
+                      // Tambahkan toast notifikasi jika tersedia
+                      if (window.showToast) {
+                        window.showToast('Anda kembali online', 'success');
+                      }
+                    }
+                  });
+                  
+                  window.addEventListener('offline', () => {
+                    if (document.visibilityState === 'visible') {
+                      if (window.showToast) {
+                        window.showToast('Anda offline, beberapa fitur mungkin tidak tersedia', 'warning');
+                      }
+                    }
+                  });
                 });
               }
             `,

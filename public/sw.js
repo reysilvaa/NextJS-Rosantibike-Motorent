@@ -1,7 +1,7 @@
 // Nama cache untuk asset statis
-const CACHE_NAME = 'rosantibike-cache-v1';
-const RUNTIME_CACHE = 'rosantibike-runtime-v1';
-const IMAGE_CACHE = 'rosantibike-images-v1';
+const CACHE_NAME = 'rosantibike-cache-v2';
+const RUNTIME_CACHE = 'rosantibike-runtime-v2';
+const IMAGE_CACHE = 'rosantibike-images-v2';
 
 // List asset yang akan di-cache saat service worker dipasang
 const urlsToCache = [
@@ -22,6 +22,9 @@ const urlsToCache = [
   // Logo untuk offline page
   '/logo/logo1.svg',
   '/logo/logo2.svg',
+  // Tambahan assets untuk mobile
+  '/motorcycle-placeholder.jpg',
+  '/motorcycle-bg.svg',
 ];
 
 // Asset kritikal yang harus tersedia di halaman beranda
@@ -58,21 +61,43 @@ async function cacheUrls(cache, urls) {
   };
 }
 
-// Pemasangan service worker
+// Pemasangan service worker - versi yang lebih baik untuk mobile
 self.addEventListener('install', event => {
   event.waitUntil(
     caches
       .open(CACHE_NAME)
       .then(async (cache) => {
         console.log('Cache dibuka');
-        // Pastikan offline.html selalu terinstall
-        await cache.add('/offline.html').catch(err => {
+        
+        // Pastikan offline.html selalu terinstall terlebih dahulu
+        try {
+          await cache.add('/offline.html');
+          console.log('offline.html berhasil di-cache');
+        } catch (err) {
           console.warn('Gagal meng-cache offline.html:', err);
-        });
+        }
         
         // Gunakan metode yang lebih baik untuk caching - tidak akan gagal jika 1 file tidak ada
         const result = await cacheUrls(cache, urlsToCache);
         console.log(`Berhasil cache ${result.success} file, gagal ${result.failed} file`);
+        
+        // Mencoba kembali file yang gagal cache dengan versi yang lebih sederhana
+        if (result.failedUrls.length > 0) {
+          console.log('Mencoba kembali file yang gagal di-cache...');
+          await Promise.allSettled(
+            result.failedUrls.map(url => 
+              fetch(url)
+                .then(response => {
+                  if (response.ok) {
+                    return cache.put(url, response);
+                  }
+                  throw new Error(`Gagal fetch ${url}: ${response.status}`);
+                })
+                .catch(err => console.warn(`Gagal retry cache ${url}:`, err))
+            )
+          );
+        }
+        
         return result;
       })
       .then(() => self.skipWaiting()) // Aktifkan langsung SW baru
