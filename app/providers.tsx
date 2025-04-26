@@ -7,7 +7,7 @@ import NotificationHandler from '../components/shared/notifications/notification
 import { MotorcycleFilterProvider } from '../contexts/motorcycle-filter-context';
 import { SocketProvider } from '../contexts/socket-context';
 import { VideoContextProvider } from '../contexts/video-context';
-import { I18nProvider } from '../i18n/provider';
+import { I18nProvider } from '../i18n/provider';  
 
 // Definisikan default rooms untuk socket.io
 const defaultRooms = ['system', 'motorcycles', 'transactions'];
@@ -28,6 +28,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           </SocketProvider>
         </ThemeProvider>
       </I18nProvider>
+      
     </>
   );
 }

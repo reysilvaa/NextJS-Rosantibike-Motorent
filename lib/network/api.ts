@@ -270,20 +270,60 @@ export async function fetchMotorcycleTypes(
 
 export async function fetchMotorcycleTypeById(id: string): Promise<MotorcycleType | null> {
   try {
-    // Di endpoint ini, API langsung mengembalikan data tanpa membungkusnya dalam properti 'data'
-    const response = await apiRequest<MotorcycleType>(`${API_CONFIG.ENDPOINTS.JENIS_MOTOR}/${id}`);
+    console.log(`Fetching motorcycle type with ID: ${id}`);
 
-    // Log respons untuk debugging
-    console.log('Motorcycle type response:', response);
+    // Coba dapatkan detail jenis motor dari endpoint unit-motor yang telah difilter
+    const endpoint = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.UNIT_MOTOR}`;
+    const params = new URLSearchParams();
+    params.append('jenisId', id);
 
-    // Periksa apakah respons valid
-    if (!response) return null;
+    const url = `${endpoint}?${params.toString()}`;
+    console.log(`Making request to: ${url}`);
 
-    // Kembalikan data motor
-    return response;
-  } catch (error) {
-    console.error(`Error fetching motorcycle type by ID ${id}:`, error);
-    return null;
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch motorcycle type. Status: ${response.status}`);
+    }
+
+    const responseData = await response.json();
+    console.log('Response data for motorcycle type:', responseData);
+
+    // Handle different response formats
+    let units = [];
+    if (responseData && responseData.data) {
+      // Format: { data: [...] }
+      units = responseData.data;
+    } else if (Array.isArray(responseData)) {
+      // Format: direct array
+      units = responseData;
+    } else {
+      throw new Error('Unexpected response format');
+    }
+
+    // Jika tidak ada unit, kembalikan null
+    if (!units || units.length === 0) {
+      console.error('No units found for this motorcycle type');
+      return null;
+    }
+
+    // Ambil data jenis dari unit pertama
+    const firstUnit = units[0];
+    if (!firstUnit.jenis) {
+      console.error('Unit data does not contain jenis information');
+      return null;
+    }
+
+    // Construct the motorcycle type with unit data
+    const motorcycleType: MotorcycleType = {
+      ...firstUnit.jenis,
+      unitMotor: units,
+    };
+
+    return motorcycleType;
+  } catch (error: any) {
+    console.error('Error fetching motorcycle type:', error);
+    throw error;
   }
 }
 

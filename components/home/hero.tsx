@@ -132,30 +132,6 @@ export default function Hero() {
         setIsLoading(false);
       } catch (err) {
         console.error('Error loading motorcycle types:', err);
-        // Fallback data jika API error
-        setMotorcycleTypes([
-          {
-            id: '1',
-            merk: 'Honda',
-            model: 'Vario 125',
-            slug: 'honda-vario-125',
-            cc: 125,
-            gambar: null,
-            createdAt: '',
-            updatedAt: '',
-          },
-          {
-            id: '2',
-            merk: 'Yamaha',
-            model: 'NMAX',
-            slug: 'yamaha-nmax',
-            cc: 155,
-            gambar: null,
-            createdAt: '',
-            updatedAt: '',
-          },
-        ]);
-        setIsLoading(false);
       }
     };
 

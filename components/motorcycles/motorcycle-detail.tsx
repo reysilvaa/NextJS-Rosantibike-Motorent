@@ -36,6 +36,17 @@ interface ExtendedMotorcycleType extends MotorcycleType {
 // Placeholder statis yang dijamin ada di folder public
 const MOTORCYCLE_PLACEHOLDER = '/motorcycle-placeholder.svg';
 
+// Tambahkan interface untuk response dari API
+interface AvailabilityResponse {
+  startDate: string;
+  endDate: string;
+  totalUnits: number;
+  units: Array<MotorcycleUnit & { 
+    jenisMotor?: { id: string; merk: string; model: string; cc: number };
+    availability?: Array<{ date: string; isAvailable: boolean }>;
+  }>;
+}
+
 export default function MotorcycleDetail({ id }: { id: string }) {
   const { t } = useTranslation();
   const router = useRouter();
@@ -248,59 +259,58 @@ export default function MotorcycleDetail({ id }: { id: string }) {
 
       // Ambil data ketersediaan dari API
       const response = await checkAvailability(searchParams);
-      console.log('API response:', response);
+      console.log('Availability response:', response);
 
-      // Siapkan array untuk unit yang tersedia
-      let availableMotorcycles: any[] = [];
+      // Periksa format respons dan ekstrak unit yang tersedia
+      let availableUnits: MotorcycleUnit[] = [];
 
-      // Cek apakah respons berupa array langsung atau objek dengan properti units
       if (Array.isArray(response)) {
-        availableMotorcycles = response;
+        // Format lama: langsung array unit
+        availableUnits = response;
       } else if (response && typeof response === 'object') {
-        // Gunakan type assertion untuk mengatasi error linter
-        const responseObj = response as { units?: any[] };
-        if (responseObj.units && Array.isArray(responseObj.units)) {
-          availableMotorcycles = responseObj.units;
-        } else {
-          console.warn('Tidak menemukan array units dalam respons:', response);
-          setAvailableUnits([]);
-          toast({
-            title: t('unavailable'),
-            description: t('noUnitsAvailableForSelectedDates'),
-            variant: 'destructive',
+        // Format baru: objek dengan properti units
+        // Gunakan type assertion untuk memberitahu TypeScript tentang struktur response
+        const typedResponse = response as AvailabilityResponse;
+        
+        if (typedResponse.units && Array.isArray(typedResponse.units)) {
+          // Perbarui struktur respons sesuai dengan endpoint backend baru
+          availableUnits = typedResponse.units.filter((unit) => {
+            // Filter unit berdasarkan jenisId yang sama dengan ID motor yang sedang dilihat
+            const isCorrectType = unit.jenisMotor?.id === id;
+            
+            // Periksa availability dari semua hari
+            const isFullyAvailable = unit.availability && 
+              Array.isArray(unit.availability) && 
+              unit.availability.every((day) => day.isAvailable);
+            
+            return isCorrectType && isFullyAvailable;
           });
-          setShowAvailability(true);
-          return;
         }
-      } else {
-        console.warn('Format respons API tidak dikenali:', response);
-        setAvailableUnits([]);
-        toast({
-          title: t('unavailable'),
-          description: t('noUnitsAvailableForSelectedDates'),
-          variant: 'destructive',
-        });
-        setShowAvailability(true);
-        return;
       }
 
-      // Update state dengan unit yang tersedia
-      setAvailableUnits(availableMotorcycles);
+      setAvailableUnits(availableUnits);
       setShowAvailability(true);
 
-      // Tampilkan pesan jika tidak ada motor yang tersedia
-      if (availableMotorcycles.length === 0) {
+      // Update units dengan data ketersediaan
+      if (availableUnits.length > 0) {
+        setUnits(availableUnits);
+        
         toast({
-          title: t('unavailable'),
-          description: t('noUnitsAvailableForSelectedDates'),
+          title: t('availabilityCheck'),
+          description: t('motorcyclesAvailable', { count: availableUnits.length }),
+        });
+      } else {
+        toast({
+          title: t('availabilityCheck'),
+          description: t('noMotorcyclesAvailable'),
           variant: 'destructive',
         });
       }
-    } catch (error) {
-      console.error('Error checking availability:', error);
+    } catch (err: any) {
+      console.error('Error checking availability:', err);
       toast({
         title: t('error'),
-        description: t('failedToCheckAvailability'),
+        description: err.message || t('failedToCheckAvailability'),
         variant: 'destructive',
       });
     } finally {
@@ -510,104 +520,79 @@ export default function MotorcycleDetail({ id }: { id: string }) {
         </div>
       </div>
 
-      {/* Daftar Unit Motor */}
-      <div className="mt-8">
-        <h2 className="text-2xl font-bold mb-4">
-          Unit Motor Tersedia
-          {startDate && endDate && (
-            <span className="ml-2 text-sm font-normal text-muted-foreground">
-              ({format(startDate, 'dd/MM/yyyy')} - {format(endDate, 'dd/MM/yyyy')})
-            </span>
-          )}
-        </h2>
-
-        {units.length === 0 ? (
-          <Card className="bg-card/50 border-border">
-            <CardContent className="pt-6">
-              <p className="text-muted-foreground">Tidak ada unit tersedia saat ini</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-4">
-            {units.map((unit, index) => (
-              <motion.div
-                key={unit.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-              >
-                <Card className="bg-card/50 border-border hover:border-primary/30 transition-all">
-                  <CardHeader>
-                    <div className="flex justify-between items-center">
-                      <CardTitle className="text-xl">
-                        {unit.platNomor}
-                        {unit.warna && (
-                          <span className="ml-2 text-muted-foreground">({unit.warna})</span>
-                        )}
-                      </CardTitle>
+      {/* Unit List */}
+      {units.length > 0 && (
+        <div className="mt-10">
+          <h2 className="text-2xl font-bold mb-4">{t('availableUnits')}</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {units.map(unit => {
+              // Cek status unit
+              const isAvailable = unit.status === StatusMotor.TERSEDIA;
+              
+              // Cek ketersediaan untuk rentang tanggal yang dipilih jika availability data ada
+              const hasAvailabilityData = unit.availability && Array.isArray(unit.availability);
+              const isAvailableForDates = hasAvailabilityData
+                ? unit.availability && unit.availability.every(day => day.isAvailable)
+                : isAvailable;
+              
+              return (
+                <Card key={unit.id} className="overflow-hidden">
+                  <CardHeader className="pb-2">
+                    <div className="flex justify-between items-start">
+                      <CardTitle className="text-lg">{unit.platNomor}</CardTitle>
                       <Badge
                         className={
-                          unit.status === StatusMotor.TERSEDIA
-                            ? 'bg-success/20 text-success hover:bg-success/30'
-                            : unit.status === StatusMotor.DISEWA
-                              ? 'bg-accent/20 text-accent hover:bg-accent/30'
-                              : unit.status === StatusMotor.DIPESAN
-                                ? 'bg-warning/20 text-warning hover:bg-warning/30'
-                                : 'bg-destructive/20 text-destructive hover:bg-destructive/30'
+                          isAvailable
+                            ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
+                            : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
                         }
                       >
-                        {unit.status}
+                        {isAvailable ? t('available') : t('unavailable')}
                       </Badge>
                     </div>
+                    <CardDescription>
+                      {t('manufacturingYear')}: {unit.tahunPembuatan}
+                    </CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-foreground/80 mb-2">
-                      Rp {Number(unit.hargaSewa).toLocaleString('id-ID')} / hari
-                    </p>
-
-                    {startDate && endDate && (
-                      <>
-                        <Separator className="my-4" />
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="text-muted-foreground text-sm">
-                              Total untuk {calculateDays()} hari:
-                            </p>
-                            <p className="text-xl font-bold">
-                              Rp{' '}
-                              {(Number(unit.hargaSewa) * calculateDays()).toLocaleString('id-ID')}
-                            </p>
-                          </div>
-
-                          <Button
-                            variant="default"
-                            disabled={unit.status !== StatusMotor.TERSEDIA}
-                            onClick={() => handleRent(unit.id)}
-                          >
-                            {unit.status === StatusMotor.TERSEDIA
-                              ? 'Sewa Sekarang'
-                              : 'Tidak Tersedia'}
-                          </Button>
-                        </div>
-                      </>
-                    )}
-
-                    {(!startDate || !endDate) && (
-                      <Button
-                        className="w-full mt-4"
-                        variant="outline"
-                        onClick={handleCheckAvailability}
-                      >
-                        Cek Ketersediaan & Harga
-                      </Button>
+                  <CardContent className="pb-2">
+                    <div className="flex justify-between items-center">
+                      <div className="font-medium">
+                        {t('rentalPrice')}:{' '}
+                        <span className="text-primary font-bold">
+                          Rp {new Intl.NumberFormat('id-ID').format(unit.hargaSewa)}
+                        </span>
+                        <span className="text-sm text-muted-foreground ml-1">{t('perDay')}</span>
+                      </div>
+                    </div>
+                    
+                    {startDate && endDate && hasAvailabilityData && (
+                      <div className="mt-2">
+                        <Badge
+                          variant={isAvailableForDates ? 'outline' : 'destructive'}
+                          className="w-full justify-center mt-2"
+                        >
+                          {isAvailableForDates
+                            ? t('availableForSelectedDates')
+                            : t('unavailableForSelectedDates')}
+                        </Badge>
+                      </div>
                     )}
                   </CardContent>
+                  <CardFooter>
+                    <Button
+                      className="w-full"
+                      disabled={!isAvailable || (startDate && endDate && !isAvailableForDates)}
+                      onClick={() => handleRent(unit.id)}
+                    >
+                      {t('rentNow')}
+                    </Button>
+                  </CardFooter>
                 </Card>
-              </motion.div>
-            ))}
+              );
+            })}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </motion.div>
   );
 }
