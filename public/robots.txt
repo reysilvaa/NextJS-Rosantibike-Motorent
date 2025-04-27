@@ -1,12 +1,15 @@
-# Allow all crawlers
+# Allow all user agents
 User-agent: *
 Allow: /
+Allow: /_next/static/
+Allow: /_next/image/
 
-# Sitemap location
+# Sitemap locations (untuk www dan non-www domain)
 Sitemap: https://rosantibikemotorent.com/sitemap.xml
+Sitemap: https://www.rosantibikemotorent.com/sitemap.xml
 
-# Disallow admin and private areas
-Disallow: /admin/
+# Disallow specific routes
 Disallow: /api/
-Disallow: /_next/
-Disallow: /static/ 
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /_next/data/ 

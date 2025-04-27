@@ -5,7 +5,7 @@ import { ArrowRight, ChevronRight, Search } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -60,6 +60,9 @@ export default function Hero() {
   const [_imagesLoaded, _setImagesLoaded] = useState(false);
   const [videoLoading, setVideoLoading] = useState<{ [key: number]: boolean }>({ 0: true });
 
+  // Menyimpan promise pemutaran video yang sedang aktif
+  const playPromisesRef = useRef<{ [key: number]: Promise<void> | null }>({});
+
   // Definisi slides
   const slides: SlideType[] = [
     {
@@ -111,13 +114,9 @@ export default function Hero() {
 
   // Force using image fallback on mobile to improve performance
   useEffect(() => {
-    // Check if device is likely mobile
-    const isMobile =
-      window.innerWidth < 768 ||
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-    if (isMobile && !useVideoFallback) {
-      setUseVideoFallback(true);
+    // Pastikan video diputar untuk semua perangkat
+    if (useVideoFallback) {
+      setUseVideoFallback(false);
     }
   }, [useVideoFallback, setUseVideoFallback]);
 
@@ -133,30 +132,6 @@ export default function Hero() {
         setIsLoading(false);
       } catch (err) {
         console.error('Error loading motorcycle types:', err);
-        // Fallback data jika API error
-        setMotorcycleTypes([
-          {
-            id: '1',
-            merk: 'Honda',
-            model: 'Vario 125',
-            slug: 'honda-vario-125',
-            cc: 125,
-            gambar: null,
-            createdAt: '',
-            updatedAt: '',
-          },
-          {
-            id: '2',
-            merk: 'Yamaha',
-            model: 'NMAX',
-            slug: 'yamaha-nmax',
-            cc: 155,
-            gambar: null,
-            createdAt: '',
-            updatedAt: '',
-          },
-        ]);
-        setIsLoading(false);
       }
     };
 
@@ -177,6 +152,95 @@ export default function Hero() {
     });
   }, [currentSlide, slides.length]);
 
+  // Menangani perubahan slide dengan menjaga pemutaran video
+  useEffect(() => {
+    // Pertama, pastikan video current slide diputar
+    const currentVideo = videoRefs.current[currentSlide];
+
+    if (currentVideo && !useVideoFallback) {
+      // Putar video dengan aman menggunakan Promise
+      try {
+        const playPromise = currentVideo.play();
+
+        // Hanya jika browser mengembalikan Promise, simpan untuk referensi
+        if (playPromise !== undefined) {
+          playPromisesRef.current[currentSlide] = playPromise;
+
+          // Handle jika pemutaran berhasil
+          playPromise
+            .then(() => {
+              // Pemutaran berhasil
+              playPromisesRef.current[currentSlide] = null;
+            })
+            .catch(error => {
+              // Abaikan AbortError karena kita sudah menanganinya
+              if (error.name !== 'AbortError') {
+                console.error('Video playback error:', error);
+              }
+              playPromisesRef.current[currentSlide] = null;
+            });
+        }
+      } catch (error) {
+        console.error('Error playing video:', error);
+      }
+    }
+
+    // Cleanup: Pause video yang tidak aktif
+    return () => {
+      // Untuk semua video, cek jika ada yang bukan current slide
+      Object.keys(videoRefs.current).forEach(slideIndex => {
+        const index = Number(slideIndex);
+        if (index !== currentSlide) {
+          const video = videoRefs.current[index];
+          const playPromise = playPromisesRef.current[index];
+
+          if (video) {
+            if (playPromise) {
+              // Jika masih ada Promise pemutaran yang aktif
+              playPromise
+                .then(() => {
+                  // Tunggu pemutaran selesai, baru pause
+                  video.pause();
+                })
+                .catch(() => {
+                  // Abaikan error
+                });
+            } else {
+              // Tidak ada Promise aktif, langsung pause
+              video.pause();
+            }
+          }
+        }
+      });
+    };
+  }, [currentSlide, useVideoFallback, videoRefs]);
+
+  // Cleanup ketika komponen unmount
+  useEffect(() => {
+    return () => {
+      // Pause semua video saat unmount untuk mencegah memory leak
+      Object.keys(videoRefs.current).forEach(slideIndex => {
+        const index = Number(slideIndex);
+        const video = videoRefs.current[index];
+        const playPromise = playPromisesRef.current[index];
+
+        if (video) {
+          if (playPromise) {
+            playPromise
+              .then(() => {
+                video.pause();
+              })
+              .catch(() => {
+                // Abaikan error
+              });
+          } else {
+            video.pause();
+          }
+        }
+      });
+    };
+  }, [videoRefs]);
+
   // Handler video loaded
   const handleVideoLoadStart = (index: number) => {
     setVideoLoading(prev => ({
@@ -191,6 +255,45 @@ export default function Hero() {
       [index]: false,
     }));
   };
+
+  // Set custom attributes for mobile video playback
+  useEffect(() => {
+    // Iterasi semua video yang sudah dimuat
+    loadedVideos.forEach(index => {
+      const video = videoRefs.current[index];
+      if (video) {
+        // Tambahkan atribut khusus untuk pemutaran di browser mobile
+        video.setAttribute('webkit-playsinline', 'true');
+        video.setAttribute('x5-playsinline', 'true');
+        video.setAttribute('x5-video-player-type', 'h5');
+        video.setAttribute('x5-video-player-fullscreen', 'false');
+        video.setAttribute('x5-video-orientation', 'portraint');
+
+        // Set playback rate untuk performa lebih baik
+        video.playbackRate = 1.0;
+
+        // Pastikan video dimuat dengan prioritas tinggi untuk slide saat ini
+        if (index === currentSlide) {
+          video.setAttribute('importance', 'high');
+        }
+
+        // Force restart video jika sudah dimuat
+        if (video.readyState >= 2 && index === currentSlide) {
+          video.currentTime = 0;
+          try {
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+              playPromise.catch(error => {
+                console.info('Video playback error:', error);
+              });
+            }
+          } catch (error) {
+            console.warn('Error playing video:', error);
+          }
+        }
+      }
+    });
+  }, [loadedVideos, videoRefs, currentSlide]);
 
   return (
     <section className="relative h-screen w-full overflow-hidden">
@@ -207,45 +310,38 @@ export default function Hero() {
               index === currentSlide ? 'opacity-100' : 'opacity-0 pointer-events-none'
             }`}
           >
-            {useVideoFallback ? (
-              <div className="absolute inset-0 bg-gray-900">
-                <div
-                  className={`absolute inset-0 ${theme === 'light' ? 'bg-black/75' : 'bg-black/60'}`}
-                />
-              </div>
-            ) : (
-              <div className="absolute inset-0 w-full h-full">
-                {/* Background color sebagai pengganti placeholder */}
-                <div
-                  className={`absolute inset-0 bg-gray-900 transition-opacity duration-500 ${
-                    videoLoading[index] ? 'opacity-100' : 'opacity-0'
-                  }`}
-                />
+            <div className="absolute inset-0 w-full h-full">
+              {/* Background color sebagai pengganti placeholder */}
+              <div
+                className={`absolute inset-0 bg-gray-900 transition-opacity duration-500 ${
+                  videoLoading[index] ? 'opacity-100' : 'opacity-0'
+                }`}
+              />
 
-                <video
-                  ref={el => {
-                    videoRefs.current[index] = el;
-                  }}
-                  src={slide.videoUrl}
-                  className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
-                  style={{
-                    opacity: videoLoading[index] ? 0 : 1,
-                  }}
-                  muted
-                  playsInline
-                  loop
-                  preload={index === currentSlide ? 'auto' : 'none'} // Hanya preload video saat ini
-                  disablePictureInPicture
-                  disableRemotePlayback
-                  onLoadStart={() => handleVideoLoadStart(index)}
-                  onCanPlay={() => handleVideoCanPlay(index)}
-                  aria-label={slide.imageAlt || `Video slide ${index + 1}`}
-                />
-                <div
-                  className={`absolute inset-0 ${theme === 'light' ? 'bg-black/65' : 'bg-black/50'}`}
-                />
-              </div>
-            )}
+              <video
+                ref={el => {
+                  videoRefs.current[index] = el;
+                }}
+                src={slide.videoUrl}
+                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+                style={{
+                  opacity: videoLoading[index] ? 0 : 1,
+                }}
+                muted
+                playsInline
+                loop
+                autoPlay={index === currentSlide}
+                preload={index === currentSlide ? 'auto' : 'none'} // Hanya preload video saat ini
+                disablePictureInPicture
+                disableRemotePlayback
+                onLoadStart={() => handleVideoLoadStart(index)}
+                onCanPlay={() => handleVideoCanPlay(index)}
+                aria-label={slide.imageAlt || `Video slide ${index + 1}`}
+              />
+              <div
+                className={`absolute inset-0 ${theme === 'light' ? 'bg-black/65' : 'bg-black/50'}`}
+              />
+            </div>
           </div>
         );
       })}

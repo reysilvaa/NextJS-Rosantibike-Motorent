@@ -2,7 +2,7 @@ import { generateMetadata } from '@/lib/seo/config';
 import { generateKeywords } from '@/lib/seo/keywords';
 
 export const metadata = generateMetadata({
-  title: 'Book Your Motorcycle - Rosanti Bike Rental',
+  title: 'Book Your Motorcycle - Rosantibike Motorent',
   description:
     'Complete your motorcycle booking details. Fast and secure motorcycle reservation process with flexible options.',
   keywords: generateKeywords('availability', {

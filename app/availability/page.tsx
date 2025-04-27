@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 
 import AvailabilityResults from '@/components/availability/availability-results';
-import DateRangeSearch from '@/components/shared/date-range-search';
+import DateRangeSearch from '@/components/shared/search/date-range-search';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';

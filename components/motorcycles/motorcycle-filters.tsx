@@ -23,6 +23,14 @@ import { useMotorcycleFilters } from '@/contexts/motorcycle-filter-context';
 import { useTranslation } from '@/i18n/hooks';
 import { cn } from '@/lib/utils/utils';
 
+// Tambahkan StatusMotor enum sesuai dengan yang di backend
+enum StatusMotor {
+  TERSEDIA = 'TERSEDIA',
+  DISEWA = 'DISEWA',
+  DIPESAN = 'DIPESAN',
+  OVERDUE = 'OVERDUE',
+}
+
 export default function MotorcycleFilters() {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -71,8 +79,9 @@ export default function MotorcycleFilters() {
     // Ensure the value is an array of exactly 2 numbers
     if (Array.isArray(value) && value.length === 2) {
       // Only update if values have actually changed
-      if (value[0] !== filters.ccRange[0] || value[1] !== filters.ccRange[1]) {
-        updateFilter('ccRange', value as [number, number]);
+      if (value[0] !== filters.ccMin || value[1] !== filters.ccMax) {
+        updateFilter('ccMin', value[0]);
+        updateFilter('ccMax', value[1]);
 
         // Log for debugging
         console.log(`CC range filter updated to: ${value[0]}-${value[1]} CC`);
@@ -85,8 +94,9 @@ export default function MotorcycleFilters() {
     // Ensure the value is an array of exactly 2 numbers
     if (Array.isArray(value) && value.length === 2) {
       // Only update if values have actually changed
-      if (value[0] !== filters.yearRange[0] || value[1] !== filters.yearRange[1]) {
-        updateFilter('yearRange', value as [number, number]);
+      if (value[0] !== filters.yearMin || value[1] !== filters.yearMax) {
+        updateFilter('yearMin', value[0]);
+        updateFilter('yearMax', value[1]);
 
         // Log for debugging
         console.log(`Year range filter updated to: ${value[0]}-${value[1]}`);
@@ -177,7 +187,7 @@ export default function MotorcycleFilters() {
               <div>
                 <h3 className="font-medium mb-3">{t('engineSizeCC')}</h3>
                 <Slider
-                  value={filters.ccRange}
+                  value={[filters.ccMin, filters.ccMax]}
                   min={0}
                   max={1500}
                   step={50}
@@ -185,15 +195,15 @@ export default function MotorcycleFilters() {
                   className="mb-2"
                 />
                 <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>{filters.ccRange[0]} CC</span>
-                  <span>{filters.ccRange[1]} CC</span>
+                  <span>{filters.ccMin} CC</span>
+                  <span>{filters.ccMax} CC</span>
                 </div>
               </div>
 
               <div>
                 <h3 className="font-medium mb-3">{t('year')}</h3>
                 <Slider
-                  value={filters.yearRange}
+                  value={[filters.yearMin, filters.yearMax]}
                   min={2010}
                   max={new Date().getFullYear()}
                   step={1}
@@ -201,8 +211,8 @@ export default function MotorcycleFilters() {
                   className="mb-2"
                 />
                 <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>{filters.yearRange[0]}</span>
-                  <span>{filters.yearRange[1]}</span>
+                  <span>{filters.yearMin}</span>
+                  <span>{filters.yearMax}</span>
                 </div>
               </div>
 
@@ -234,6 +244,34 @@ export default function MotorcycleFilters() {
                           </div>
                         ))
                       )}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+
+              {/* Status Filter */}
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="status" className="border-border">
+                  <AccordionTrigger className="py-2">{t('status')}</AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-2">
+                      {Object.values(StatusMotor).map(status => (
+                        <div key={status} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`mobile-status-${status}`}
+                            checked={filters.status === status}
+                            onCheckedChange={checked => {
+                              updateFilter('status', checked ? status : undefined);
+                            }}
+                          />
+                          <Label
+                            htmlFor={`mobile-status-${status}`}
+                            className="text-sm font-normal cursor-pointer"
+                          >
+                            {status}
+                          </Label>
+                        </div>
+                      ))}
                     </div>
                   </AccordionContent>
                 </AccordionItem>
@@ -310,7 +348,7 @@ export default function MotorcycleFilters() {
           <div>
             <h3 className="font-medium mb-3">{t('engineSizeCC')}</h3>
             <Slider
-              value={filters.ccRange}
+              value={[filters.ccMin, filters.ccMax]}
               min={0}
               max={1500}
               step={50}
@@ -318,15 +356,15 @@ export default function MotorcycleFilters() {
               className="mb-2"
             />
             <div className="flex justify-between text-sm text-muted-foreground">
-              <span>{filters.ccRange[0]} CC</span>
-              <span>{filters.ccRange[1]} CC</span>
+              <span>{filters.ccMin} CC</span>
+              <span>{filters.ccMax} CC</span>
             </div>
           </div>
 
           <div>
             <h3 className="font-medium mb-3">{t('year')}</h3>
             <Slider
-              value={filters.yearRange}
+              value={[filters.yearMin, filters.yearMax]}
               min={2010}
               max={new Date().getFullYear()}
               step={1}
@@ -334,8 +372,8 @@ export default function MotorcycleFilters() {
               className="mb-2"
             />
             <div className="flex justify-between text-sm text-muted-foreground">
-              <span>{filters.yearRange[0]}</span>
-              <span>{filters.yearRange[1]}</span>
+              <span>{filters.yearMin}</span>
+              <span>{filters.yearMax}</span>
             </div>
           </div>
 
@@ -360,6 +398,30 @@ export default function MotorcycleFilters() {
                   </div>
                 ))
               )}
+            </div>
+          </div>
+
+          {/* Desktop Status Filter */}
+          <div className="mb-6">
+            <h3 className="font-medium mb-3">{t('status')}</h3>
+            <div className="space-y-2">
+              {Object.values(StatusMotor).map(status => (
+                <div key={status} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`desktop-status-${status}`}
+                    checked={filters.status === status}
+                    onCheckedChange={checked => {
+                      updateFilter('status', checked ? status : undefined);
+                    }}
+                  />
+                  <Label
+                    htmlFor={`desktop-status-${status}`}
+                    className="text-sm font-normal cursor-pointer"
+                  >
+                    {status}
+                  </Label>
+                </div>
+              ))}
             </div>
           </div>
 

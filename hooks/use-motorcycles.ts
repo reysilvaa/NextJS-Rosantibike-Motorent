@@ -23,25 +23,27 @@ function convertFiltersToApiParams(
     params.search = filters.search;
   }
 
-  // Menangani filter rentang CC - pastikan nilai adalah number
-  if (filters.ccRange && filters.ccRange.length === 2) {
-    // Hanya tambahkan filter jika nilai tidak sama dengan default
-    if (filters.ccRange[0] > 0 || filters.ccRange[1] < 1500) {
-      params.ccMin = Number(filters.ccRange[0]);
-      params.ccMax = Number(filters.ccRange[1]);
-      console.log(`CC filter active: ${params.ccMin}-${params.ccMax}`);
-    }
+  // Menangani filter CC (ccMin dan ccMax)
+  if (typeof filters.ccMin === 'number') {
+    params.ccMin = filters.ccMin;
   }
 
-  // Menangani filter tahun - pastikan nilai adalah number
-  if (filters.yearRange && filters.yearRange.length === 2) {
-    const currentYear = new Date().getFullYear();
-    // Hanya tambahkan filter jika nilai tidak sama dengan default
-    if (filters.yearRange[0] > 2010 || filters.yearRange[1] < currentYear) {
-      params.yearMin = Number(filters.yearRange[0]);
-      params.yearMax = Number(filters.yearRange[1]);
-      console.log(`Year filter active: ${params.yearMin}-${params.yearMax}`);
-    }
+  if (typeof filters.ccMax === 'number') {
+    params.ccMax = filters.ccMax;
+  }
+
+  // Menangani filter tahun (yearMin dan yearMax)
+  if (typeof filters.yearMin === 'number') {
+    params.yearMin = filters.yearMin;
+  }
+
+  if (typeof filters.yearMax === 'number') {
+    params.yearMax = filters.yearMax;
+  }
+
+  // Menangani filter status
+  if (filters.status) {
+    params.status = filters.status;
   }
 
   // Menangani filter brand/merek - pastikan dikirim sebagai array
@@ -199,20 +201,23 @@ export async function checkAvailability(
     // Log parameter untuk debugging
     console.log('Availability check parameters:', params);
 
-    // Pastikan format tanggal adalah ISO 8601
-    const startDate = new Date(params.tanggalMulai);
-    const endDate = new Date(params.tanggalSelesai);
+    // Format tanggal sesuai dengan yang diharapkan backend (YYYY-MM-DD)
+    if (params.tanggalMulai) {
+      const startDate = new Date(params.tanggalMulai);
+      queryParams.append('startDate', startDate.toISOString().split('T')[0]);
+    }
 
-    // Format tanggal dalam ISO 8601 (YYYY-MM-DDTHH:mm:ss.sssZ)
-    queryParams.append('startDate', startDate.toISOString());
-    queryParams.append('endDate', endDate.toISOString());
+    if (params.tanggalSelesai) {
+      const endDate = new Date(params.tanggalSelesai);
+      queryParams.append('endDate', endDate.toISOString().split('T')[0]);
+    }
 
     if (params.jenisMotorId) {
       queryParams.append('jenisId', params.jenisMotorId);
       console.log('Filtering by motorcycle type ID:', params.jenisMotorId);
     }
 
-    const endpoint = `${API_CONFIG.ENDPOINTS.UNIT_MOTOR_AVAILABILITY}?${queryParams.toString()}`;
+    const endpoint = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.UNIT_MOTOR_AVAILABILITY}?${queryParams.toString()}`;
 
     // Cek cache sebelum melakukan request
     const cacheKey = endpoint;
@@ -228,69 +233,47 @@ export async function checkAvailability(
     try {
       console.log(`Making request to: ${endpoint}`);
       const result = await fetch(endpoint)
-        .then(response => response.json())
-        .then(data => {
-          console.log('Availability result returned:', data);
-
-          // Handle berbagai format respons
-          if (Array.isArray(data)) {
-            console.log(`Received array of ${data.length} motorcycles from API`);
-
-            // Log detail untuk debugging
-            if (data.length > 0) {
-              console.log('Sample motor from availability:', data[0]);
-            } else {
-              console.log('No motorcycles returned from availability API');
-            }
-
-            return data;
-          } else if (data && typeof data === 'object') {
-            console.log('Received object result instead of array:', data);
-
-            // Coba ekstrak data dari berbagai format yang mungkin
-            // Cast result sebagai any untuk menghindari error typing
-            const responseObj = data as any;
-
-            if (responseObj.data && Array.isArray(responseObj.data)) {
-              console.log(`Found ${responseObj.data.length} motorcycles in data property`);
-              return responseObj.data;
-            } else if (responseObj.units && Array.isArray(responseObj.units)) {
-              console.log(`Found ${responseObj.units.length} motorcycles in units property`);
-              return responseObj.units;
-            } else if (responseObj.motorcycles && Array.isArray(responseObj.motorcycles)) {
-              console.log(
-                `Found ${responseObj.motorcycles.length} motorcycles in motorcycles property`
-              );
-              return responseObj.motorcycles;
-            } else {
-              console.warn('Could not find valid motorcycle array in response');
-              return [];
-            }
-          } else {
-            console.warn('API returned unknown result type:', data);
-            return [];
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
           }
+          return response.json();
         })
-        .catch(err => {
-          console.error('Error checking availability:', err);
-          if (err?.message?.includes('too many request')) {
-            throw new Error('Terlalu banyak permintaan. Silakan coba lagi dalam beberapa saat.');
+        .then(responseData => {
+          console.log('Availability result returned:', responseData);
+
+          // Handle format respons dari backend baru
+          if (responseData && responseData.data && responseData.data.units) {
+            console.log(`Received ${responseData.data.units.length} units from API`);
+            return responseData.data.units;
+          } else if (Array.isArray(responseData)) {
+            console.log(`Received array of ${responseData.length} motorcycles from API`);
+            return responseData;
+          } else if (responseData && responseData.data) {
+            return responseData.data;
           } else {
-            throw new Error(err?.message || 'Gagal memeriksa ketersediaan motor');
+            console.warn('Unexpected response format:', responseData);
+            return [];
           }
         });
 
-      // Simpan hasil ke cache
-      availabilityCache[cacheKey] = { data: result, timestamp: Date.now() };
+      // Cache hasil untuk request berikutnya
+      availabilityCache[cacheKey] = {
+        data: result,
+        timestamp: now,
+      };
 
       return result;
-    } catch (err: any) {
-      console.error('Error checking availability:', err);
-      throw err;
+    } catch (error: any) {
+      // Log error untuk debugging
+      console.error('Error checking availability:', error);
+
+      // Lempar error untuk ditangani oleh pemanggil
+      throw error;
     }
-  } catch (err: any) {
-    console.error('Error checking availability:', err);
-    throw err;
+  } catch (error: any) {
+    console.error('Error in checkAvailability:', error);
+    throw error;
   }
 }
 

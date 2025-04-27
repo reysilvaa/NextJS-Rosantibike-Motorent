@@ -35,6 +35,12 @@ export interface SeoConfig {
     index?: boolean;
     follow?: boolean;
   };
+  alternates?: {
+    canonical?: string;
+    languages?: Record<string, string>;
+    media?: Record<string, string>;
+    types?: Record<string, string>;
+  };
 }
 
 export const defaultSeoConfig: SeoConfig = {
@@ -45,7 +51,7 @@ export const defaultSeoConfig: SeoConfig = {
   metadataBase: 'https://rosantibikemotorent.com',
   openGraph: {
     type: 'website',
-    siteName: 'Rosanti Bike',
+    siteName: 'Rosantibike',
     images: ['/images/og-image.jpg'],
   },
   twitter: {
@@ -91,6 +97,14 @@ export const generateMetadata = (config: Partial<SeoConfig> = {}): Metadata => {
       ? {
           index: mergedConfig.robots.index,
           follow: mergedConfig.robots.follow,
+        }
+      : undefined,
+    alternates: mergedConfig.alternates
+      ? {
+          canonical: mergedConfig.alternates.canonical,
+          languages: mergedConfig.alternates.languages,
+          media: mergedConfig.alternates.media,
+          types: mergedConfig.alternates.types,
         }
       : undefined,
   };

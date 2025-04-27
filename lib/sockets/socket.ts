@@ -61,10 +61,10 @@ export const initializeSocket = (): Socket | null => {
     // Gunakan URL relatif untuk backend dan port yang sesuai
     const wsUrl = process.env.NEXT_PUBLIC_WS_URL;
 
-    console.log(`Mencoba connect ke socket: ${wsUrl} dengan namespace /notifications`);
+    console.log(`Mencoba connect ke socket: ${wsUrl} dengan namespace /realtime`);
 
     // Inisialisasi socket dengan namespace yang benar dan tambahan opsi
-    socketInstance = io(`${wsUrl}/notifications`, {
+    socketInstance = io(`${wsUrl}/realtime`, {
       transports: ['polling', 'websocket'], // Mulai dengan polling untuk koneksi lebih stabil
       autoConnect: true,
       reconnection: true,

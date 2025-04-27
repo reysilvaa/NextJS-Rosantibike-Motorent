@@ -43,6 +43,11 @@ const nextConfig = {
         hostname: 'res.cloudinary.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'rosantibikemotorent.com',
+        pathname: '/**',
+      },
     ],
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
@@ -71,6 +76,7 @@ const nextConfig = {
     ],
     optimisticClientCache: true,
   },
+  // Pindahkan konfigurasi turbo ke level teratas sebagai turbopack
   turbopack: {
     // Konfigurasi loader untuk Turbopack
     rules: {
@@ -191,8 +197,8 @@ const nextConfig = {
           basePath: false,
         },
         {
-          source: '/notifications/:path*',
-          destination: `${apiUrl}/notifications/:path*`,
+          source: '/realtime/:path*',
+          destination: `${apiUrl}/realtime/:path*`,
           basePath: false,
         },
       ]
@@ -297,4 +303,4 @@ try {
   // Fallback to regular config if bundle analyzer is not available
 }
 
-export default exportedConfig;
+export default exportedConfig; 
