@@ -46,7 +46,14 @@ async function cacheUrls(cache, urls) {
   await Promise.all(
     urls.map(async url => {
       try {
-        await cache.add(url);
+        // Buat request explisit untuk menghindari masalah pada cache.add
+        const request = new Request(url, { mode: 'no-cors' });
+        const response = await fetch(request);
+        if (response) {
+          await cache.put(request, response);
+        } else {
+          throw new Error(`Gagal fetch ${url}`);
+        }
       } catch (error) {
         console.warn(`Gagal meng-cache: ${url}`, error);
         failedUrls.push(url);
@@ -71,8 +78,13 @@ self.addEventListener('install', event => {
 
         // Pastikan offline.html selalu terinstall terlebih dahulu
         try {
-          await cache.add('/offline.html');
-          console.log('offline.html berhasil di-cache');
+          // Gunakan fetch dan put daripada add untuk kontrol lebih baik
+          const offlineRequest = new Request('/offline.html', { mode: 'no-cors' });
+          const offlineResponse = await fetch(offlineRequest);
+          if (offlineResponse) {
+            await cache.put(offlineRequest, offlineResponse);
+            console.log('offline.html berhasil di-cache');
+          }
         } catch (err) {
           console.warn('Gagal meng-cache offline.html:', err);
         }
@@ -86,12 +98,12 @@ self.addEventListener('install', event => {
           console.log('Mencoba kembali file yang gagal di-cache...');
           await Promise.allSettled(
             result.failedUrls.map(url =>
-              fetch(url)
+              fetch(url, { mode: 'no-cors' })
                 .then(response => {
-                  if (response.ok) {
+                  if (response) {
                     return cache.put(url, response);
                   }
-                  throw new Error(`Gagal fetch ${url}: ${response.status}`);
+                  throw new Error(`Gagal fetch ${url}`);
                 })
                 .catch(err => console.warn(`Gagal retry cache ${url}:`, err))
             )
