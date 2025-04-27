@@ -16,7 +16,9 @@ export default function Home() {
       <VideoContextProvider>
         <Hero />
       </VideoContextProvider>
-      <h2 className="sr-only">Rosantibike Motorent - Layanan Sewa Motor Berkualitas di Malang Kota</h2>
+      <h2 className="sr-only">
+        Rosantibike Motorent - Layanan Sewa Motor Berkualitas di Malang Kota
+      </h2>
       <FeaturedMotorcycles />
       <HowItWorks />
       <AvailabilityPreview />

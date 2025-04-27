@@ -5,7 +5,7 @@ import { ArrowRight, ChevronRight, Search } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -59,9 +59,9 @@ export default function Hero() {
   const [isLoading, setIsLoading] = useState(true);
   const [_imagesLoaded, _setImagesLoaded] = useState(false);
   const [videoLoading, setVideoLoading] = useState<{ [key: number]: boolean }>({ 0: true });
-  
+
   // Menyimpan promise pemutaran video yang sedang aktif
-  const playPromisesRef = useRef<{[key: number]: Promise<void> | null}>({});
+  const playPromisesRef = useRef<{ [key: number]: Promise<void> | null }>({});
 
   // Definisi slides
   const slides: SlideType[] = [
@@ -156,33 +156,35 @@ export default function Hero() {
   useEffect(() => {
     // Pertama, pastikan video current slide diputar
     const currentVideo = videoRefs.current[currentSlide];
-    
+
     if (currentVideo && !useVideoFallback) {
       // Putar video dengan aman menggunakan Promise
       try {
         const playPromise = currentVideo.play();
-        
+
         // Hanya jika browser mengembalikan Promise, simpan untuk referensi
         if (playPromise !== undefined) {
           playPromisesRef.current[currentSlide] = playPromise;
-          
+
           // Handle jika pemutaran berhasil
-          playPromise.then(() => {
-            // Pemutaran berhasil
-            playPromisesRef.current[currentSlide] = null;
-          }).catch(error => {
-            // Abaikan AbortError karena kita sudah menanganinya
-            if (error.name !== 'AbortError') {
-              console.error('Video playback error:', error);
-            }
-            playPromisesRef.current[currentSlide] = null;
-          });
+          playPromise
+            .then(() => {
+              // Pemutaran berhasil
+              playPromisesRef.current[currentSlide] = null;
+            })
+            .catch(error => {
+              // Abaikan AbortError karena kita sudah menanganinya
+              if (error.name !== 'AbortError') {
+                console.error('Video playback error:', error);
+              }
+              playPromisesRef.current[currentSlide] = null;
+            });
         }
       } catch (error) {
         console.error('Error playing video:', error);
       }
     }
-    
+
     // Cleanup: Pause video yang tidak aktif
     return () => {
       // Untuk semua video, cek jika ada yang bukan current slide
@@ -191,7 +193,7 @@ export default function Hero() {
         if (index !== currentSlide) {
           const video = videoRefs.current[index];
           const playPromise = playPromisesRef.current[index];
-          
+
           if (video) {
             if (playPromise) {
               // Jika masih ada Promise pemutaran yang aktif
@@ -221,7 +223,7 @@ export default function Hero() {
         const index = Number(slideIndex);
         const video = videoRefs.current[index];
         const playPromise = playPromisesRef.current[index];
-        
+
         if (video) {
           if (playPromise) {
             playPromise
@@ -266,15 +268,15 @@ export default function Hero() {
         video.setAttribute('x5-video-player-type', 'h5');
         video.setAttribute('x5-video-player-fullscreen', 'false');
         video.setAttribute('x5-video-orientation', 'portraint');
-        
+
         // Set playback rate untuk performa lebih baik
         video.playbackRate = 1.0;
-        
+
         // Pastikan video dimuat dengan prioritas tinggi untuk slide saat ini
         if (index === currentSlide) {
           video.setAttribute('importance', 'high');
         }
-        
+
         // Force restart video jika sudah dimuat
         if (video.readyState >= 2 && index === currentSlide) {
           video.currentTime = 0;

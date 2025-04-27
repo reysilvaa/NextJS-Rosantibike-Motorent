@@ -12,7 +12,6 @@ import {
   SocketEvents as SocketEventsType,
 } from '../lib/sockets/socket';
 
-
 // Interface untuk nilai context
 interface SocketContextValue {
   socket: Socket | null;

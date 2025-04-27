@@ -18,7 +18,7 @@ export const metadata = generateMetadata({
   },
   alternates: {
     canonical: 'https://rosantibikemotorent.com/contact',
-  }
+  },
 });
 
 export default function ContactLayout({ children }: { children: React.ReactNode }) {

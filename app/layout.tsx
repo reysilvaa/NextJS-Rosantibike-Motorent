@@ -5,8 +5,8 @@ import type React from 'react';
 
 import Footer from '@/components/layout/footer';
 import Navbar from '@/components/layout/navbar';
-import SchemaOrg from '@/components/shared/seo/schema-org';
 import PWAInstallPrompt from '@/components/shared/pwa/pwa-install-prompt';
+import SchemaOrg from '@/components/shared/seo/schema-org';
 
 import { inter } from './fonts';
 import { metadata as seoMetadata } from './metadata';
@@ -65,19 +65,16 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Rosantibike Motorent" />
         <meta name="apple-touch-fullscreen" content="yes" />
-        
+
         {/* Meta tags untuk SEO dan performa */}
         <meta name="theme-color" content="#F97316" />
         <meta name="application-name" content="Rosantibike Motorent" />
         <meta name="msapplication-TileColor" content="#F97316" />
         <meta name="msapplication-tap-highlight" content="no" />
         <meta name="HandheldFriendly" content="true" />
-        
+
         {/* Canonical URL */}
-        <link
-          rel="canonical"
-          href="https://rosantibikemotorent.com"
-        />
+        <link rel="canonical" href="https://rosantibikemotorent.com" />
 
         {/* Preconnect untuk meningkatkan performa */}
         <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
@@ -85,7 +82,7 @@ export default function RootLayout({
 
         {/* PWA icons */}
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        
+
         {/* iOS splash screens yang dioptimalkan, fokus pada device populer */}
         {/* iPhone 5, SE (1st gen) */}
         <link
@@ -129,7 +126,7 @@ export default function RootLayout({
           media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)"
           href="/web-app-manifest-512x512.png"
         />
-        
+
         {/* Service Worker Registration yang disederhanakan */}
         <script
           dangerouslySetInnerHTML={{

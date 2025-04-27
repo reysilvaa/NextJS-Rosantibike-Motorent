@@ -16,7 +16,7 @@ export const metadata = generateMetadata({
   },
   alternates: {
     canonical: 'https://rosantibikemotorent.com/blog',
-  }
+  },
 });
 
 export default function BlogLayout({ children }: { children: React.ReactNode }) {

@@ -3,7 +3,6 @@
   "version": "0.1.1",
   "private": true,
   "type": "module",
-  
   "scripts": {
     "dev": "next dev -p 3001",
     "dev:turbo": "next dev -p 3001 --turbo",
@@ -100,10 +99,12 @@
     "@eslint/eslintrc": "^3.3.1",
     "@next/eslint-plugin-next": "^15.3.1",
     "@tailwindcss/typography": "^0.5.16",
+    "@types/eslint-scope": "^3.7.7",
     "@types/node": "^22.15.2",
     "@types/react-dom": "^18.3.1",
     "eslint": "^9.25.1",
     "eslint-config-next": "^15.3.1",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
     "eslint-plugin-unused-imports": "^4.1.4",
     "postcss": "^8.5.3",
     "prettier": "^3.5.3",

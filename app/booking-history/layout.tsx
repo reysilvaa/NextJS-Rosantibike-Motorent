@@ -15,7 +15,7 @@ export const metadata = generateMetadata({
   },
   alternates: {
     canonical: 'https://rosantibikemotorent.com/booking-history',
-  }
+  },
 });
 
 export default function BookingHistoryLayout({ children }: { children: React.ReactNode }) {

@@ -18,7 +18,7 @@ export const metadata = generateMetadata({
   },
   alternates: {
     canonical: 'https://rosantibikemotorent.com/availability',
-  }
+  },
 });
 
 export default function AvailabilityLayout({ children }: { children: React.ReactNode }) {

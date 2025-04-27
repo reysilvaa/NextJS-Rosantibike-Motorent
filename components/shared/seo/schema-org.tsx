@@ -192,4 +192,4 @@ export default function SchemaOrg({ type = 'home', motorcycleData, articleData }
       strategy="afterInteractive"
     />
   );
-} 
+}

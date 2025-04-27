@@ -42,9 +42,9 @@ function isValidCacheUrl(url) {
 // Helper untuk caching yang lebih baik - tidak gagal jika 1 file tidak tersedia
 async function cacheUrls(cache, urls) {
   const failedUrls = [];
-  
+
   await Promise.all(
-    urls.map(async (url) => {
+    urls.map(async url => {
       try {
         await cache.add(url);
       } catch (error) {
@@ -53,11 +53,11 @@ async function cacheUrls(cache, urls) {
       }
     })
   );
-  
+
   return {
     success: urls.length - failedUrls.length,
     failed: failedUrls.length,
-    failedUrls
+    failedUrls,
   };
 }
 
@@ -66,9 +66,9 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches
       .open(CACHE_NAME)
-      .then(async (cache) => {
+      .then(async cache => {
         console.log('Cache dibuka');
-        
+
         // Pastikan offline.html selalu terinstall terlebih dahulu
         try {
           await cache.add('/offline.html');
@@ -76,16 +76,16 @@ self.addEventListener('install', event => {
         } catch (err) {
           console.warn('Gagal meng-cache offline.html:', err);
         }
-        
+
         // Gunakan metode yang lebih baik untuk caching - tidak akan gagal jika 1 file tidak ada
         const result = await cacheUrls(cache, urlsToCache);
         console.log(`Berhasil cache ${result.success} file, gagal ${result.failed} file`);
-        
+
         // Mencoba kembali file yang gagal cache dengan versi yang lebih sederhana
         if (result.failedUrls.length > 0) {
           console.log('Mencoba kembali file yang gagal di-cache...');
           await Promise.allSettled(
-            result.failedUrls.map(url => 
+            result.failedUrls.map(url =>
               fetch(url)
                 .then(response => {
                   if (response.ok) {
@@ -97,7 +97,7 @@ self.addEventListener('install', event => {
             )
           );
         }
-        
+
         return result;
       })
       .then(() => self.skipWaiting()) // Aktifkan langsung SW baru
@@ -163,7 +163,7 @@ async function cacheImage(request, response) {
 self.addEventListener('fetch', event => {
   const request = event.request;
   let url;
-  
+
   try {
     url = new URL(request.url);
   } catch (error) {
@@ -224,14 +224,13 @@ self.addEventListener('fetch', event => {
           return response;
         })
         .catch(() => {
-          return caches.match(request)
-            .then(cachedResponse => {
-              if (cachedResponse) {
-                return cachedResponse;
-              }
-              // Jika offline dan tidak ada cache, tampilkan offline page
-              return caches.match('/offline.html');
-            });
+          return caches.match(request).then(cachedResponse => {
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+            // Jika offline dan tidak ada cache, tampilkan offline page
+            return caches.match('/offline.html');
+          });
         })
     );
     return;
@@ -355,26 +354,25 @@ self.addEventListener('fetch', event => {
         return response;
       })
       .catch(() => {
-        return caches.match(request)
-          .then(cachedResponse => {
-            if (cachedResponse) {
-              return cachedResponse;
-            }
-            // Saat tidak ada koneksi dan content tidak di cache, tampilkan halaman offline
-            if (request.mode === 'navigate') {
-              return caches.match('/offline.html');
-            }
-            return new Response('Network error happened', {
-              status: 408,
-              headers: { 'Content-Type': 'text/plain' },
-            });
+        return caches.match(request).then(cachedResponse => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          // Saat tidak ada koneksi dan content tidak di cache, tampilkan halaman offline
+          if (request.mode === 'navigate') {
+            return caches.match('/offline.html');
+          }
+          return new Response('Network error happened', {
+            status: 408,
+            headers: { 'Content-Type': 'text/plain' },
           });
+        });
       })
   );
 });
 
 // Handle pesan dari klien
-self.addEventListener('message', (event) => {
+self.addEventListener('message', event => {
   // Periksa apakah pesan adalah untuk skip waiting
   if (event.data === 'skipWaiting') {
     self.skipWaiting();
@@ -382,16 +380,16 @@ self.addEventListener('message', (event) => {
 });
 
 // Tambahkan event fetch khusus untuk manifest
-self.addEventListener('fetch', (event) => {
+self.addEventListener('fetch', event => {
   if (
     event.request.url.endsWith('/site.webmanifest') ||
     event.request.url.endsWith('/manifest.json')
   ) {
     // Cache manifest file secara konsisten
     event.respondWith(
-      caches.open(CACHE_NAME).then((cache) => {
+      caches.open(CACHE_NAME).then(cache => {
         return fetch(event.request)
-          .then((response) => {
+          .then(response => {
             cache.put(event.request, response.clone());
             return response;
           })

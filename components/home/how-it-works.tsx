@@ -1,7 +1,8 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Calendar, BikeIcon as Motorcycle, CreditCard, CheckCircle } from 'lucide-react';
+import { BikeIcon as Motorcycle, Calendar, CheckCircle, CreditCard } from 'lucide-react';
+
 import { useTranslation } from '@/i18n/hooks';
 
 export default function HowItWorks() {
@@ -47,7 +48,7 @@ export default function HowItWorks() {
             className="absolute inset-0"
             initial={{ opacity: 0 }}
             animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
+            transition={{ repeat: Infinity, duration: 5, ease: 'easeInOut' }}
           />
         </div>
       </div>
@@ -60,7 +61,7 @@ export default function HowItWorks() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
+            transition={{ duration: 0.7, ease: 'easeOut' }}
           >
             {t('howItWorks')}
           </motion.h2>
@@ -69,7 +70,7 @@ export default function HowItWorks() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
+            transition={{ duration: 0.7, delay: 0.2, ease: 'easeOut' }}
           >
             {t('howItWorksDescription')}
           </motion.p>
@@ -81,9 +82,9 @@ export default function HowItWorks() {
           <motion.div
             className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary/20 via-primary/40 to-primary/20 transform -translate-x-1/2"
             initial={{ height: 0 }}
-            whileInView={{ height: "100%" }}
+            whileInView={{ height: '100%' }}
             viewport={{ once: true }}
-            transition={{ duration: 1, ease: "easeInOut" }}
+            transition={{ duration: 1, ease: 'easeInOut' }}
           />
 
           <div className="space-y-12 lg:space-y-24 relative">
@@ -99,8 +100,8 @@ export default function HowItWorks() {
                 {/* Left side content */}
                 <motion.div
                   className={`z-10 ${
-                    index % 2 === 0 
-                      ? 'order-1 lg:text-right lg:pr-8' 
+                    index % 2 === 0
+                      ? 'order-1 lg:text-right lg:pr-8'
                       : 'order-1 lg:order-3 lg:text-left lg:pl-8 lg:col-start-3'
                   }`}
                   initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
@@ -110,7 +111,7 @@ export default function HowItWorks() {
                 >
                   {index % 2 === 0 ? (
                     <>
-                      <motion.h3 
+                      <motion.h3
                         className="text-2xl font-bold mb-3"
                         initial={{ opacity: 0, y: 10 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -119,7 +120,7 @@ export default function HowItWorks() {
                       >
                         {step.title}
                       </motion.h3>
-                      <motion.p 
+                      <motion.p
                         className="text-muted-foreground"
                         initial={{ opacity: 0, y: 10 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -164,8 +165,8 @@ export default function HowItWorks() {
                       transition={{
                         duration: 0.6,
                         delay: step.delay,
-                        type: "spring",
-                        stiffness: 200
+                        type: 'spring',
+                        stiffness: 200,
                       }}
                     >
                       <motion.div
@@ -181,8 +182,8 @@ export default function HowItWorks() {
                 {/* Right side content */}
                 <motion.div
                   className={`z-10 ${
-                    index % 2 === 0 
-                      ? 'order-3 lg:text-left lg:pl-8' 
+                    index % 2 === 0
+                      ? 'order-3 lg:text-left lg:pl-8'
                       : 'order-1 lg:text-right lg:pr-8'
                   }`}
                   initial={{ opacity: 0, x: index % 2 === 0 ? 20 : -20 }}
@@ -192,7 +193,7 @@ export default function HowItWorks() {
                 >
                   {index % 2 !== 0 ? (
                     <>
-                      <motion.h3 
+                      <motion.h3
                         className="text-2xl font-bold mb-3"
                         initial={{ opacity: 0, y: 10 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -201,7 +202,7 @@ export default function HowItWorks() {
                       >
                         {step.title}
                       </motion.h3>
-                      <motion.p 
+                      <motion.p
                         className="text-muted-foreground"
                         initial={{ opacity: 0, y: 10 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -216,7 +217,7 @@ export default function HowItWorks() {
 
                 {/* Mobile view content (only shown on small screens) */}
                 <div className="lg:hidden col-span-full order-4 text-center mt-4">
-                  <motion.h3 
+                  <motion.h3
                     className="text-2xl font-bold mb-3"
                     initial={{ opacity: 0, y: 10 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -225,7 +226,7 @@ export default function HowItWorks() {
                   >
                     {step.title}
                   </motion.h3>
-                  <motion.p 
+                  <motion.p
                     className="text-muted-foreground"
                     initial={{ opacity: 0, y: 10 }}
                     whileInView={{ opacity: 1, y: 0 }}

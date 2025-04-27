@@ -41,10 +41,12 @@ interface AvailabilityResponse {
   startDate: string;
   endDate: string;
   totalUnits: number;
-  units: Array<MotorcycleUnit & { 
-    jenisMotor?: { id: string; merk: string; model: string; cc: number };
-    availability?: Array<{ date: string; isAvailable: boolean }>;
-  }>;
+  units: Array<
+    MotorcycleUnit & {
+      jenisMotor?: { id: string; merk: string; model: string; cc: number };
+      availability?: Array<{ date: string; isAvailable: boolean }>;
+    }
+  >;
 }
 
 export default function MotorcycleDetail({ id }: { id: string }) {
@@ -271,18 +273,19 @@ export default function MotorcycleDetail({ id }: { id: string }) {
         // Format baru: objek dengan properti units
         // Gunakan type assertion untuk memberitahu TypeScript tentang struktur response
         const typedResponse = response as AvailabilityResponse;
-        
+
         if (typedResponse.units && Array.isArray(typedResponse.units)) {
           // Perbarui struktur respons sesuai dengan endpoint backend baru
-          availableUnits = typedResponse.units.filter((unit) => {
+          availableUnits = typedResponse.units.filter(unit => {
             // Filter unit berdasarkan jenisId yang sama dengan ID motor yang sedang dilihat
             const isCorrectType = unit.jenisMotor?.id === id;
-            
+
             // Periksa availability dari semua hari
-            const isFullyAvailable = unit.availability && 
-              Array.isArray(unit.availability) && 
-              unit.availability.every((day) => day.isAvailable);
-            
+            const isFullyAvailable =
+              unit.availability &&
+              Array.isArray(unit.availability) &&
+              unit.availability.every(day => day.isAvailable);
+
             return isCorrectType && isFullyAvailable;
           });
         }
@@ -294,7 +297,7 @@ export default function MotorcycleDetail({ id }: { id: string }) {
       // Update units dengan data ketersediaan
       if (availableUnits.length > 0) {
         setUnits(availableUnits);
-        
+
         toast({
           title: t('availabilityCheck'),
           description: t('motorcyclesAvailable', { count: availableUnits.length }),
@@ -339,7 +342,7 @@ export default function MotorcycleDetail({ id }: { id: string }) {
   };
 
   // Menghitung jumlah hari sewa
-  const calculateDays = () => {
+  const _calculateDays = () => {
     if (!startDate || !endDate) return 1;
     return Math.max(
       1,
@@ -528,13 +531,13 @@ export default function MotorcycleDetail({ id }: { id: string }) {
             {units.map(unit => {
               // Cek status unit
               const isAvailable = unit.status === StatusMotor.TERSEDIA;
-              
+
               // Cek ketersediaan untuk rentang tanggal yang dipilih jika availability data ada
               const hasAvailabilityData = unit.availability && Array.isArray(unit.availability);
               const isAvailableForDates = hasAvailabilityData
                 ? unit.availability && unit.availability.every(day => day.isAvailable)
                 : isAvailable;
-              
+
               return (
                 <Card key={unit.id} className="overflow-hidden">
                   <CardHeader className="pb-2">
@@ -564,7 +567,7 @@ export default function MotorcycleDetail({ id }: { id: string }) {
                         <span className="text-sm text-muted-foreground ml-1">{t('perDay')}</span>
                       </div>
                     </div>
-                    
+
                     {startDate && endDate && hasAvailabilityData && (
                       <div className="mt-2">
                         <Badge

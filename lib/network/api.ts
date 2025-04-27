@@ -84,8 +84,8 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
   const baseUrl = API_CONFIG.BASE_URL || '';
   // Pastikan endpoint tidak menambahkan / di awal jika BASE_URL sudah diakhiri dengan /
   const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-  const url = baseUrl.endsWith('/') 
-    ? `${baseUrl}${normalizedEndpoint.substring(1)}` 
+  const url = baseUrl.endsWith('/')
+    ? `${baseUrl}${normalizedEndpoint.substring(1)}`
     : `${baseUrl}${normalizedEndpoint}`;
 
   // Default headers
@@ -281,7 +281,7 @@ export async function fetchMotorcycleTypeById(id: string): Promise<MotorcycleTyp
     console.log(`Making request to: ${url}`);
 
     const response = await fetch(url);
-    
+
     if (!response.ok) {
       throw new Error(`Failed to fetch motorcycle type. Status: ${response.status}`);
     }

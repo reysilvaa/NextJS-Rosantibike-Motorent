@@ -27,7 +27,7 @@ function convertFiltersToApiParams(
   if (typeof filters.ccMin === 'number') {
     params.ccMin = filters.ccMin;
   }
-  
+
   if (typeof filters.ccMax === 'number') {
     params.ccMax = filters.ccMax;
   }
@@ -36,7 +36,7 @@ function convertFiltersToApiParams(
   if (typeof filters.yearMin === 'number') {
     params.yearMin = filters.yearMin;
   }
-  
+
   if (typeof filters.yearMax === 'number') {
     params.yearMax = filters.yearMax;
   }

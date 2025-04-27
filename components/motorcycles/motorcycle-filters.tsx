@@ -2,7 +2,7 @@
 
 import { format } from 'date-fns';
 import { Calendar, Filter, Search } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { DateRange } from 'react-day-picker';
 
 import {
@@ -28,7 +28,7 @@ enum StatusMotor {
   TERSEDIA = 'TERSEDIA',
   DISEWA = 'DISEWA',
   DIPESAN = 'DIPESAN',
-  OVERDUE = 'OVERDUE'
+  OVERDUE = 'OVERDUE',
 }
 
 export default function MotorcycleFilters() {
@@ -260,7 +260,7 @@ export default function MotorcycleFilters() {
                           <Checkbox
                             id={`mobile-status-${status}`}
                             checked={filters.status === status}
-                            onCheckedChange={(checked) => {
+                            onCheckedChange={checked => {
                               updateFilter('status', checked ? status : undefined);
                             }}
                           />
@@ -410,7 +410,7 @@ export default function MotorcycleFilters() {
                   <Checkbox
                     id={`desktop-status-${status}`}
                     checked={filters.status === status}
-                    onCheckedChange={(checked) => {
+                    onCheckedChange={checked => {
                       updateFilter('status', checked ? status : undefined);
                     }}
                   />

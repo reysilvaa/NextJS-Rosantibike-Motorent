@@ -4,7 +4,14 @@ import { Download, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { useTranslation } from '@/i18n/hooks';
 import { cn } from '@/lib/utils/utils';
 
@@ -22,8 +29,10 @@ const PWAInstallPrompt = () => {
 
   useEffect(() => {
     // Cek apakah aplikasi sudah diinstal sebagai PWA
-    if (window.matchMedia('(display-mode: standalone)').matches || 
-        (window.navigator as any).standalone === true) {
+    if (
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as any).standalone === true
+    ) {
       setIsInstalled(true);
       return;
     }
@@ -33,13 +42,13 @@ const PWAInstallPrompt = () => {
     setIsIOSDevice(isIOS);
 
     // Deteksi perangkat Android
-    const isAndroid = /Android/.test(navigator.userAgent);
-    
+    const _isAndroid = /Android/.test(navigator.userAgent);
+
     // Tangkap beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setInstallPrompt(e as BeforeInstallPromptEvent);
-      
+
       // Cek setting lokal - tampilkan prompt hanya jika belum ditolak
       const promptShown = localStorage.getItem('pwaPromptDismissed');
       if (!promptShown || Date.now() > parseInt(promptShown) + 3 * 24 * 60 * 60 * 1000) {
@@ -60,7 +69,7 @@ const PWAInstallPrompt = () => {
     }
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    
+
     // Cek jika service worker aktif dan teregistrasi
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.ready.then(() => {
@@ -80,7 +89,7 @@ const PWAInstallPrompt = () => {
     try {
       await installPrompt.prompt();
       const choiceResult = await installPrompt.userChoice;
-      
+
       if (choiceResult.outcome === 'accepted') {
         console.log('User accepted the install prompt');
         setShowPrompt(false);
@@ -97,7 +106,7 @@ const PWAInstallPrompt = () => {
     } catch (error) {
       console.error('Error saat instalasi PWA:', error);
     }
-    
+
     setInstallPrompt(null);
   };
 
@@ -124,9 +133,9 @@ const PWAInstallPrompt = () => {
             <CardTitle className="text-lg font-semibold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
               {t('installApp') || 'Instal Aplikasi'}
             </CardTitle>
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               className="h-8 w-8 rounded-full hover:bg-primary/10 transition-colors"
               onClick={handleDismiss}
             >
@@ -141,7 +150,9 @@ const PWAInstallPrompt = () => {
         <CardContent className="text-sm">
           {isIOSDevice ? (
             <div className="space-y-3">
-              <p className="font-medium text-foreground/90">{t('installIOSInstructions') || 'Untuk menginstal di iOS:'}</p>
+              <p className="font-medium text-foreground/90">
+                {t('installIOSInstructions') || 'Untuk menginstal di iOS:'}
+              </p>
               <ol className="list-decimal pl-5 space-y-2.5">
                 <li className="flex items-center gap-2 text-foreground/80">
                   {t('tapShareButton') || 'Ketuk tombol Share'}
@@ -160,21 +171,23 @@ const PWAInstallPrompt = () => {
               <div className="mt-4 rounded-lg bg-primary/5 border border-primary/20 p-3">
                 <p className="font-medium text-foreground flex items-center gap-2">
                   <span className="text-lg">✨</span>
-                  {t('iosInstallBenefits') || 'Manfaat: Akses lebih cepat dan pengalaman seperti aplikasi native'}
+                  {t('iosInstallBenefits') ||
+                    'Manfaat: Akses lebih cepat dan pengalaman seperti aplikasi native'}
                 </p>
               </div>
             </div>
           ) : (
             <div className="py-2">
               <p className="text-foreground/80">
-                {t('installBenefits') || 'Nikmati pengalaman lebih cepat, fitur offline, dan tanpa browser frame.'}
+                {t('installBenefits') ||
+                  'Nikmati pengalaman lebih cepat, fitur offline, dan tanpa browser frame.'}
               </p>
             </div>
           )}
         </CardContent>
-        <CardFooter className={cn("relative", !isIOSDevice && "pt-2")}>
+        <CardFooter className={cn('relative', !isIOSDevice && 'pt-2')}>
           {!isIOSDevice && (
-            <Button 
+            <Button
               onClick={handleInstall}
               className="w-full bg-install-gradient hover:opacity-90 text-primary-foreground font-medium group transition-all duration-300 shadow-lg shadow-primary/20"
             >
