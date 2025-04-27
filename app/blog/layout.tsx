@@ -2,17 +2,20 @@ import { generateMetadata } from '@/lib/seo/config';
 import { generateKeywords } from '@/lib/seo/keywords';
 
 export const metadata = generateMetadata({
-  title: 'Blog - Rosanti Bike Rental',
+  title: 'Blog - Rosantibike Motorent',
   description:
-    'Read our latest articles about motorcycles, travel tips, and rental information. Stay updated with Rosanti Bike Rental.',
+    'Read our latest articles about motorcycle riding tips, adventure destinations around Malang, and other useful information for riders.',
   keywords: generateKeywords('blog'),
   openGraph: {
-    url: 'https://rosantibike.com/blog',
+    url: 'https://rosantibikemotorent.com/blog',
     images: ['/images/blog-og.jpg'],
   },
   robots: {
     index: true,
     follow: true,
+  },
+  alternates: {
+    canonical: 'https://rosantibikemotorent.com/blog',
   },
 });
 

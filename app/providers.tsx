@@ -3,7 +3,7 @@
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from 'sonner';
 
-import NotificationHandler from '../components/shared/notification-handler';
+import NotificationHandler from '../components/shared/notifications/notification-handler';
 import { MotorcycleFilterProvider } from '../contexts/motorcycle-filter-context';
 import { SocketProvider } from '../contexts/socket-context';
 import { VideoContextProvider } from '../contexts/video-context';

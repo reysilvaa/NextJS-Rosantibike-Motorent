@@ -12,11 +12,13 @@ import { VideoContextProvider } from '@/contexts/video-context';
 export default function Home() {
   return (
     <div className="flex flex-col w-full">
-      <h1 className="sr-only">Rosantibike Motorent - Rental Motor Terbaik di Malang</h1>
+      <h1 className="sr-only">Rosantibike Motorent - Rental Motor Premium di Malang</h1>
       <VideoContextProvider>
         <Hero />
       </VideoContextProvider>
-      <h2 className="sr-only">Layanan Rental Motor Premium di Malang dengan Harga Terjangkau</h2>
+      <h2 className="sr-only">
+        Rosantibike Motorent - Layanan Sewa Motor Berkualitas di Malang Kota
+      </h2>
       <FeaturedMotorcycles />
       <HowItWorks />
       <AvailabilityPreview />

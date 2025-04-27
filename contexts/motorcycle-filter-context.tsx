@@ -7,11 +7,14 @@ import { apiClient } from '@/lib/network/api';
 
 export interface MotorcycleFilters {
   search: string;
-  ccRange: [number, number];
-  yearRange: [number, number];
+  ccMin: number;
+  ccMax: number;
+  yearMin: number;
+  yearMax: number;
   brands: string[]; // ini sebenarnya adalah field 'merk' di model JenisMotor
   startDate?: string;
   endDate?: string;
+  status?: string;
 }
 
 // Interface Brand mewakili data dari field 'merk' di model JenisMotor
@@ -31,8 +34,10 @@ interface MotorcycleFilterContextType {
 
 const defaultFilters: MotorcycleFilters = {
   search: '',
-  ccRange: [0, 1500],
-  yearRange: [2010, new Date().getFullYear()],
+  ccMin: 0,
+  ccMax: 1500,
+  yearMin: 2010,
+  yearMax: new Date().getFullYear(),
   brands: [],
 };
 

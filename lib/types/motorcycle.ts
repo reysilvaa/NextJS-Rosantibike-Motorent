@@ -26,4 +26,5 @@ export interface MotorcycleUnit {
   updatedAt: string;
   jenis: MotorcycleType;
   sewa?: Transaction[];
+  availability?: Array<{ date: string; isAvailable: boolean }>;
 }
