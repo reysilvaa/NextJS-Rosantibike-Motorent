@@ -6,9 +6,11 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-let userConfig = undefined
+let userConfig = undefined;
 try {
-  userConfig = await import('./v0-user-next.config')
+  // Fix the import to handle ESM properly
+  const userConfigModule = await import('./v0-user-next.config.js');
+  userConfig = userConfigModule.default || userConfigModule;
 } catch (/** @type {any} */ _unused) {
   // ignore error
 }
@@ -22,7 +24,6 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // Tambahkan transpilePackages untuk memastikan next-intl diproses dengan benar
   transpilePackages: ['next-intl'],
   images: {
     unoptimized: false,
@@ -33,7 +34,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: process.env.NEXT_PUBLIC_WS_URL,
+        hostname: process.env.NEXT_PUBLIC_WS_URL?.replace(/^https?:\/\//, '') || 'api.rosantibikemotorent.com',
         pathname: '/**',
       },
       {
@@ -79,44 +80,32 @@ const nextConfig = {
     ],
     optimisticClientCache: true,
   },
-  // Pindahkan konfigurasi turbo ke level teratas sebagai turbopack
-  turbopack: {
-    // Konfigurasi loader untuk Turbopack
-    rules: {
-      '*.svg': {
-        loaders: ['@svgr/webpack'],
-        as: '*.js',
-      },
-      '*.yaml': {
-        loaders: ['yaml-loader'],
-      },
-      '*.mdx': {
-        loaders: ['babel-loader'],
-      },
-    },
-    // Konfigurasi alias untuk Turbopack
-    resolveAlias: {
-      '@': join(__dirname),
-      '@components': join(__dirname, 'components'),
-      '@app': join(__dirname, 'app'),
-      '@lib': join(__dirname, 'lib'),
-      '@hooks': join(__dirname, 'hooks'),
-      '@contexts': join(__dirname, 'contexts'),
-      '@styles': join(__dirname, 'styles'),
-    },
-    // Ekstensi file yang didukung
-    resolveExtensions: ['.js', '.jsx', '.ts', '.tsx', '.json', '.mdx', '.svg'],
-  },
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
     config.module.rules.push({
       test: /\.(svg|png|jpg|jpeg|gif|ico|webp)$/i,
       type: 'asset/resource',
     });
 
+    // Fix for module format compatibility
+    if (isServer) {
+      config.experiments = {
+        ...config.experiments,
+        layers: true,
+        topLevelAwait: true,
+      };
+    }
+
+    // Ensure compatibility between ESM and CommonJS
+    config.output = {
+      ...config.output,
+      chunkFormat: isServer ? 'module' : undefined,
+      module: isServer,
+    };
+
     // Optimize bundle size
     config.optimization = {
       ...config.optimization,
-      runtimeChunk: 'single',
+      runtimeChunk: isServer ? undefined : 'single',
       splitChunks: {
         chunks: 'all',
         maxInitialRequests: Infinity,
@@ -133,7 +122,7 @@ const nextConfig = {
               
               const packageName = match[1];
               
-              // Separate larger packages (match these with popular deps from package.json)
+              // Separate larger packages
               if ([
                 'framer-motion', 
                 'react-icons', 
@@ -156,7 +145,7 @@ const nextConfig = {
                 return 'npm.radix-ui';
               }
 
-              // Group remaining packages by first letter to create smaller bundles
+              // Group remaining packages by first letter
               const firstLetter = packageName.charAt(0).toLowerCase();
               return `npm.chunk.${firstLetter}`;
             },
@@ -245,6 +234,11 @@ const nextConfig = {
             key: 'Access-Control-Allow-Headers',
             value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
           },
+        ],
+      },
+      {
+        source: '/((?!api|_next/static|_next/image|favicon.ico).*)',
+        headers: [
           {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable',
@@ -271,41 +265,48 @@ const nextConfig = {
       },
     ];
   },
-}
+};
 
-mergeConfig(nextConfig, userConfig)
-
-function mergeConfig(nextConfig, userConfig) {
+// Merge configs properly
+function mergeConfig(baseConfig, userConfig) {
   if (!userConfig) {
-    return
+    return baseConfig;
   }
+
+  const mergedConfig = { ...baseConfig };
 
   for (const key in userConfig) {
     if (
-      typeof nextConfig[key] === 'object' &&
-      !Array.isArray(nextConfig[key])
+      typeof baseConfig[key] === 'object' &&
+      !Array.isArray(baseConfig[key]) &&
+      baseConfig[key] !== null
     ) {
-      nextConfig[key] = {
-        ...nextConfig[key],
+      mergedConfig[key] = {
+        ...baseConfig[key],
         ...userConfig[key],
-      }
+      };
     } else {
-      nextConfig[key] = userConfig[key]
+      mergedConfig[key] = userConfig[key];
     }
   }
+
+  return mergedConfig;
 }
 
+const finalConfig = mergeConfig(nextConfig, userConfig);
+
 // Export nextConfig with analyzer if available
-let exportedConfig = nextConfig;
+let exportedConfig = finalConfig;
 
 try {
-  const withBundleAnalyzer = (await import('@next/bundle-analyzer')).default({
+  const bundleAnalyzerModule = await import('@next/bundle-analyzer');
+  const withBundleAnalyzer = bundleAnalyzerModule.default({
     enabled: process.env.ANALYZE === 'true',
   });
-  exportedConfig = withBundleAnalyzer(nextConfig);
+  exportedConfig = withBundleAnalyzer(finalConfig);
 } catch (_unused) {
   // Fallback to regular config if bundle analyzer is not available
 }
 
-// Wrap config dengan next-intl
-export default withNextIntl('./i18n.config.js')(exportedConfig); 
+// Wrap config with next-intl
+export default withNextIntl('./i18n.config.js')(exportedConfig);
