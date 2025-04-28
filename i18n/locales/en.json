@@ -21,7 +21,16 @@
   "endDate": "End Date",
   "checkAvailability": "Check Availability",
   "rentNow": "Rent Now",
+  "rentalPeriod": "Rental Period",
   "days": "days",
+  "engineSizeCC": "Engine Size (CC)",
+  "brands": "Brands",
+  "reset": "Reset",
+  "applyFilters": "Apply Filters",
+  "searchMotorcycles": "Search Motorcycles",
+  "manufacturingYear": "Manufacturing Year",
+  "rentalPrice": "Rental Price",
+  "availableUnits": "Available Units",
   "price": "Price",
   "licensePlate": "License Plate",
   "status": "Status",
@@ -280,5 +289,7 @@
   "searchArticles": "Search for Article",
   "category": "Category",
   "recentPosts": "Recent Posts",
-  "readingTime": "Reading Time"
+  "readingTime": "Reading Time",
+  "getDirections": "Get Directions",
+  "loading": "Loading..."
 }

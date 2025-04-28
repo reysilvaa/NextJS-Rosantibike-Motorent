@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils/utils';
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
-  const { t  } = useAppTranslations();
+  const { t, locale } = useAppTranslations();
   const { theme } = useTheme();
   const isLightTheme = theme === 'light';
   const isHomePage = pathname === '/';
@@ -66,13 +66,19 @@ export default function Navbar() {
   }, []);
 
   const navLinks = [
-    { href: '/', label: t('home') },
-    { href: '/motorcycles', label: t('motorcycles') },
-    { href: '/availability', label: t('availability') },
-    { href: '/booking-history', label: t('bookingHistory') },
-    { href: '/blog', label: t('blog') },
-    { href: '/contact', label: t('contact') },
+    { href: '/{locale}', label: t('home') },
+    { href: '/{locale}/motorcycles', label: t('motorcycles') },
+    { href: '/{locale}/availability', label: t('availability') },
+    { href: '/{locale}/booking-history', label: t('bookingHistory') },
+    { href: '/{locale}/blog', label: t('blog') },
+    { href: '/{locale}/contact', label: t('contact') },
   ];
+  
+  // Ubah href dengan locale yang aktif
+  const localizedNavLinks = navLinks.map(link => ({
+    ...link,
+    href: link.href.replace('{locale}', locale)
+  }));
 
   return (
     <header
@@ -90,7 +96,7 @@ export default function Navbar() {
       }}
     >
       <div className="container mx-auto flex items-center justify-between px-4">
-        <Link href="/" className="flex items-center group">
+        <Link href={`/${locale}`} className="flex items-center group">
           {/* <div className="mr-2 flex items-center justify-center rounded-full bg-primary/10 p-1.5 group-hover:bg-primary/20 transition-colors duration-300 animate-pulse-soft">
             <Bike className={cn("h-5 w-5", shouldUseWhiteStyle ? "text-white" : "text-primary")} />
           </div> */}
@@ -128,7 +134,7 @@ export default function Navbar() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
-          {navLinks.map(link => (
+          {localizedNavLinks.map(link => (
             <Link
               key={link.href}
               href={link.href}
@@ -197,7 +203,7 @@ export default function Navbar() {
             <SheetTitle className="sr-only">{t('mobileMenuTitle')}</SheetTitle>
             <div className="flex flex-col h-full">
               <div className="p-4 border-b border-border/30">
-                <Link href="/" className="flex items-center group">
+                <Link href={`/${locale}`} className="flex items-center group">
                   <div className="mr-2 flex items-center justify-center rounded-full bg-primary/10 p-1.5">
                     <Bike className="h-5 w-5 text-primary" />
                   </div>
@@ -221,7 +227,7 @@ export default function Navbar() {
               </div>
 
               <nav className="flex flex-col p-4 overflow-y-auto">
-                {navLinks.map(link => (
+                {localizedNavLinks.map(link => (
                   <Link
                     key={link.href}
                     href={link.href}

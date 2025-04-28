@@ -1,5 +1,5 @@
 // Re-export dari file locales
-export { defaultLocale, localeNames, locales, type Locale } from './locales';
+export { defaultLocale, type Locale,localeNames, locales } from './locales';
 
 // Re-export dari file messages
 export { getMessages, loadAllMessages } from './messages';
@@ -20,7 +20,7 @@ export function localizedPathname(
   const currentLocaleSegment = pathSegments[1];
 
   // Periksa apakah segmen pertama adalah locale yang valid
-  if (currentLocaleSegment === 'id' || currentLocaleSegment === 'en') {
+  if (currentLocaleSegment === 'id' || currentLocaleSegment === 'en' || currentLocaleSegment === 'jv') {
     pathSegments[1] = locale;
     return pathSegments.join('/');
   }

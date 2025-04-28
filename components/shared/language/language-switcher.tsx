@@ -1,6 +1,8 @@
 'use client';
 
 import { Check, Globe } from 'lucide-react';
+import { useParams, usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -9,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { type Locale, localeNames } from '@/i18n';
+import { type Locale, localeNames, locales as allLocales } from '@/i18n';
 import { useAppTranslations } from '@/i18n/hooks';
 import { cn } from '@/lib/utils/utils';
 
@@ -18,11 +20,49 @@ interface LanguageSwitcherProps {
 }
 
 export default function LanguageSwitcher({ useWhiteStyle = false }: LanguageSwitcherProps) {
-  const { locale, changeLocale, locales, t } = useAppTranslations();
+  const { locale, changeLocale } = useAppTranslations();
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useParams();
+  
+  // Gunakan state untuk menyimpan daftar bahasa yang tersedia
+  // Ini memastikan bahwa komponen selalu di-render ulang saat bahasa berubah
+  const [availableLocales, setAvailableLocales] = useState<Locale[]>([...allLocales]);
+  
+  // useEffect untuk memastikan daftar bahasa selalu up-to-date
+  useEffect(() => {
+    console.log("Available locales:", allLocales);
+    setAvailableLocales([...allLocales]);
+  }, [pathname]);
 
   const handleLanguageChange = (lang: Locale) => {
     if (lang !== locale) {
+      // Tambahkan log untuk debugging
+      console.log("Changing language to:", lang);
+      
+      // Ubah bahasa dalam context
       changeLocale(lang);
+      
+      if (pathname) {
+        const currentLocale = params?.locale || '';
+        
+        if (currentLocale && typeof currentLocale === 'string') {
+          const newPath = pathname.replace(`/${currentLocale}`, `/${lang}`);
+          router.push(newPath);
+          
+          // Refresh halaman tanpa mengubah URL
+          setTimeout(() => {
+            router.refresh();
+          }, 100);
+        } else {
+          router.push(`/${lang}`);
+          
+          // Refresh halaman tanpa mengubah URL
+          setTimeout(() => {
+            router.refresh();
+          }, 100);
+        }
+      }
     }
   };
 
@@ -52,7 +92,7 @@ export default function LanguageSwitcher({ useWhiteStyle = false }: LanguageSwit
         sideOffset={8}
         className="z-[60] w-[140px] bg-card/95 backdrop-blur-lg border-border/50 shadow-lg rounded-xl p-1 animate-in fade-in-0 zoom-in-95 duration-100"
       >
-        {locales.map((lang: Locale) => (
+        {availableLocales.map((lang: Locale) => (
           <DropdownMenuItem
             key={lang}
             onClick={() => handleLanguageChange(lang)}

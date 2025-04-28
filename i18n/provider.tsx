@@ -1,9 +1,10 @@
 'use client';
 
+import { useParams } from 'next/navigation';
 import { NextIntlClientProvider } from 'next-intl';
 import { createContext, useEffect, useState } from 'react';
 
-import { defaultLocale, type Locale } from './locales';
+import { defaultLocale, isValidLocale,type Locale } from './locales';
 import { loadAllMessages, messagesCache } from './messages';
 
 // Context untuk penyedia bahasa
@@ -19,6 +20,7 @@ export const LocaleContext = createContext<{
 const LOCALE_STORAGE_KEY = 'preferred_language';
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
+  const params = useParams();
   const [locale, setLocale] = useState<Locale>(defaultLocale);
   const [messages, setMessages] = useState<Record<string, any>>({});
   const [isLoaded, setIsLoaded] = useState(false);
@@ -27,21 +29,40 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initLocale = async () => {
       try {
-        // Dapatkan bahasa dari localStorage jika tersedia
-        let savedLocale = defaultLocale;
-        if (typeof window !== 'undefined') {
+        // Selalu prioritaskan locale dari URL path terlebih dahulu
+        let urlLocale: string | undefined;
+        if (params?.locale && typeof params.locale === 'string') {
+          urlLocale = params.locale;
+        }
+
+        // Gunakan nilai locale dari URL jika valid, atau fallback ke localStorage
+        let selectedLocale = defaultLocale;
+        if (urlLocale && isValidLocale(urlLocale)) {
+          selectedLocale = urlLocale as Locale;
+          
+          // Jika locale dari URL berbeda dengan yang di localStorage, perbarui localStorage
+          if (typeof window !== 'undefined') {
+            const storedLocale = localStorage.getItem(LOCALE_STORAGE_KEY);
+            if (storedLocale !== selectedLocale) {
+              localStorage.setItem(LOCALE_STORAGE_KEY, selectedLocale);
+            }
+          }
+        } else if (typeof window !== 'undefined') {
+          // Hanya gunakan localStorage jika tidak ada URL locale yang valid
           const storedLocale = localStorage.getItem(LOCALE_STORAGE_KEY) as Locale;
-          if (storedLocale && (storedLocale === 'id' || storedLocale === 'en')) {
-            savedLocale = storedLocale;
+          if (storedLocale && isValidLocale(storedLocale)) {
+            selectedLocale = storedLocale;
           }
         }
 
-        // Atur locale
-        setLocale(savedLocale);
+        console.log("Selected locale:", selectedLocale, "URL locale:", urlLocale);
+
+        // Atur locale dan muat pesan
+        setLocale(selectedLocale);
 
         // Muat semua terjemahan
         const allMessages = await loadAllMessages();
-        setMessages(allMessages[savedLocale] || {});
+        setMessages(allMessages[selectedLocale] || {});
         setIsLoaded(true);
       } catch (error) {
         console.error('Gagal menginisialisasi locale:', error);
@@ -52,7 +73,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     };
 
     initLocale();
-  }, []);
+  }, [params]);
 
   // Fungsi untuk mengganti bahasa
   const changeLocale = async (newLocale: Locale) => {

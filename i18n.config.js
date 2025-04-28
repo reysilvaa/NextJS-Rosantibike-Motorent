@@ -1,5 +1,5 @@
 module.exports = {
-  locales: ['id', 'en'],
+  locales: ['id', 'en', 'jv'],
   defaultLocale: 'id',
   localeDetection: true,
   fallbackLng: 'id',

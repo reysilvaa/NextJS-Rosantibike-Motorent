@@ -52,11 +52,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  params
 }: Readonly<{
   children: React.ReactNode;
+  params?: { locale?: string };
 }>) {
+  // Dynamically set the language based on the route or default to 'id'
+  const lang = params?.locale || 'id';
+
   return (
-    <html lang="id" suppressHydrationWarning className={inter.variable}>
+    <html lang={lang} suppressHydrationWarning className={inter.variable}>
       <head>
         {/* Meta tags dasar untuk mobile */}
         <meta name="format-detection" content="telephone=no" />

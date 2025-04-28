@@ -31,7 +31,7 @@ export default function AvailabilityPreview() {
   const [selectedMotorcycleId, setSelectedMotorcycleId] = useState('');
   const [motorcycleTypes, setMotorcycleTypes] = useState<MotorcycleType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { t  } = useAppTranslations();
+  const { t } = useAppTranslations();
 
   // Fetch motorcycle types from API
   useEffect(() => {
