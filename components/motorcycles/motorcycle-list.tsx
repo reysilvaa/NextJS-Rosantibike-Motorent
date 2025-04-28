@@ -208,7 +208,7 @@ function MotorcycleCard({
     >
       <Card className="bg-card/50 border-border overflow-hidden hover:shadow-lg transition-all hover:border-primary/30 h-full flex flex-col">
         <Link
-          href={`/motorcycles/${motorcycle.id}${startDate && endDate ? `?startDate=${startDate}&endDate=${endDate}` : ''}`}
+          href={`/motorcycles/${motorcycle.slug}${startDate && endDate ? `?startDate=${startDate}&endDate=${endDate}` : ''}`}
           className="flex flex-col h-full"
         >
           <div className="relative h-48 overflow-hidden">

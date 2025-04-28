@@ -23,7 +23,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/use-toast';
 import { SocketEvents, useSocketContext } from '@/contexts/socket-context';
 import { useTranslation } from '@/i18n/hooks';
-import { checkAvailability, fetchMotorcycleTypeById } from '@/lib/network/api';
+import { checkAvailability, fetchMotorcycleTypeBySlug } from '@/lib/network/api';
 import { StatusMotor } from '@/lib/types/enums';
 import type { MotorcycleType, MotorcycleUnit } from '@/lib/types/motorcycle';
 
@@ -49,7 +49,7 @@ interface AvailabilityResponse {
   >;
 }
 
-export default function MotorcycleDetail({ id }: { id: string }) {
+export default function MotorcycleDetail({ slug }: { slug: string }) {
   const { t } = useTranslation();
   const router = useRouter();
   const [motorcycle, setMotorcycle] = useState<ExtendedMotorcycleType | null>(null);
@@ -71,10 +71,10 @@ export default function MotorcycleDetail({ id }: { id: string }) {
   const { isConnected, joinRoom, listen } = useSocketContext();
 
   useEffect(() => {
-    if (!isConnected) return;
+    if (!isConnected || !motorcycle) return;
 
     // Join room untuk motor ini
-    joinRoom(`motorcycle-${id}`);
+    joinRoom(`motorcycle-${motorcycle.id}`);
 
     // Setup listeners
     const unsubStatusUpdate = listen(SocketEvents.MOTOR_STATUS_UPDATE, handleMotorStatusUpdate);
@@ -87,7 +87,7 @@ export default function MotorcycleDetail({ id }: { id: string }) {
       unsubUnitUpdate();
       unsubUnitDelete();
     };
-  }, [isConnected, id, joinRoom, listen]);
+  }, [isConnected, motorcycle, joinRoom, listen]);
 
   // Handler untuk update status motor
   function handleMotorStatusUpdate(data: any) {
@@ -139,7 +139,7 @@ export default function MotorcycleDetail({ id }: { id: string }) {
       });
     } else {
       // Tambahkan unit baru jika jenisnya cocok dengan yang sedang dilihat
-      if (updatedUnit.jenis?.id === id) {
+      if (updatedUnit.jenis?.id === slug) {
         setUnits(prevUnits => [...prevUnits, updatedUnit]);
 
         toast({
@@ -174,7 +174,7 @@ export default function MotorcycleDetail({ id }: { id: string }) {
     const fetchMotorcycleDetail = async () => {
       try {
         setIsLoading(true);
-        const data = await fetchMotorcycleTypeById(id);
+        const data = await fetchMotorcycleTypeBySlug(slug);
 
         // Cek apakah data valid
         if (data) {
@@ -204,7 +204,7 @@ export default function MotorcycleDetail({ id }: { id: string }) {
     };
 
     fetchMotorcycleDetail();
-  }, [id, t]);
+  }, [slug, t]);
 
   useEffect(() => {
     if (startDate) {
@@ -253,7 +253,7 @@ export default function MotorcycleDetail({ id }: { id: string }) {
       const searchParams = {
         tanggalMulai: formattedStartDate,
         tanggalSelesai: formattedEndDate,
-        jenisMotorId: id,
+        jenisMotorId: slug,
       };
 
       // Tambahkan logging untuk membantu debug
@@ -278,7 +278,7 @@ export default function MotorcycleDetail({ id }: { id: string }) {
           // Perbarui struktur respons sesuai dengan endpoint backend baru
           availableUnits = typedResponse.units.filter(unit => {
             // Filter unit berdasarkan jenisId yang sama dengan ID motor yang sedang dilihat
-            const isCorrectType = unit.jenisMotor?.id === id;
+            const isCorrectType = unit.jenisMotor?.id === slug;
 
             // Periksa availability dari semua hari
             const isFullyAvailable =

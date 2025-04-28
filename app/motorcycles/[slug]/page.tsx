@@ -1,29 +1,28 @@
 'use client';
 
 import { notFound } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 
 import MotorcycleDetail from '@/components/motorcycles/motorcycle-detail';
 
 interface MotorcycleDetailPageProps {
-  params: {
-    id: string;
-  };
+  params: Promise<{
+    slug: string;
+  }>;
 }
 
 export default function MotorcycleDetailPage({ params }: MotorcycleDetailPageProps) {
-  const [id, setId] = useState<string>('');
+  // Menggunakan React.use() untuk mengakses params
+  const { slug } = use(params);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Mengambil id dari params
-    if (params && params.id) {
-      setId(params.id);
+    if (slug) {
       setIsLoading(false);
     } else {
       notFound();
     }
-  }, [params]);
+  }, [slug]);
 
   if (isLoading) {
     return (
@@ -40,15 +39,11 @@ export default function MotorcycleDetailPage({ params }: MotorcycleDetailPagePro
     );
   }
 
-  if (!id) {
-    return null; // Akan di-handle oleh notFound
-  }
-
   return (
     <div className="py-20">
       <div className="container mx-auto px-4">
-        <MotorcycleDetail id={id} />
+        <MotorcycleDetail slug={slug} />
       </div>
     </div>
   );
-}
+} 

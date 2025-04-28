@@ -327,6 +327,48 @@ export async function fetchMotorcycleTypeById(id: string): Promise<MotorcycleTyp
   }
 }
 
+export async function fetchMotorcycleTypeBySlug(slug: string): Promise<MotorcycleType | null> {
+  try {
+    console.log(`Fetching motorcycle type with slug: ${slug}`);
+
+    // Gunakan endpoint khusus untuk slug
+    const endpoint = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.JENIS_MOTOR}/slug/${slug}`;
+    console.log(`Making request to: ${endpoint}`);
+
+    const response = await fetch(endpoint);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch motorcycle type. Status: ${response.status}`);
+    }
+
+    const responseData = await response.json();
+    console.log('Response data for motorcycle type:', responseData);
+
+    // Handle different response formats
+    let motorcycleType = null;
+    if (responseData && responseData.data) {
+      // Format: { data: {...} }
+      motorcycleType = responseData.data;
+    } else if (responseData && 'id' in responseData) {
+      // Format: direct object
+      motorcycleType = responseData;
+    } else {
+      throw new Error('Unexpected response format');
+    }
+
+    // Jika tidak ada data, kembalikan null
+    if (!motorcycleType) {
+      console.error('No motorcycle type found with this slug');
+      return null;
+    }
+
+    return motorcycleType;
+  } catch (error: any) {
+    console.error('Error fetching motorcycle type by slug:', error);
+    throw error;
+  }
+}
+
 // Motorcycle Units API
 export async function fetchMotorcycleUnits(
   filter?: Record<string, any>
