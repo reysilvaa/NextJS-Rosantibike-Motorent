@@ -1,19 +1,9 @@
-// Import bundle analyzer
 import withNextIntl from 'next-intl/plugin';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-let userConfig = undefined;
-try {
-  // Fix the import to handle ESM properly
-  const userConfigModule = await import('./v0-user-next.config.js');
-  userConfig = userConfigModule.default || userConfigModule;
-} catch (/** @type {any} */ _unused) {
-  // ignore error
-}
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -26,11 +16,7 @@ const nextConfig = {
   },
   transpilePackages: ['next-intl'],
   images: {
-    unoptimized: false,
-    minimumCacheTTL: 60,
     formats: ['image/avif', 'image/webp'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     remotePatterns: [
       {
         protocol: 'https',
@@ -54,20 +40,9 @@ const nextConfig = {
       },
     ],
     dangerouslyAllowSVG: true,
-    contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
-  outputFileTracingExcludes: {
-    '*': [
-      'node_modules/@swc/core-linux-x64-gnu',
-      'node_modules/@swc/core-linux-x64-musl',
-      'node_modules/@esbuild/linux-x64',
-    ],
-  },
   experimental: {
-    webpackBuildWorker: true,
-    parallelServerBuildTraces: true,
-    parallelServerCompiles: true,
     optimizePackageImports: [
       '@radix-ui/react-icons',
       'lucide-react',
@@ -78,11 +53,17 @@ const nextConfig = {
       '@radix-ui',
       'recharts'
     ],
-    optimisticClientCache: true,
   },
   webpack: (config, { isServer }) => {
+    // Handle SVG files
     config.module.rules.push({
-      test: /\.(svg|png|jpg|jpeg|gif|ico|webp)$/i,
+      test: /\.svg$/,
+      use: ['@svgr/webpack']
+    });
+
+    // Handle other image types
+    config.module.rules.push({
+      test: /\.(png|jpg|jpeg|gif|ico|webp)$/i,
       type: 'asset/resource',
     });
 
@@ -91,70 +72,10 @@ const nextConfig = {
       config.experiments = {
         ...config.experiments,
         layers: true,
-        topLevelAwait: true,
       };
     }
 
-    // Ensure compatibility between ESM and CommonJS
-    config.output = {
-      ...config.output,
-      chunkFormat: isServer ? 'module' : undefined,
-      module: isServer,
-    };
-
-    // Optimize bundle size
-    config.optimization = {
-      ...config.optimization,
-      runtimeChunk: isServer ? undefined : 'single',
-      splitChunks: {
-        chunks: 'all',
-        maxInitialRequests: Infinity,
-        minSize: 20000,
-        cacheGroups: {
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name(module) {
-              // Protect against null module.context
-              if (!module.context) return 'npm.unknown';
-              
-              const match = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/);
-              if (!match) return 'npm.unknown';
-              
-              const packageName = match[1];
-              
-              // Separate larger packages
-              if ([
-                'framer-motion', 
-                'react-icons', 
-                'date-fns', 
-                'recharts',
-                'axios',
-                'embla-carousel-react',
-                'lucide-react',
-                'socket.io-client',
-                'video.js',
-                'react-hook-form',
-                'zod',
-                'i18next'
-              ].includes(packageName)) {
-                return `npm.${packageName}`;
-              }
-              
-              // Group all radix-ui components together
-              if (packageName.startsWith('@radix-ui')) {
-                return 'npm.radix-ui';
-              }
-
-              // Group remaining packages by first letter
-              const firstLetter = packageName.charAt(0).toLowerCase();
-              return `npm.chunk.${firstLetter}`;
-            },
-          },
-        },
-      },
-    };
-    
-    // Alias setup in webpack
+    // Alias setup
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': join(__dirname),
@@ -168,145 +89,64 @@ const nextConfig = {
     
     return config;
   },
-  output: 'standalone',
-  poweredByHeader: false,
-  compress: true,
   async rewrites() {
-    const isProduction = process.env.NODE_ENV === 'production';
-    const prodApiUrl = process.env.NEXT_PUBLIC_WS_URL || 'https://api.rosantibikemotorent.com';
-    const devApiUrl = prodApiUrl;
-    const apiUrl = isProduction ? prodApiUrl : devApiUrl;
+    const apiUrl = process.env.NEXT_PUBLIC_WS_URL || 'https://api.rosantibikemotorent.com';
 
-    return {
-      beforeFiles: [
-        {
-          source: '/api/:path*',
-          destination: `${apiUrl}/api/:path*`,
-          basePath: false,
-        },
-        {
-          source: '/socket.io/:path*',
-          destination: `${apiUrl}/socket.io/:path*`,
-          basePath: false,
-        },
-        {
-          source: '/realtime/:path*',
-          destination: `${apiUrl}/realtime/:path*`,
-          basePath: false,
-        },
-      ]
-    };
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${apiUrl}/api/:path*`,
+      },
+      {
+        source: '/socket.io/:path*',
+        destination: `${apiUrl}/socket.io/:path*`,
+      },
+      {
+        source: '/realtime/:path*',
+        destination: `${apiUrl}/realtime/:path*`,
+      },
+    ];
   },
   async headers() {
     return [
       {
         source: '/:path*',
         headers: [
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
-          },
-          {
-            key: 'Access-Control-Allow-Credentials',
-            value: 'true',
-          },
-          {
-            key: 'Access-Control-Allow-Origin',
-            value: '*',
-          },
-          {
-            key: 'Access-Control-Allow-Methods',
-            value: 'GET,OPTIONS,PATCH,DELETE,POST,PUT',
-          },
-          {
-            key: 'Access-Control-Allow-Headers',
-            value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
-          },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-XSS-Protection', value: '1; mode=block' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
         ],
       },
       {
-        source: '/((?!api|_next/static|_next/image|favicon.ico).*)',
+        source: '/api/:path*',
         headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
+          { key: 'Access-Control-Allow-Credentials', value: 'true' },
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET,OPTIONS,PATCH,DELETE,POST,PUT' },
+          { key: 'Access-Control-Allow-Headers', value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version' },
         ],
       },
       {
-        source: '/public/fonts/(.*)',
+        source: '/fonts/:path*',
         headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          }
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }
         ]
       },
       {
-        source: '/public/images/(.*)',
+        source: '/images/:path*',
         headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          }
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }
         ]
       },
     ];
   },
 };
 
-// Merge configs properly
-function mergeConfig(baseConfig, userConfig) {
-  if (!userConfig) {
-    return baseConfig;
-  }
+// For bundle analyzer support
+const withBundleAnalyzer = process.env.ANALYZE === 'true' 
+  ? require('@next/bundle-analyzer')({ enabled: true })
+  : (config) => config;
 
-  const mergedConfig = { ...baseConfig };
-
-  for (const key in userConfig) {
-    if (
-      typeof baseConfig[key] === 'object' &&
-      !Array.isArray(baseConfig[key]) &&
-      baseConfig[key] !== null
-    ) {
-      mergedConfig[key] = {
-        ...baseConfig[key],
-        ...userConfig[key],
-      };
-    } else {
-      mergedConfig[key] = userConfig[key];
-    }
-  }
-
-  return mergedConfig;
-}
-
-const finalConfig = mergeConfig(nextConfig, userConfig);
-
-// Export nextConfig with analyzer if available
-let exportedConfig = finalConfig;
-
-try {
-  const bundleAnalyzerModule = await import('@next/bundle-analyzer');
-  const withBundleAnalyzer = bundleAnalyzerModule.default({
-    enabled: process.env.ANALYZE === 'true',
-  });
-  exportedConfig = withBundleAnalyzer(finalConfig);
-} catch (_unused) {
-  // Fallback to regular config if bundle analyzer is not available
-}
-
-// Wrap config with next-intl
-export default withNextIntl('./i18n.config.js')(exportedConfig);
+// Apply plugins
+export default withNextIntl('./i18n.config.js')(withBundleAnalyzer(nextConfig));
