@@ -9,10 +9,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 
 export default function BlogSidebar() {
-  const { t } = useTranslation();
+  const { t  } = useAppTranslations();
   const [searchQuery, setSearchQuery] = useState('');
 
   const categories = [

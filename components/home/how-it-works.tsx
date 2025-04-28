@@ -3,10 +3,10 @@
 import { motion } from 'framer-motion';
 import { BikeIcon as Motorcycle, Calendar, CheckCircle, CreditCard } from 'lucide-react';
 
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 
 export default function HowItWorks() {
-  const { t } = useTranslation();
+  const { t  } = useAppTranslations();
 
   const steps = [
     {

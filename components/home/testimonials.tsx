@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 import reviewsData from '@/lib/data/reviews.json';
 
 interface Review {
@@ -21,7 +21,7 @@ interface Review {
 export default function Testimonials() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [autoplay, setAutoplay] = useState(true);
-  const { t } = useTranslation();
+  const { t  } = useAppTranslations();
   const [reviews, setReviews] = useState<Review[]>([]);
   const autoplayRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);

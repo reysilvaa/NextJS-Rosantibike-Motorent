@@ -8,7 +8,7 @@ import { DateRange } from 'react-day-picker';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 
 interface DateRangeSearchProps {
   onSearch: (dateFrom: string, dateTo: string) => void;
@@ -31,7 +31,7 @@ export default function DateRangeSearch({
   cardClassName,
   _usePopover = true,
 }: DateRangeSearchProps) {
-  const { t } = useTranslation();
+  const { t  } = useAppTranslations();
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
   // Inisialisasi tanggal dari props jika tersedia

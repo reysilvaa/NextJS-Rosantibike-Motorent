@@ -11,13 +11,13 @@ import LanguageSwitcher from '@/components/shared/language/language-switcher';
 import { ThemeToggle } from '@/components/shared/theme/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 import { cn } from '@/lib/utils/utils';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
-  const { t } = useTranslation();
+  const { t  } = useAppTranslations();
   const { theme } = useTheme();
   const isLightTheme = theme === 'light';
   const isHomePage = pathname === '/';

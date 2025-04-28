@@ -1,96 +1,112 @@
 'use client';
 
-import i18next from 'i18next';
+import { NextIntlClientProvider } from 'next-intl';
 import { createContext, useEffect, useState } from 'react';
-import { I18nextProvider, initReactI18next } from 'react-i18next';
 
-import { defaultLanguage, Language, languages } from './index';
+import { defaultLocale, type Locale } from './locales';
+import { loadAllMessages, messagesCache } from './messages';
 
 // Context untuk penyedia bahasa
-export const LanguageContext = createContext<{
-  language: Language;
-  changeLanguage: (lang: Language) => void;
+export const LocaleContext = createContext<{
+  locale: Locale;
+  changeLocale: (lang: Locale) => void;
 }>({
-  language: defaultLanguage,
-  changeLanguage: () => {},
+  locale: defaultLocale,
+  changeLocale: () => {},
 });
 
-// Inisialisasi i18next di luar komponen untuk menghindari reinisialisasi
-const i18n = i18next.createInstance();
+// Kunci untuk menyimpan preferensi bahasa di localStorage
+const LOCALE_STORAGE_KEY = 'preferred_language';
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguage] = useState<Language>(defaultLanguage);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [locale, setLocale] = useState<Locale>(defaultLocale);
+  const [messages, setMessages] = useState<Record<string, any>>({});
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Fungsi untuk memuat terjemahan
-  const loadTranslations = async () => {
-    try {
-      const idModule = await import('./locales/id.json');
-      const enModule = await import('./locales/en.json');
-
-      await i18n.use(initReactI18next).init({
-        lng: language,
-        fallbackLng: defaultLanguage,
-        resources: {
-          id: { translation: idModule.default || idModule },
-          en: { translation: enModule.default || enModule },
-        },
-        interpolation: {
-          escapeValue: false,
-        },
-        react: {
-          useSuspense: false,
-        },
-      });
-
-      setIsInitialized(true);
-    } catch (error) {
-      console.error('Gagal menginisialisasi i18n:', error);
-    }
-  };
-
-  // Inisialisasi bahasa dari localStorage dan i18n instance
+  // Inisialisasi bahasa dan terjemahan
   useEffect(() => {
-    // Dapatkan bahasa dari localStorage jika tersedia
-    if (typeof window !== 'undefined') {
-      const savedLanguage = localStorage.getItem('preferred_language') as Language;
-      if (savedLanguage && languages.includes(savedLanguage as any)) {
-        setLanguage(savedLanguage);
-      }
-    }
+    const initLocale = async () => {
+      try {
+        // Dapatkan bahasa dari localStorage jika tersedia
+        let savedLocale = defaultLocale;
+        if (typeof window !== 'undefined') {
+          const storedLocale = localStorage.getItem(LOCALE_STORAGE_KEY) as Locale;
+          if (storedLocale && (storedLocale === 'id' || storedLocale === 'en')) {
+            savedLocale = storedLocale;
+          }
+        }
 
-    // Muat terjemahan
-    loadTranslations();
+        // Atur locale
+        setLocale(savedLocale);
+
+        // Muat semua terjemahan
+        const allMessages = await loadAllMessages();
+        setMessages(allMessages[savedLocale] || {});
+        setIsLoaded(true);
+      } catch (error) {
+        console.error('Gagal menginisialisasi locale:', error);
+        // Default ke id jika terjadi kesalahan
+        setMessages({}); 
+        setIsLoaded(true); // Tetap atur loaded untuk menghindari loading infinite
+      }
+    };
+
+    initLocale();
   }, []);
 
-  // Effect untuk mengubah bahasa saat state language berubah (setelah inisialisasi)
-  useEffect(() => {
-    if (isInitialized && i18n.language !== language) {
-      i18n.changeLanguage(language);
-    }
-  }, [language, isInitialized]);
-
   // Fungsi untuk mengganti bahasa
-  const changeLanguage = (lang: Language) => {
-    // Hanya proses jika berbeda dari bahasa saat ini
-    if (lang !== language) {
-      // Simpan preferensi bahasa di localStorage
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('preferred_language', lang);
-      }
+  const changeLocale = async (newLocale: Locale) => {
+    try {
+      // Hanya proses jika berbeda dari bahasa saat ini
+      if (newLocale !== locale) {
+        // Simpan preferensi bahasa di localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(LOCALE_STORAGE_KEY, newLocale);
+        }
 
-      // Perbarui state
-      setLanguage(lang);
+        // Periksa apakah pesan sudah di-cache
+        if (Object.keys(messagesCache[newLocale]).length === 0) {
+          try {
+            // Jika belum ada di cache, muat pesan untuk locale tersebut
+            const newMessages = await import(`./locales/${newLocale}.json`);
+            messagesCache[newLocale] = newMessages.default || newMessages;
+          } catch (error) {
+            console.error(`Gagal memuat pesan untuk bahasa ${newLocale}:`, error);
+            messagesCache[newLocale] = {}; // Fallback ke objek kosong
+          }
+        }
+
+        // Perbarui state
+        setMessages(messagesCache[newLocale] || {});
+        setLocale(newLocale);
+      }
+    } catch (error) {
+      console.error(`Gagal mengubah bahasa ke ${newLocale}:`, error);
+      // Jangan ubah state jika terjadi kesalahan
     }
   };
 
-  if (!isInitialized) {
+  // Tambahkan error handler untuk next-intl
+  const handleError = (error: Error) => {
+    console.error('Next-intl error:', error);
+    // Biarkan aplikasi tetap berjalan meskipun ada error
+    return null;
+  };
+
+  if (!isLoaded) {
     return null; // Atau tampilkan loading state
   }
 
   return (
-    <LanguageContext.Provider value={{ language, changeLanguage }}>
-      <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
-    </LanguageContext.Provider>
+    <LocaleContext.Provider value={{ locale, changeLocale }}>
+      <NextIntlClientProvider 
+        locale={locale} 
+        messages={messages}
+        onError={handleError}
+        timeZone="Asia/Jakarta"
+      >
+        {children}
+      </NextIntlClientProvider>
+    </LocaleContext.Provider>
   );
 }

@@ -19,7 +19,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 import { fetchMotorcycleTypes } from '@/lib/network/api';
 import { MotorcycleType } from '@/lib/types/motorcycle';
 import { cn } from '@/lib/utils/utils';
@@ -31,7 +31,7 @@ export default function AvailabilityPreview() {
   const [selectedMotorcycleId, setSelectedMotorcycleId] = useState('');
   const [motorcycleTypes, setMotorcycleTypes] = useState<MotorcycleType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { t } = useTranslation();
+  const { t  } = useAppTranslations();
 
   // Fetch motorcycle types from API
   useEffect(() => {

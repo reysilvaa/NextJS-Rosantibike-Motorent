@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useAvailabilitySearch } from '@/hooks/availability/use-availability-search';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 import { cn } from '@/lib/utils/utils';
 
 interface AvailabilitySearchProps {
@@ -28,7 +28,7 @@ export default function AvailabilitySearch({
   initialStartDate,
   initialEndDate,
 }: AvailabilitySearchProps) {
-  const { t } = useTranslation();
+  const { t  } = useAppTranslations();
   const router = useRouter();
 
   const {

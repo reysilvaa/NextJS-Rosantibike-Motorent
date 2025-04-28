@@ -9,14 +9,14 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 import { cn } from '@/lib/utils/utils';
 
 export default function AvailabilityPreview() {
   const router = useRouter();
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
-  const { t } = useTranslation();
+  const { t  } = useAppTranslations();
 
   const handleSearch = () => {
     if (startDate && endDate) {

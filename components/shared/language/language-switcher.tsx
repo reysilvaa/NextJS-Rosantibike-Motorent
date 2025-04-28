@@ -9,7 +9,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useTranslation } from '@/i18n/hooks';
+import { type Locale, localeNames } from '@/i18n';
+import { useAppTranslations } from '@/i18n/hooks';
 import { cn } from '@/lib/utils/utils';
 
 interface LanguageSwitcherProps {
@@ -17,17 +18,11 @@ interface LanguageSwitcherProps {
 }
 
 export default function LanguageSwitcher({ useWhiteStyle = false }: LanguageSwitcherProps) {
-  const { language, changeLanguage, languages, _t } = useTranslation();
+  const { locale, changeLocale, locales, t } = useAppTranslations();
 
-  // Label bahasa untuk UI
-  const languageLabels: Record<string, string> = {
-    id: 'Indonesia',
-    en: 'English',
-  };
-
-  const handleLanguageChange = (lang: string) => {
-    if (lang !== language) {
-      changeLanguage(lang as any);
+  const handleLanguageChange = (lang: Locale) => {
+    if (lang !== locale) {
+      changeLocale(lang);
     }
   };
 
@@ -57,20 +52,20 @@ export default function LanguageSwitcher({ useWhiteStyle = false }: LanguageSwit
         sideOffset={8}
         className="z-[60] w-[140px] bg-card/95 backdrop-blur-lg border-border/50 shadow-lg rounded-xl p-1 animate-in fade-in-0 zoom-in-95 duration-100"
       >
-        {languages.map(lang => (
+        {locales.map((lang: Locale) => (
           <DropdownMenuItem
             key={lang}
             onClick={() => handleLanguageChange(lang)}
             className={cn(
               'flex items-center justify-between rounded-lg cursor-pointer transition-colors duration-200',
-              language === lang ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-primary/5'
+              locale === lang ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-primary/5'
             )}
           >
             <div className="flex items-center">
               <span className="text-xs font-bold uppercase mr-2 opacity-70">{lang}</span>
-              {languageLabels[lang]}
+              {localeNames[lang]}
             </div>
-            {language === lang && <Check className="h-4 w-4" />}
+            {locale === lang && <Check className="h-4 w-4" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

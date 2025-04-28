@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 import { fetchMotorcycleTypes } from '@/lib/network/api';
 import type { MotorcycleType } from '@/lib/types/motorcycle';
 
@@ -18,7 +18,7 @@ export default function FeaturedMotorcycles() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState('all');
-  const { t } = useTranslation();
+  const { t  } = useAppTranslations();
 
   useEffect(() => {
     const getMotorcycles = async () => {

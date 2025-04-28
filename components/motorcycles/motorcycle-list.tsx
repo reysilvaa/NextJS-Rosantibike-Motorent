@@ -12,7 +12,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useMotorcycleFilters } from '@/contexts/motorcycle-filter-context';
 import { useSocketContext } from '@/contexts/socket-context';
 import { useAvailability, useMotorcycleTypes } from '@/hooks/use-motorcycles';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 import type { AvailabilitySearchParams } from '@/lib/types/forms';
 import type { MotorcycleType } from '@/lib/types/motorcycle';
 
@@ -28,7 +28,7 @@ const normalizeMotorcycle = (motorcycle: MotorcycleType): MotorcycleType => {
 };
 
 export default function MotorcycleList() {
-  const { t } = useTranslation();
+  const { t  } = useAppTranslations();
   const { filters } = useMotorcycleFilters();
 
   // Gunakan filter dari context langsung ke hook
@@ -198,7 +198,7 @@ function MotorcycleCard({
   startDate,
   endDate,
 }: MotorcycleCardProps) {
-  const { t } = useTranslation();
+  const { t  } = useAppTranslations();
 
   return (
     <motion.div

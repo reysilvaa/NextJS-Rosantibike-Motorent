@@ -1,6 +1,7 @@
 // Import bundle analyzer
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import withNextIntl from 'next-intl/plugin';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -303,4 +304,5 @@ try {
   // Fallback to regular config if bundle analyzer is not available
 }
 
-export default exportedConfig; 
+// Wrap config dengan next-intl
+export default withNextIntl('./i18n.config.js')(exportedConfig); 

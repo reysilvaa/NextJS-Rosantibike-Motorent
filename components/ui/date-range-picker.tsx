@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useMediaQuery } from '@/hooks/common/use-media-query';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 import { cn } from '@/lib/utils/utils';
 
 // Core props for all date range pickers
@@ -56,7 +56,7 @@ export function DateRangePicker({
   disabledDates,
   numberOfMonths: customNumberOfMonths,
 }: CoreDateRangePickerProps) {
-  const { _t } = useTranslation();
+  const { _t  } = useAppTranslations();
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
   // Determine the number of months based on screen size unless specified

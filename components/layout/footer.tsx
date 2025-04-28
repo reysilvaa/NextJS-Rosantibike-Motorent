@@ -3,10 +3,10 @@
 import { Facebook, Instagram, Mail, MapPin, Phone, Twitter } from 'lucide-react';
 import Link from 'next/link';
 
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 
 export default function Footer() {
-  const { t } = useTranslation();
+  const { t } = useAppTranslations();
 
   return (
     <footer className="bg-card border-t border-border">

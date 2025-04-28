@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 import { fetchBlogPosts } from '@/lib/network/api';
 import type { BlogPost } from '@/lib/types/';
 
@@ -19,7 +19,7 @@ export default function BlogPreview() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState('all');
-  const { t } = useTranslation();
+  const { t  } = useAppTranslations();
 
   useEffect(() => {
     const getBlogPosts = async () => {

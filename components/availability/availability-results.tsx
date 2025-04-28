@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/select';
 import { toast } from '@/components/ui/use-toast';
 import { useAvailability } from '@/hooks/availability/use-availability';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 import type { MotorcycleUnit } from '@/lib/types/motorcycle';
 import { formatCurrency } from '@/lib/utils/utils';
 
@@ -37,7 +37,7 @@ export default function AvailabilityResults({
   _isLoading,
   _onBook,
 }: AvailabilityResultsProps) {
-  const { t } = useTranslation();
+  const { t  } = useAppTranslations();
   const router = useRouter();
   const { sortOption, setSortOption, rentalDays, calculateTotalPrice } = useAvailability();
 

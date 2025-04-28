@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useVideoContext } from '@/contexts/video-context';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 import { fetchMotorcycleTypes } from '@/lib/network/api';
 import { MotorcycleType } from '@/lib/types/motorcycle';
 
@@ -41,7 +41,7 @@ interface SlideType {
 }
 
 export default function Hero() {
-  const { t, language: _language } = useTranslation();
+  const { t, language: _language  } = useAppTranslations();
   const { theme } = useTheme();
   const {
     videoRefs,

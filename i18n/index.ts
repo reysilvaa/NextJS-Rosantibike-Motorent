@@ -1,89 +1,30 @@
-import { createInstance } from 'i18next';
-import { initReactI18next } from 'react-i18next';
+// Re-export dari file locales
+export { defaultLocale, localeNames, locales, type Locale } from './locales';
 
-// Daftar bahasa yang didukung
-export const languages = ['id', 'en'] as const;
-export type Language = (typeof languages)[number];
+// Re-export dari file messages
+export { getMessages, loadAllMessages } from './messages';
 
-// Konfigurasi i18n default
-export const defaultLanguage: Language = 'id';
+// Re-export dari file provider
+export { I18nProvider, LocaleContext } from './provider';
 
-// Cache untuk menyimpan terjemahan
-const translationCache: Record<string, Record<string, any>> = {
-  id: {},
-  en: {},
-};
+// Re-export dari file hooks
+export { useAppTranslations } from './hooks';
 
-// Memuat resource dari file statis
-const loadResources = async () => {
-  try {
-    // Muat semua terjemahan sekaligus
-    const idModule = await import('./locales/id.json');
-    const enModule = await import('./locales/en.json');
+// Export fungsi utility
+export function localizedPathname(
+  pathname: string,
+  locale: string
+): string {
+  // Jika pathname sudah dimulai dengan locale, ganti dengan locale baru
+  const pathSegments = pathname.split('/');
+  const currentLocaleSegment = pathSegments[1];
 
-    translationCache.id = idModule.default || idModule;
-    translationCache.en = enModule.default || enModule;
-
-    return {
-      id: translationCache.id,
-      en: translationCache.en,
-    };
-  } catch (error) {
-    console.error(`Gagal memuat terjemahan:`, error);
-    return {
-      id: {},
-      en: {},
-    };
+  // Periksa apakah segmen pertama adalah locale yang valid
+  if (currentLocaleSegment === 'id' || currentLocaleSegment === 'en') {
+    pathSegments[1] = locale;
+    return pathSegments.join('/');
   }
-};
 
-// Fungsi untuk membuat instance i18n yang digunakan di server dan client
-export const createI18nInstance = async (initialLanguage: Language) => {
-  // Muat semua resource terjemahan
-  const translations = await loadResources();
-
-  // Buat instance i18n baru
-  const i18nInstance = createInstance();
-
-  // Konfigurasi resource dengan semua bahasa yang tersedia
-  const resources = {
-    id: {
-      translation: translations.id,
-    },
-    en: {
-      translation: translations.en,
-    },
-  };
-
-  // Inisialisasi i18n instance
-  await i18nInstance.use(initReactI18next).init({
-    // Bahasa saat ini
-    lng: initialLanguage,
-    // Bahasa fallback jika terjemahan tidak ditemukan
-    fallbackLng: defaultLanguage,
-    // Debug mode (dinonaktifkan di production)
-    debug: false,
-    // Resources yang sudah dimuat (semua bahasa)
-    resources,
-    interpolation: {
-      // Hindari konflik dengan ekspresi JSX
-      escapeValue: false,
-    },
-    // Menyederhanakan penggunaan tanpa namespace
-    defaultNS: 'translation',
-    fallbackNS: 'translation',
-    react: {
-      useSuspense: false, // Penting agar tidak ada loading state
-    },
-  });
-
-  return i18nInstance;
-};
-
-// Mendapatkan terjemahan dari server side
-export const getTranslation = async (language: Language) => {
-  if (Object.keys(translationCache[language]).length === 0) {
-    await loadResources();
-  }
-  return translationCache[language];
-};
+  // Jika tidak dimulai dengan locale, tambahkan locale ke awal path
+  return `/${locale}${pathname === '/' ? '' : pathname}`;
+}

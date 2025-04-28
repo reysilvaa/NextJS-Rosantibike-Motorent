@@ -9,10 +9,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 
 export default function ContactForm() {
-  const { t } = useTranslation();
+  const { t  } = useAppTranslations();
   const [formData, setFormData] = useState({
     name: '',
     email: '',

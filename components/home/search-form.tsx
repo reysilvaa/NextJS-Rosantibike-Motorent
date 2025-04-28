@@ -5,7 +5,7 @@ import { BikeIcon, Calendar, Search } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 import { MotorcycleType } from '@/lib/types/motorcycle';
 
 interface SearchFormProps {
@@ -20,7 +20,7 @@ interface SearchFormState {
 }
 
 export default function SearchForm({ motorcycleTypes, isLoading }: SearchFormProps) {
-  const { t } = useTranslation();
+  const { t  } = useAppTranslations();
   const [searchForm, setSearchForm] = useState<SearchFormState>({
     motorcycleTypeId: '',
     pickupDate: '',
