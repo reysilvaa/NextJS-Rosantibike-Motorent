@@ -154,8 +154,9 @@ const nextConfig = {
                 return 'npm.radix-ui';
               }
 
-              // otherwise bundle smaller packages together
-              return `npm.bundle`;
+              // Group remaining packages by first letter to create smaller bundles
+              const firstLetter = packageName.charAt(0).toLowerCase();
+              return `npm.chunk.${firstLetter}`;
             },
           },
         },
