@@ -1,7 +1,7 @@
 // Import bundle analyzer
+import withNextIntl from 'next-intl/plugin';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
-import withNextIntl from 'next-intl/plugin';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -22,6 +22,8 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Tambahkan transpilePackages untuk memastikan next-intl diproses dengan benar
+  transpilePackages: ['next-intl'],
   images: {
     unoptimized: false,
     minimumCacheTTL: 60,
