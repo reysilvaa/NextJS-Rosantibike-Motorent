@@ -1,175 +1,160 @@
 'use client';
 
-import { Bike, Menu } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
 
 import LanguageSwitcher from '@/components/shared/language/language-switcher';
 import { ThemeToggle } from '@/components/shared/theme/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { useAppTranslations } from '@/i18n/hooks';
+import { useNavbar } from '@/hooks/common/use-navbar';
 import { cn } from '@/lib/utils/utils';
 
 export default function Navbar() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const pathname = usePathname();
-  const { t, locale } = useAppTranslations();
-  const { theme } = useTheme();
-  const isLightTheme = theme === 'light';
-  const isHomePage = pathname === '/';
+  const {
+    isScrolled,
+    pathname,
+    locale,
+    t,
+    isHomePage,
+    shouldUseWhiteStyle,
+    isLightAndNotScrolled,
+    shouldUseDarkStyle,
+    logoSrc,
+    localizedNavLinks,
+    navbarStyle,
+    isLightTheme
+  } = useNavbar();
 
-  // Kondisi untuk mengubah style navbar sesuai home page
-  const shouldUseWhiteStyle = isLightTheme && !isScrolled && isHomePage;
+  // Fungsi untuk menentukan style text navbar berdasarkan kondisi
+  const getTextStyle = (isActive = false) => {
+    if (shouldUseWhiteStyle) return isActive ? 'text-white' : 'text-white/80 hover:text-white';
+    if (shouldUseDarkStyle) return isActive ? 'text-foreground' : 'text-foreground/80 hover:text-foreground';
+    if (isActive) return 'text-primary';
+    return 'text-muted-foreground hover:text-primary';
+  };
 
-  useEffect(() => {
-    // Using requestAnimationFrame for smoother performance
-    let lastScrollY = window.scrollY;
-    let animationFrameId = 0;
-    let scrollTimeout = setTimeout(() => {});
+  // Fungsi untuk menentukan style border navbar berdasarkan kondisi
+  const getBorderStyle = () => {
+    if (shouldUseWhiteStyle) return 'bg-white/70';
+    if (shouldUseDarkStyle) return 'bg-foreground/70';
+    return 'bg-primary/70';
+  };
 
-    // Clear initial timeout
-    clearTimeout(scrollTimeout);
-    animationFrameId = 0;
+  // Tentukan class header berdasarkan kondisi
+  const headerClass = cn(
+    'fixed top-0 w-full z-50 will-change-transform transform-gpu',
+    isHomePage 
+      ? (isScrolled ? 'bg-background/80 backdrop-blur-xl border-b border-border/20 shadow-sm' : 'bg-transparent')
+      : (isScrolled ? 'bg-background/80 backdrop-blur-xl border-b border-border/20 shadow-sm' : 'bg-background/70 backdrop-blur-sm')
+  );
 
-    const handleScroll = () => {
-      if (animationFrameId) return;
+  // Pilih logo untuk mobile berdasarkan tema
+  const mobileLogoSrc = isLightTheme ? '/logo/logo2.svg' : '/logo/logo1.svg';
 
-      animationFrameId = window.requestAnimationFrame(() => {
-        // Only update if scroll position changed by more than 2px
-        if (Math.abs(window.scrollY - lastScrollY) > 2) {
-          setIsScrolled(window.scrollY > 10);
-          lastScrollY = window.scrollY;
-        }
+  // Komponen Link Navigasi Desktop
+  const DesktopNavLink = ({ href, label }: { href: string, label: string }) => {
+    const isActive = pathname === href;
+    return (
+      <Link
+        href={href}
+        className={cn(
+          'text-sm font-medium transition-all duration-300 relative group',
+          'h-[var(--navbar-item-height)] flex items-center px-[var(--navbar-item-spacing)]',
+          getTextStyle(isActive)
+        )}
+      >
+        <span className="relative z-10">{label}</span>
+        <span
+          className={cn(
+            'absolute bottom-0 left-0 w-0 h-[var(--navbar-border-size)] transition-all duration-300 group-hover:w-full rounded-full',
+            getBorderStyle(),
+            isActive ? 'w-full' : ''
+          )}
+        ></span>
+        <span
+          className={cn(
+            'absolute inset-0 rounded-md scale-0 transition-transform duration-300 group-hover:scale-100 origin-bottom',
+            shouldUseWhiteStyle
+              ? 'bg-white/10'
+              : shouldUseDarkStyle
+                ? 'bg-foreground/5'
+                : 'bg-primary/5',
+            isActive ? 'scale-100' : ''
+          )}
+        ></span>
+      </Link>
+    );
+  };
 
-        animationFrameId = 0;
-
-        // Clear previous timeout
-        if (scrollTimeout) clearTimeout(scrollTimeout);
-
-        // Set a timeout to ensure state is updated when scrolling stops
-        scrollTimeout = setTimeout(() => {
-          setIsScrolled(window.scrollY > 10);
-        }, 100);
-      });
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      if (animationFrameId) window.cancelAnimationFrame(animationFrameId);
-      if (scrollTimeout) clearTimeout(scrollTimeout);
-    };
-  }, []);
-
-  const navLinks = [
-    { href: '/{locale}', label: t('home') },
-    { href: '/{locale}/motorcycles', label: t('motorcycles') },
-    { href: '/{locale}/availability', label: t('availability') },
-    { href: '/{locale}/booking-history', label: t('bookingHistory') },
-    { href: '/{locale}/blog', label: t('blog') },
-    { href: '/{locale}/contact', label: t('contact') },
-  ];
-  
-  // Ubah href dengan locale yang aktif
-  const localizedNavLinks = navLinks.map(link => ({
-    ...link,
-    href: link.href.replace('{locale}', locale)
-  }));
+  // Komponen Link Navigasi Mobile
+  const MobileNavLink = ({ href, label }: { href: string, label: string }) => {
+    const isActive = pathname === href;
+    return (
+      <Link
+        href={href}
+        className={cn(
+          'flex items-center py-3 px-2 text-base font-medium transition-colors duration-200 hover:text-primary relative group rounded-lg',
+          isActive ? 'text-primary bg-primary/5' : 'text-muted-foreground hover:bg-primary/5'
+        )}
+      >
+        {label}
+        <span
+          className={cn(
+            'absolute bottom-2 left-2 h-[var(--navbar-border-size)] bg-primary/50 transition-all duration-200 rounded-full',
+            isActive ? 'w-12' : 'w-0 group-hover:w-12'
+          )}
+        ></span>
+      </Link>
+    );
+  };
 
   return (
-    <header
-      className={cn(
-        'fixed top-0 w-full z-50 will-change-transform',
-        isScrolled
-          ? 'bg-background/80 backdrop-blur-xl border-b border-border/20 shadow-sm'
-          : 'bg-transparent',
-        // Using transform-gpu for better performance
-        'transform-gpu transition-all duration-300 ease-out'
-      )}
-      style={{
-        paddingTop: isScrolled ? '0.5rem' : '1rem',
-        paddingBottom: isScrolled ? '0.5rem' : '1rem',
-      }}
-    >
+    <header className={headerClass} style={navbarStyle}>
       <div className="container mx-auto flex items-center justify-between px-4">
+        {/* Logo */}
         <Link href={`/${locale}`} className="flex items-center group">
-          {/* <div className="mr-2 flex items-center justify-center rounded-full bg-primary/10 p-1.5 group-hover:bg-primary/20 transition-colors duration-300 animate-pulse-soft">
-            <Bike className={cn("h-5 w-5", shouldUseWhiteStyle ? "text-white" : "text-primary")} />
-          </div> */}
           <span
             className={cn(
               'text-2xl font-bold relative',
               shouldUseWhiteStyle
                 ? 'text-white'
-                : 'bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70'
+                : shouldUseDarkStyle
+                  ? 'text-foreground'
+                  : isLightAndNotScrolled
+                      ? 'text-foreground'
+                      : 'bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70'
             )}
           >
             <Image
-              src={
-                isHomePage
-                  ? isLightTheme
-                    ? isScrolled
-                      ? '/logo/logo2.svg'
-                      : '/logo/logo1.svg'
-                    : '/logo/logo1.svg'
-                  : '/logo/logo2.svg'
-              }
+              src={logoSrc}
               alt="Rosantibike Motorent"
               width={120}
               height={40}
-              className="h-10 w-auto"
+              className="h-[var(--navbar-logo-height)] w-auto"
             />
             <span
               className={cn(
-                'absolute -bottom-1 left-0 w-0 h-0.5 transition-all duration-500 group-hover:w-full',
-                shouldUseWhiteStyle ? 'bg-white/70' : 'bg-primary/50'
+                'absolute -bottom-1 left-0 w-0 h-[var(--navbar-border-size)] transition-all duration-500 group-hover:w-full',
+                getBorderStyle()
               )}
             ></span>
           </span>
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-8">
+        <nav className="hidden md:flex items-center" style={{ gap: 'var(--navbar-link-margin)' }}>
           {localizedNavLinks.map(link => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                'text-sm font-medium transition-all duration-300 relative group py-1.5',
-                pathname === link.href
-                  ? shouldUseWhiteStyle
-                    ? 'text-white'
-                    : 'text-primary'
-                  : shouldUseWhiteStyle
-                    ? 'text-white/80 hover:text-white'
-                    : 'text-muted-foreground hover:text-primary'
-              )}
-            >
-              <span className="relative z-10">{link.label}</span>
-              <span
-                className={cn(
-                  'absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full rounded-full',
-                  shouldUseWhiteStyle ? 'bg-white/70' : 'bg-primary/70',
-                  pathname === link.href ? 'w-full' : ''
-                )}
-              ></span>
-              <span
-                className={cn(
-                  'absolute inset-0 rounded-md scale-0 transition-transform duration-300 group-hover:scale-100 origin-bottom',
-                  shouldUseWhiteStyle ? 'bg-white/10' : 'bg-primary/5',
-                  pathname === link.href ? 'scale-100' : ''
-                )}
-              ></span>
-            </Link>
+            <DesktopNavLink key={link.href} href={link.href} label={link.label} />
           ))}
         </nav>
 
         {/* Actions - Fixed width container to prevent shifting */}
-        <div className="hidden md:flex items-center gap-3 min-w-[190px] justify-end">
+        <div 
+          className="hidden md:flex items-center justify-end" 
+          style={{ gap: 'var(--navbar-item-spacing)', minWidth: '190px' }}
+        >
           <div className="relative">
             <LanguageSwitcher useWhiteStyle={shouldUseWhiteStyle} />
           </div>
@@ -185,11 +170,17 @@ export default function Navbar() {
               variant="ghost"
               size="icon"
               className={cn(
-                'md:hidden h-9 w-9 rounded-full',
+                'md:hidden rounded-full',
                 shouldUseWhiteStyle
                   ? 'hover:bg-white/10 text-white'
-                  : 'hover:bg-primary/10 text-foreground'
+                  : shouldUseDarkStyle
+                    ? 'hover:bg-foreground/10 text-foreground'
+                    : 'hover:bg-primary/10 text-foreground'
               )}
+              style={{ 
+                height: 'var(--navbar-item-height)', 
+                width: 'var(--navbar-item-height)' 
+              }}
               aria-label={t('mobileMenuTitle') || 'Menu'}
             >
               <Menu className="h-5 w-5" />
@@ -204,18 +195,9 @@ export default function Navbar() {
             <div className="flex flex-col h-full">
               <div className="p-4 border-b border-border/30">
                 <Link href={`/${locale}`} className="flex items-center group">
-                  <div className="mr-2 flex items-center justify-center rounded-full bg-primary/10 p-1.5">
-                    <Bike className="h-5 w-5 text-primary" />
-                  </div>
                   <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
                     <Image
-                      src={
-                        isHomePage
-                          ? isScrolled
-                            ? '/logo/logo2.svg'
-                            : '/logo/logo1.svg'
-                          : '/logo/logo2.svg'
-                      }
+                      src={mobileLogoSrc}
                       alt="RosantiBike Motorent"
                       width={96}
                       height={32}
@@ -228,24 +210,7 @@ export default function Navbar() {
 
               <nav className="flex flex-col p-4 overflow-y-auto">
                 {localizedNavLinks.map(link => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={cn(
-                      'flex items-center py-3 px-2 text-base font-medium transition-colors duration-200 hover:text-primary relative group rounded-lg',
-                      pathname === link.href
-                        ? 'text-primary bg-primary/5'
-                        : 'text-muted-foreground hover:bg-primary/5'
-                    )}
-                  >
-                    {link.label}
-                    <span
-                      className={cn(
-                        'absolute bottom-2 left-2 h-0.5 bg-primary/50 transition-all duration-200 rounded-full',
-                        pathname === link.href ? 'w-12' : 'w-0 group-hover:w-12'
-                      )}
-                    ></span>
-                  </Link>
+                  <MobileNavLink key={link.href} href={link.href} label={link.label} />
                 ))}
               </nav>
 
