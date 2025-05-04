@@ -35,6 +35,11 @@ const CRITICAL_HOME_ASSETS = [
 
 // Helper untuk memvalidasi URL yang aman untuk di-cache
 function isValidCacheUrl(url) {
+  // Pastikan URL adalah string
+  if (typeof url !== 'string') {
+    return false;
+  }
+  
   // Hanya cache HTTP/HTTPS URLs, tolak chrome-extension dan skema lainnya
   return url.startsWith('http:') || url.startsWith('https:');
 }
@@ -178,19 +183,22 @@ self.addEventListener('fetch', event => {
 
   try {
     url = new URL(request.url);
+    
+    // Skip permintaan dengan skema yang tidak valid (chrome-extension, dll)
+    if (!isValidCacheUrl(request.url)) {
+      return; // Tidak menangani permintaan dengan skema yang tidak valid
+    }
   } catch (error) {
     // URL tidak valid, abaikan
     return;
   }
 
-  // Skip permintaan dengan skema yang tidak valid (chrome-extension, dll)
-  if (!isValidCacheUrl(request.url)) {
-    return; // Tidak menangani permintaan dengan skema yang tidak valid
-  }
-
   // Skip cross-origin requests
   if (url.origin !== self.location.origin) {
-    return; // Tidak menangani permintaan cross-origin sama sekali
+    // Khusus untuk socket.io, tetap berikan kontrol ke browser
+    if (request.url.includes('socket.io')) {
+      return;
+    }
   }
 
   // Skip non-GET requests

@@ -172,23 +172,18 @@ export const getSocket = (): Socket => {
       console.log(`getSocket: Mencoba connect ke socket: ${wsUrl} dengan path /socket.io/`);
 
       socketInstance = io(wsUrl, {
-        transports: ['polling'], // Use only polling for better mobile compatibility
+        transports: ['polling', 'websocket'], // Mencoba polling dulu, lalu websocket jika tersedia
         path: '/socket.io/',
         autoConnect: true,
         reconnection: true,
-        reconnectionAttempts: 5, // Reduce reconnection attempts
-        reconnectionDelay: 2000, // Increase delay between attempts
-        timeout: 30000, // Shorter timeout
+        reconnectionAttempts: 5,
+        reconnectionDelay: 2000,
+        timeout: 30000,
         forceNew: true,
-        withCredentials: false,
-        // Add mobile-specific options
-        upgrade: false, // Disable transport upgrade
-        rememberUpgrade: false,
-        // Add better error handling
-        rejectUnauthorized: false,
-        // Add mobile-specific transport options
+        withCredentials: true, // Kirim cookies untuk autentikasi jika diperlukan
+        // Opsi CORS
         extraHeaders: {
-          'Access-Control-Allow-Origin': '*',
+          'Origin': typeof window !== 'undefined' ? window.location.origin : 'https://rosantibikemotorent.com',
         },
       });
 
