@@ -9,7 +9,6 @@ import PWAInstallPrompt from '@/components/shared/pwa/pwa-install-prompt';
 import SchemaOrg from '@/components/shared/seo/schema-org';
 
 import { inter } from './fonts';
-import { metadata as seoMetadata } from './metadata';
 import { Providers } from './providers';
 
 // Viewport untuk Next.js
@@ -26,7 +25,6 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  ...seoMetadata,
   title: 'Rosantibike Motorent | Rental Motor Berkualitas di Malang',
   description: 'Rental motor terpercaya dengan harga terjangkau dan layanan terbaik di Malang',
   icons: {
