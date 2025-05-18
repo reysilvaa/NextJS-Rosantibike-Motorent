@@ -184,7 +184,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen flex flex-col antialiased font-sans">
-        <Providers>
+        <Providers locale={lang}>
           <SchemaOrg />
           <Navbar />
           <main className="flex-grow">{children}</main>

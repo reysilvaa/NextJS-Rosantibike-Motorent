@@ -19,9 +19,16 @@ export const LocaleContext = createContext<{
 // Kunci untuk menyimpan preferensi bahasa di localStorage
 const LOCALE_STORAGE_KEY = 'preferred_language';
 
-export function I18nProvider({ children }: { children: React.ReactNode }) {
+export function I18nProvider({ 
+  children,
+  initialLocale 
+}: { 
+  children: React.ReactNode;
+  initialLocale?: Locale;
+}) {
+  // Selalu panggil useParams unconditionally, untuk mengikuti aturan React Hooks
   const params = useParams();
-  const [locale, setLocale] = useState<Locale>(defaultLocale);
+  const [locale, setLocale] = useState<Locale>(initialLocale || defaultLocale);
   const [messages, setMessages] = useState<Record<string, any>>({});
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -36,7 +43,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
         }
 
         // Gunakan nilai locale dari URL jika valid, atau fallback ke localStorage
-        let selectedLocale = defaultLocale;
+        let selectedLocale = initialLocale || defaultLocale;
         if (urlLocale && isValidLocale(urlLocale)) {
           selectedLocale = urlLocale as Locale;
           
@@ -73,7 +80,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     };
 
     initLocale();
-  }, [params]);
+  }, [params, initialLocale]);
 
   // Fungsi untuk mengganti bahasa
   const changeLocale = async (newLocale: Locale) => {
@@ -109,7 +116,11 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 
   // Tambahkan error handler untuk next-intl
   const handleError = (error: Error) => {
-    console.error('Next-intl error:', error);
+    // Hanya log ke console di development
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Next-intl error:', error);
+    }
+    
     // Biarkan aplikasi tetap berjalan meskipun ada error
     return null;
   };

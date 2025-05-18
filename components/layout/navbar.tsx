@@ -12,6 +12,17 @@ import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/s
 import { useNavbar } from '@/hooks/common/use-navbar';
 import { cn } from '@/lib/utils/utils';
 
+// Add custom CSS for shimmer animation
+const shimmerAnimation = `
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .animate-shimmer {
+    animation: shimmer 2s ease-in-out infinite;
+  }
+`;
+
 export default function Navbar() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
@@ -21,15 +32,25 @@ export default function Navbar() {
     pathname,
     locale,
     t,
-    isHomePage, 
+    isHomePage,
     shouldUseWhiteStyle,
-    // isLightAndNotScrolled,
     shouldUseDarkStyle,
     logoSrc,
     localizedNavLinks,
     navbarStyle,
     isLightTheme
   } = useNavbar();
+
+  // Add shimmer animation styles to head
+  useEffect(() => {
+    const styleElement = document.createElement('style');
+    styleElement.textContent = shimmerAnimation;
+    document.head.appendChild(styleElement);
+    
+    return () => {
+      document.head.removeChild(styleElement);
+    };
+  }, []);
 
   // Auto close mobile menu when navigation occurs
   useEffect(() => {
@@ -91,61 +112,22 @@ export default function Navbar() {
       <Link
         href={href}
         className={cn(
-          'text-sm transition-all duration-400 relative group overflow-hidden rounded-xl',
-          'h-[var(--navbar-item-height)] flex items-center px-[var(--navbar-item-spacing)]',
-          'transform hover:scale-105 active:scale-95',
+          'text-base font-medium transition-all duration-300 relative group py-3 px-6',
           getTextStyle(isActive)
         )}
-        onMouseEnter={(e) => {
-          // Add subtle ripple effect on hover
-          const ripple = document.createElement('span');
-          ripple.className = 'absolute inset-0 bg-current opacity-5 rounded-xl transform scale-0 transition-transform duration-300';
-          e.currentTarget.appendChild(ripple);
-          ripple.style.transform = 'scale(1)';
-        }}
       >
-        {/* Text with enhanced typography */}
-        <span className="relative z-10 tracking-wide">{label}</span>
+        {label}
         
-        {/* Enhanced active/hover border with better animations */}
+        {/* Simplified underline indicator */}
         <span
           className={cn(
-            'absolute bottom-0 left-1/2 h-[3px] transition-all duration-500 ease-out rounded-full',
-            'transform -translate-x-1/2',
+            'absolute bottom-0 left-0 h-0.5 transition-all duration-300 ease-out rounded-full',
             getBorderStyle(),
             isActive 
-              ? 'w-full scale-100 opacity-100' 
-              : 'w-0 scale-50 opacity-0 group-hover:w-full group-hover:scale-100 group-hover:opacity-100'
+              ? 'w-full opacity-100' 
+              : 'w-0 opacity-0 group-hover:w-full group-hover:opacity-100'
           )}
         />
-        
-        {/* Enhanced background hover effect */}
-        <span
-          className={cn(
-            'absolute inset-0 rounded-xl transition-all duration-400 ease-out',
-            'transform origin-center scale-0 group-hover:scale-100',
-            shouldUseWhiteStyle
-              ? 'bg-white/15 shadow-lg shadow-white/10'
-              : shouldUseDarkStyle
-                ? 'bg-foreground/10 shadow-lg shadow-foreground/5'
-                : 'bg-primary/10 shadow-lg shadow-primary/10',
-            isActive ? 'scale-100' : ''
-          )}
-        />
-        
-        {/* Subtle glow effect for active state */}
-        {isActive && (
-          <span
-            className={cn(
-              'absolute inset-0 rounded-xl blur-xl opacity-30 animate-pulse',
-              shouldUseWhiteStyle
-                ? 'bg-white/20'
-                : shouldUseDarkStyle
-                  ? 'bg-foreground/20'
-                  : 'bg-primary/20'
-            )}
-          />
-        )}
       </Link>
     );
   };
@@ -159,11 +141,10 @@ export default function Navbar() {
         onClick={() => setIsNavigating(true)}
         className={cn(
           'group flex items-center py-4 px-4 text-base font-medium transition-all duration-300',
-          'hover:translate-x-2 active:scale-95 rounded-2xl border border-transparent',
-          'hover:border-border/30 hover:shadow-lg hover:shadow-black/5',
+          'hover:translate-x-2 active:scale-95',
           isActive 
-            ? 'text-primary bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 shadow-md shadow-primary/10' 
-            : 'text-muted-foreground hover:text-primary hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/2'
+            ? 'text-primary' 
+            : 'text-muted-foreground hover:text-primary'
         )}
       >
         <span className="relative flex-1">
@@ -176,16 +157,6 @@ export default function Navbar() {
             )}
           />
         </span>
-        
-        {/* Arrow indicator for active/hover state */}
-        <span
-          className={cn(
-            'w-2 h-2 rounded-full transition-all duration-300 ml-3',
-            isActive 
-              ? 'bg-primary scale-100 shadow-md shadow-primary/30' 
-              : 'bg-transparent scale-0 group-hover:scale-100 group-hover:bg-primary/50'
-          )}
-        />
       </Link>
     );
   };
@@ -193,83 +164,37 @@ export default function Navbar() {
   return (
     <header className={headerClass} style={navbarStyle}>
       <div className="container mx-auto flex items-center justify-between px-4 lg:px-6">
-        {/* Enhanced Logo with better animations */}
+        {/* Simplified Logo without boxes */}
         <Link 
           href={`/${locale}`} 
-          className="flex items-center group relative transition-transform duration-300 hover:scale-105 active:scale-95"
+          className="flex items-center transition-all duration-300 hover:opacity-80"
         >
-          <div className="relative">
-            <Image
-              src={logoSrc}
-              alt="Rosantibike Motorent"
-              width={120}
-              height={40}
-              className="h-[var(--navbar-logo-height)] w-auto transition-all duration-300 group-hover:brightness-110"
-              priority
-            />
-            
-            {/* Logo glow effect */}
-            <span
-              className={cn(
-                'absolute inset-0 rounded-lg blur-lg opacity-0 transition-opacity duration-500 group-hover:opacity-30',
-                shouldUseWhiteStyle
-                  ? 'bg-white/20'
-                  : shouldUseDarkStyle
-                    ? 'bg-foreground/20'
-                    : 'bg-primary/20'
-              )}
-            />
-            
-            {/* Enhanced logo underline */}
-            <span
-              className={cn(
-                'absolute -bottom-2 left-1/2 h-0.5 transition-all duration-500 rounded-full transform -translate-x-1/2',
-                getBorderStyle(),
-                'w-0 group-hover:w-full'
-              )}
-            />
-          </div>
+          <Image
+            src={logoSrc}
+            alt="Rosantibike Motorent"
+            width={120}
+            height={40}
+            className="h-[var(--navbar-logo-height)] w-auto"
+            priority
+          />
         </Link>
 
-        {/* Enhanced Desktop Navigation */}
+        {/* Simplified Desktop Navigation */}
         <nav 
-          className="hidden md:flex items-center backdrop-blur-sm rounded-2xl px-2 py-1" 
-          style={{ gap: 'var(--navbar-link-margin)' }}
+          className="hidden md:flex items-center gap-2"
         >
-          {localizedNavLinks.map((link, index) => (
-            <div
-              key={link.href}
-              className="relative"
-              style={{
-                animationDelay: `${index * 100}ms`,
-              }}
-            >
-              <DesktopNavLink href={link.href} label={link.label} />
-            </div>
+          {localizedNavLinks.map((link) => (
+            <DesktopNavLink key={link.href} href={link.href} label={link.label} />
           ))}
         </nav>
 
-        {/* Enhanced Actions Container */}
+        {/* Actions Container */}
         <div 
-          className="hidden md:flex items-center justify-end" 
-          style={{ gap: 'var(--navbar-item-spacing)', minWidth: '200px' }}
+          className="hidden md:flex items-center justify-end gap-3"
+          style={{ minWidth: '120px' }}
         >
-          {/* Action buttons container with enhanced styling */}
-          <div className="flex items-center gap-3 p-2 rounded-2xl bg-background/10 backdrop-blur-sm border border-border/20">
-            <div className="relative group">
-              <LanguageSwitcher useWhiteStyle={shouldUseWhiteStyle} />
-              {/* Subtle hover indicator */}
-              <span className="absolute -inset-2 rounded-full bg-current opacity-0 group-hover:opacity-5 transition-opacity duration-300" />
-            </div>
-            
-            <div className="w-px h-6 bg-border/30" />
-            
-            <div className="relative group">
-              <ThemeToggle useWhiteStyle={shouldUseWhiteStyle} />
-              {/* Subtle hover indicator */}
-              <span className="absolute -inset-2 rounded-full bg-current opacity-0 group-hover:opacity-5 transition-opacity duration-300" />
-            </div>
-          </div>
+          <LanguageSwitcher useWhiteStyle={shouldUseWhiteStyle} />
+          <ThemeToggle useWhiteStyle={shouldUseWhiteStyle} />
         </div>
 
         {/* Enhanced Mobile Navigation Trigger */}
