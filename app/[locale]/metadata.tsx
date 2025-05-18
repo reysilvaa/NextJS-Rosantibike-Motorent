@@ -31,4 +31,4 @@ export const metadata = generateMetadata({
   alternates: {
     canonical: 'https://rosantibikemotorent.com',
   },
-});
+}); 
