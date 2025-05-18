@@ -20,7 +20,7 @@ interface SearchFormState {
 }
 
 export default function SearchForm({ motorcycleTypes, isLoading }: SearchFormProps) {
-  const { t  } = useAppTranslations();
+  const { t } = useAppTranslations();
   const [searchForm, setSearchForm] = useState<SearchFormState>({
     motorcycleTypeId: '',
     pickupDate: '',

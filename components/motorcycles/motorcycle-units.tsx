@@ -20,7 +20,7 @@ interface MotorcycleUnitsProps {
 }
 
 export default function MotorcycleUnits({ typeId, startDate, endDate }: MotorcycleUnitsProps) {
-  const { t  } = useAppTranslations();
+  const { t } = useAppTranslations();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 

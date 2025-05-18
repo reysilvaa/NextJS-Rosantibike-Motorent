@@ -32,7 +32,7 @@ enum StatusMotor {
 }
 
 export default function MotorcycleFilters() {
-  const { t  } = useAppTranslations();
+  const { t } = useAppTranslations();
   const [isOpen, setIsOpen] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
 

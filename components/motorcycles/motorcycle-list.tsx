@@ -28,7 +28,7 @@ const normalizeMotorcycle = (motorcycle: MotorcycleType): MotorcycleType => {
 };
 
 export default function MotorcycleList() {
-  const { t  } = useAppTranslations();
+  const { t } = useAppTranslations();
   const { filters } = useMotorcycleFilters();
 
   // Gunakan filter dari context langsung ke hook
@@ -198,7 +198,7 @@ function MotorcycleCard({
   startDate,
   endDate,
 }: MotorcycleCardProps) {
-  const { t  } = useAppTranslations();
+  const { t } = useAppTranslations();
 
   return (
     <motion.div

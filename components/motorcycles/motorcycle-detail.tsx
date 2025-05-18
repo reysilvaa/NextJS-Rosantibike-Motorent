@@ -50,7 +50,7 @@ interface AvailabilityResponse {
 }
 
 export default function MotorcycleDetail({ slug }: { slug: string }) {
-  const { t  } = useAppTranslations();
+  const { t } = useAppTranslations();
   const router = useRouter();
   const [motorcycle, setMotorcycle] = useState<ExtendedMotorcycleType | null>(null);
   const [isLoading, setIsLoading] = useState(true);

@@ -18,7 +18,7 @@ interface ThemeToggleProps {
 
 export function ThemeToggle({ useWhiteStyle = false }: ThemeToggleProps) {
   const { setTheme, theme } = useTheme();
-  const { t  } = useAppTranslations();
+  const { t } = useAppTranslations();
 
   return (
     <DropdownMenu>

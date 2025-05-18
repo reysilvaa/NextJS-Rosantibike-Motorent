@@ -3,7 +3,7 @@
 import { Menu, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect,useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import LanguageSwitcher from '@/components/shared/language/language-switcher';
 import { ThemeToggle } from '@/components/shared/theme/theme-toggle';
@@ -26,7 +26,7 @@ const shimmerAnimation = `
 export default function Navbar() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
-  
+
   const {
     isScrolled,
     pathname,
@@ -38,7 +38,7 @@ export default function Navbar() {
     logoSrc,
     localizedNavLinks,
     navbarStyle,
-    isLightTheme
+    isLightTheme,
   } = useNavbar();
 
   // Add shimmer animation styles to head
@@ -46,7 +46,7 @@ export default function Navbar() {
     const styleElement = document.createElement('style');
     styleElement.textContent = shimmerAnimation;
     document.head.appendChild(styleElement);
-    
+
     return () => {
       document.head.removeChild(styleElement);
     };
@@ -66,13 +66,13 @@ export default function Navbar() {
   // Enhanced text styling with better contrast ratios
   const getTextStyle = (isActive = false) => {
     if (shouldUseWhiteStyle) {
-      return isActive 
-        ? 'text-white font-semibold' 
+      return isActive
+        ? 'text-white font-semibold'
         : 'text-white/90 hover:text-white font-medium hover:font-semibold';
     }
     if (shouldUseDarkStyle) {
-      return isActive 
-        ? 'text-foreground font-semibold' 
+      return isActive
+        ? 'text-foreground font-semibold'
         : 'text-foreground/85 hover:text-foreground font-medium hover:font-semibold';
     }
     if (isActive) return 'text-primary font-semibold';
@@ -82,22 +82,21 @@ export default function Navbar() {
   // Enhanced border styling with gradient support
   const getBorderStyle = () => {
     if (shouldUseWhiteStyle) return 'bg-gradient-to-r from-white/80 via-white/60 to-white/80';
-    if (shouldUseDarkStyle) return 'bg-gradient-to-r from-foreground/80 via-foreground/60 to-foreground/80';
+    if (shouldUseDarkStyle)
+      return 'bg-gradient-to-r from-foreground/80 via-foreground/60 to-foreground/80';
     return 'bg-gradient-to-r from-primary/80 via-primary/60 to-primary/80';
   };
 
   // Enhanced header with better blur and glass effect
   const headerClass = cn(
     'fixed top-0 w-full z-50 will-change-transform transform-gpu transition-all duration-500 ease-out',
-    isHomePage 
-      ? (isScrolled 
-          ? 'bg-background/85 backdrop-blur-2xl border-b border-border/25 shadow-lg shadow-black/5' 
-          : 'bg-transparent backdrop-blur-none'
-        )
-      : (isScrolled 
-          ? 'bg-background/85 backdrop-blur-2xl border-b border-border/25 shadow-lg shadow-black/5' 
-          : 'bg-background/75 backdrop-blur-lg border-b border-border/15'
-        ),
+    isHomePage
+      ? isScrolled
+        ? 'bg-background/85 backdrop-blur-2xl border-b border-border/25 shadow-lg shadow-black/5'
+        : 'bg-transparent backdrop-blur-none'
+      : isScrolled
+        ? 'bg-background/85 backdrop-blur-2xl border-b border-border/25 shadow-lg shadow-black/5'
+        : 'bg-background/75 backdrop-blur-lg border-b border-border/15',
     // Add subtle hover effect to entire navbar
     'hover:shadow-xl hover:shadow-black/10 hover:backdrop-blur-2xl transition-all duration-300'
   );
@@ -106,7 +105,7 @@ export default function Navbar() {
   const mobileLogoSrc = isLightTheme ? '/logo/logo2.svg' : '/logo/logo1.svg';
 
   // Enhanced Desktop Navigation Link with micro-interactions
-  const DesktopNavLink = ({ href, label }: { href: string, label: string }) => {
+  const DesktopNavLink = ({ href, label }: { href: string; label: string }) => {
     const isActive = pathname === href;
     return (
       <Link
@@ -117,14 +116,14 @@ export default function Navbar() {
         )}
       >
         {label}
-        
+
         {/* Simplified underline indicator */}
         <span
           className={cn(
             'absolute bottom-0 left-0 h-0.5 transition-all duration-300 ease-out rounded-full',
             getBorderStyle(),
-            isActive 
-              ? 'w-full opacity-100' 
+            isActive
+              ? 'w-full opacity-100'
               : 'w-0 opacity-0 group-hover:w-full group-hover:opacity-100'
           )}
         />
@@ -133,7 +132,7 @@ export default function Navbar() {
   };
 
   // Enhanced Mobile Navigation Link
-  const MobileNavLink = ({ href, label }: { href: string, label: string }) => {
+  const MobileNavLink = ({ href, label }: { href: string; label: string }) => {
     const isActive = pathname === href;
     return (
       <Link
@@ -142,9 +141,7 @@ export default function Navbar() {
         className={cn(
           'group flex items-center py-4 px-4 text-base font-medium transition-all duration-300',
           'hover:translate-x-2 active:scale-95',
-          isActive 
-            ? 'text-primary' 
-            : 'text-muted-foreground hover:text-primary'
+          isActive ? 'text-primary' : 'text-muted-foreground hover:text-primary'
         )}
       >
         <span className="relative flex-1">
@@ -165,8 +162,8 @@ export default function Navbar() {
     <header className={headerClass} style={navbarStyle}>
       <div className="container mx-auto flex items-center justify-between px-4 lg:px-6">
         {/* Simplified Logo without boxes */}
-        <Link 
-          href={`/${locale}`} 
+        <Link
+          href={`/${locale}`}
           className="flex items-center transition-all duration-300 hover:opacity-80"
         >
           <Image
@@ -180,16 +177,14 @@ export default function Navbar() {
         </Link>
 
         {/* Simplified Desktop Navigation */}
-        <nav 
-          className="hidden md:flex items-center gap-2"
-        >
-          {localizedNavLinks.map((link) => (
+        <nav className="hidden md:flex items-center gap-2">
+          {localizedNavLinks.map(link => (
             <DesktopNavLink key={link.href} href={link.href} label={link.label} />
           ))}
         </nav>
 
         {/* Actions Container */}
-        <div 
+        <div
           className="hidden md:flex items-center justify-end gap-3"
           style={{ minWidth: '120px' }}
         >
@@ -212,35 +207,35 @@ export default function Navbar() {
                     ? 'hover:bg-foreground/15 hover:border-foreground/20 text-foreground hover:shadow-lg hover:shadow-foreground/5'
                     : 'hover:bg-primary/15 hover:border-primary/20 text-foreground hover:shadow-lg hover:shadow-primary/10'
               )}
-              style={{ 
-                height: 'var(--navbar-item-height)', 
-                width: 'var(--navbar-item-height)' 
+              style={{
+                height: 'var(--navbar-item-height)',
+                width: 'var(--navbar-item-height)',
               }}
               aria-label={t('mobileMenuTitle') || 'Menu'}
             >
               {/* Animated hamburger/close icon */}
               <div className="relative w-5 h-5">
-                <Menu 
+                <Menu
                   className={cn(
                     'absolute inset-0 transition-all duration-300',
                     isMobileOpen ? 'rotate-180 scale-0' : 'rotate-0 scale-100'
-                  )} 
+                  )}
                 />
-                <X 
+                <X
                   className={cn(
                     'absolute inset-0 transition-all duration-300',
                     isMobileOpen ? 'rotate-0 scale-100' : 'rotate-180 scale-0'
-                  )} 
+                  )}
                 />
               </div>
-              
+
               {/* Ripple effect background */}
               <span className="absolute inset-0 rounded-2xl bg-current opacity-0 hover:opacity-10 transition-opacity duration-300" />
-              
+
               <span className="sr-only">{t('mobileMenuTitle') || 'Menu'}</span>
             </Button>
           </SheetTrigger>
-          
+
           {/* Enhanced Mobile Sheet Content */}
           <SheetContent
             side="right"
@@ -251,15 +246,15 @@ export default function Navbar() {
             )}
           >
             <SheetTitle className="sr-only">{t('mobileMenuTitle')}</SheetTitle>
-            
+
             <div className="flex flex-col h-full relative overflow-hidden">
               {/* Decorative gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/3 pointer-events-none" />
-              
+
               {/* Enhanced header section */}
               <div className="relative p-6 border-b border-border/40 bg-gradient-to-r from-primary/5 to-transparent">
-                <Link 
-                  href={`/${locale}`} 
+                <Link
+                  href={`/${locale}`}
                   onClick={() => setIsNavigating(true)}
                   className="flex items-center group transition-transform duration-300 hover:scale-105"
                 >

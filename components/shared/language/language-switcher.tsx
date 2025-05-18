@@ -24,39 +24,39 @@ export default function LanguageSwitcher({ useWhiteStyle = false }: LanguageSwit
   const router = useRouter();
   const pathname = usePathname();
   const params = useParams();
-  
+
   // Gunakan state untuk menyimpan daftar bahasa yang tersedia
   // Ini memastikan bahwa komponen selalu di-render ulang saat bahasa berubah
   const [availableLocales, setAvailableLocales] = useState<Locale[]>([...allLocales]);
-  
+
   // useEffect untuk memastikan daftar bahasa selalu up-to-date
   useEffect(() => {
-    console.log("Available locales:", allLocales);
+    console.log('Available locales:', allLocales);
     setAvailableLocales([...allLocales]);
   }, [pathname]);
 
   const handleLanguageChange = (lang: Locale) => {
     if (lang !== locale) {
       // Tambahkan log untuk debugging
-      console.log("Changing language to:", lang);
-      
+      console.log('Changing language to:', lang);
+
       // Ubah bahasa dalam context
       changeLocale(lang);
-      
+
       if (pathname) {
         const currentLocale = params?.locale || '';
-        
+
         if (currentLocale && typeof currentLocale === 'string') {
           const newPath = pathname.replace(`/${currentLocale}`, `/${lang}`);
           router.push(newPath);
-          
+
           // Refresh halaman tanpa mengubah URL
           setTimeout(() => {
             router.refresh();
           }, 100);
         } else {
           router.push(`/${lang}`);
-          
+
           // Refresh halaman tanpa mengubah URL
           setTimeout(() => {
             router.refresh();

@@ -15,7 +15,7 @@ import { useAppTranslations } from '@/i18n/hooks';
 import { formatDate } from '@/lib/utils';
 
 export function BlogPosts() {
-  const { t  } = useAppTranslations();
+  const { t } = useAppTranslations();
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const { data: posts, isLoading, meta } = useBlogPosts(currentPage, 6, search);

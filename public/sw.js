@@ -39,7 +39,7 @@ function isValidCacheUrl(url) {
   if (typeof url !== 'string') {
     return false;
   }
-  
+
   // Hanya cache HTTP/HTTPS URLs, tolak chrome-extension dan skema lainnya
   return url.startsWith('http:') || url.startsWith('https:');
 }
@@ -183,7 +183,7 @@ self.addEventListener('fetch', event => {
 
   try {
     url = new URL(request.url);
-    
+
     // Skip permintaan dengan skema yang tidak valid (chrome-extension, dll)
     if (!isValidCacheUrl(request.url)) {
       return; // Tidak menangani permintaan dengan skema yang tidak valid

@@ -56,7 +56,7 @@ export function DateRangePicker({
   disabledDates,
   numberOfMonths: customNumberOfMonths,
 }: CoreDateRangePickerProps) {
-  const { _t  } = useAppTranslations();
+  const { _t } = useAppTranslations();
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
   // Determine the number of months based on screen size unless specified

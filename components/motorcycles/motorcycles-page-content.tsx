@@ -5,7 +5,7 @@ import MotorcycleList from '@/components/motorcycles/motorcycle-list';
 import { useAppTranslations } from '@/i18n/hooks';
 
 export default function MotorcyclesPageContent() {
-  const { t  } = useAppTranslations();
+  const { t } = useAppTranslations();
 
   return (
     <div className="container mx-auto px-4 py-20">

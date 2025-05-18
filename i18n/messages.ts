@@ -16,7 +16,7 @@ export async function getMessages(locale: Locale) {
 export const messagesCache: Record<string, any> = {
   id: {},
   en: {},
-  jv: {}
+  jv: {},
 };
 
 // Memuat semua terjemahan sekaligus (berguna untuk preloading)
@@ -43,4 +43,4 @@ export async function loadAllMessages() {
       jv: {},
     };
   }
-} 
+}

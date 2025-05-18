@@ -6,7 +6,7 @@ import { BikeIcon as Motorcycle, Calendar, CheckCircle, CreditCard } from 'lucid
 import { useAppTranslations } from '@/i18n/hooks';
 
 export default function HowItWorks() {
-  const { t  } = useAppTranslations();
+  const { t } = useAppTranslations();
 
   const steps = [
     {

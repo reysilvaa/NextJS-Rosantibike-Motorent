@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card';
 import { useAppTranslations } from '@/i18n/hooks';
 
 export default function ContactMap() {
-  const { t  } = useAppTranslations();
+  const { t } = useAppTranslations();
 
   return (
     <motion.div

@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useAppTranslations } from '@/i18n/hooks';
 
 export default function ContactInfo() {
-  const { t  } = useAppTranslations();
+  const { t } = useAppTranslations();
 
   const contactInfo = [
     {

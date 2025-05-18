@@ -183,7 +183,10 @@ export const getSocket = (): Socket => {
         withCredentials: true, // Kirim cookies untuk autentikasi jika diperlukan
         // Opsi CORS
         extraHeaders: {
-          'Origin': typeof window !== 'undefined' ? window.location.origin : 'https://rosantibikemotorent.com',
+          Origin:
+            typeof window !== 'undefined'
+              ? window.location.origin
+              : 'https://rosantibikemotorent.com',
         },
       });
 

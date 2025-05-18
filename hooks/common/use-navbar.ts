@@ -9,7 +9,7 @@ export function useNavbar() {
   const pathname = usePathname();
   const { t, locale } = useAppTranslations();
   const { theme } = useTheme();
-  
+
   // Tentukan kondisi dasar
   const isHomePage = pathname === `/${locale}` || pathname === '/';
   const isLightTheme = theme === 'light';
@@ -18,18 +18,17 @@ export function useNavbar() {
   const navbarStyles = {
     // White style untuk homepage yang belum di-scroll
     shouldUseWhiteStyle: isHomePage && !isScrolled,
-    
+
     // Dark style untuk halaman non-homepage dengan tema light
     shouldUseDarkStyle: isLightTheme && !isHomePage,
-    
+
     // Kondisi light theme tapi belum di-scroll
-    isLightAndNotScrolled: isLightTheme && !isScrolled
+    isLightAndNotScrolled: isLightTheme && !isScrolled,
   };
 
   // Sederhanakan logika pemilihan logo
-  const logoSrc = (!isLightTheme || (isHomePage && !isScrolled)) 
-    ? '/logo/logo1.svg' 
-    : '/logo/logo2.svg';
+  const logoSrc =
+    !isLightTheme || (isHomePage && !isScrolled) ? '/logo/logo1.svg' : '/logo/logo2.svg';
 
   // Buat object untuk CSS variables
   const navbarStyle = {
@@ -74,7 +73,7 @@ export function useNavbar() {
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
       if (animationFrameId) window.cancelAnimationFrame(animationFrameId);
@@ -103,6 +102,6 @@ export function useNavbar() {
     ...navbarStyles,
     logoSrc,
     localizedNavLinks,
-    navbarStyle
+    navbarStyle,
   };
-} 
+}

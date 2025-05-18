@@ -21,7 +21,7 @@ interface Review {
 export default function Testimonials() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [autoplay, setAutoplay] = useState(true);
-  const { t  } = useAppTranslations();
+  const { t } = useAppTranslations();
   const [reviews, setReviews] = useState<Review[]>([]);
   const autoplayRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -81,8 +81,10 @@ export default function Testimonials() {
   return (
     <section className="py-24 relative overflow-hidden">
       {/* Simplified local accents */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/5 to-background/80 -z-10"> {/* Above global -z-20 */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,theme(colors.primary/5),transparent_70%)] opacity-30"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/5 to-background/80 -z-10">
+        {' '}
+        {/* Above global -z-20 */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(var(--primary),0.05),transparent_70%)] opacity-30"></div>
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl opacity-50"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl opacity-50"></div>
       </div>

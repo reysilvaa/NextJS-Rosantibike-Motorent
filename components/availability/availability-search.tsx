@@ -28,7 +28,7 @@ export default function AvailabilitySearch({
   initialStartDate,
   initialEndDate,
 }: AvailabilitySearchProps) {
-  const { t  } = useAppTranslations();
+  const { t } = useAppTranslations();
   const router = useRouter();
 
   const {

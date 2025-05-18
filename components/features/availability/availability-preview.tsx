@@ -16,7 +16,7 @@ export default function AvailabilityPreview() {
   const router = useRouter();
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
-  const { t  } = useAppTranslations();
+  const { t } = useAppTranslations();
 
   const handleSearch = () => {
     if (startDate && endDate) {

@@ -4,4 +4,4 @@ module.exports = {
   localeDetection: true,
   fallbackLng: 'id',
   unstable_allowDynamic: '**/*.{js,ts,jsx,tsx}',
-}; 
+};

@@ -16,7 +16,7 @@ export default function Home() {
     <div className="flex flex-col w-full relative overflow-hidden">
       {/* Global Background Gradient - Made more prominent */}
       <div className="absolute inset-0 -z-20 bg-gradient-to-b from-background via-primary/5 to-background/80 dark:from-background/80 dark:via-primary/3 dark:to-background/60" />
-      
+
       <h1 className="sr-only">Rosantibike Motorent - Rental Motor Premium di Malang</h1>
       <VideoContextProvider>
         <Hero />
@@ -74,4 +74,4 @@ export default function Home() {
       </motion.div>
     </div>
   );
-} 
+}

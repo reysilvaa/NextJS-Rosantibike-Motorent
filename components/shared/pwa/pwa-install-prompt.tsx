@@ -21,7 +21,7 @@ type BeforeInstallPromptEvent = Event & {
 };
 
 const PWAInstallPrompt = () => {
-  const { t  } = useAppTranslations();
+  const { t } = useAppTranslations();
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [isIOSDevice, setIsIOSDevice] = useState(false);

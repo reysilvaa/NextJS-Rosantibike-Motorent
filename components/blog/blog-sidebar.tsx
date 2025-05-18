@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { useAppTranslations } from '@/i18n/hooks';
 
 export default function BlogSidebar() {
-  const { t  } = useAppTranslations();
+  const { t } = useAppTranslations();
   const [searchQuery, setSearchQuery] = useState('');
 
   const categories = [

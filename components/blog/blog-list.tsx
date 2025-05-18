@@ -16,7 +16,7 @@ import { useAppTranslations } from '@/i18n/hooks';
 import { BlogPost } from '@/lib/types/blog';
 
 export default function BlogList() {
-  const { t  } = useAppTranslations();
+  const { t } = useAppTranslations();
   const _router = useRouter();
   const searchParams = useSearchParams();
 

@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAppTranslations } from '@/i18n/hooks';
 
 export default function ContactSection() {
-  const { t  } = useAppTranslations();
+  const { t } = useAppTranslations();
   const [formData, setFormData] = useState({
     name: '',
     email: '',

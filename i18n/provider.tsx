@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation';
 import { NextIntlClientProvider } from 'next-intl';
 import { createContext, useEffect, useState } from 'react';
 
-import { defaultLocale, isValidLocale,type Locale } from './locales';
+import { defaultLocale, isValidLocale, type Locale } from './locales';
 import { loadAllMessages, messagesCache } from './messages';
 
 // Context untuk penyedia bahasa
@@ -19,10 +19,10 @@ export const LocaleContext = createContext<{
 // Kunci untuk menyimpan preferensi bahasa di localStorage
 const LOCALE_STORAGE_KEY = 'preferred_language';
 
-export function I18nProvider({ 
+export function I18nProvider({
   children,
-  initialLocale 
-}: { 
+  initialLocale,
+}: {
   children: React.ReactNode;
   initialLocale?: Locale;
 }) {
@@ -46,7 +46,7 @@ export function I18nProvider({
         let selectedLocale = initialLocale || defaultLocale;
         if (urlLocale && isValidLocale(urlLocale)) {
           selectedLocale = urlLocale as Locale;
-          
+
           // Jika locale dari URL berbeda dengan yang di localStorage, perbarui localStorage
           if (typeof window !== 'undefined') {
             const storedLocale = localStorage.getItem(LOCALE_STORAGE_KEY);
@@ -62,7 +62,7 @@ export function I18nProvider({
           }
         }
 
-        console.log("Selected locale:", selectedLocale, "URL locale:", urlLocale);
+        console.log('Selected locale:', selectedLocale, 'URL locale:', urlLocale);
 
         // Atur locale dan muat pesan
         setLocale(selectedLocale);
@@ -74,7 +74,7 @@ export function I18nProvider({
       } catch (error) {
         console.error('Gagal menginisialisasi locale:', error);
         // Default ke id jika terjadi kesalahan
-        setMessages({}); 
+        setMessages({});
         setIsLoaded(true); // Tetap atur loaded untuk menghindari loading infinite
       }
     };
@@ -120,7 +120,7 @@ export function I18nProvider({
     if (process.env.NODE_ENV === 'development') {
       console.error('Next-intl error:', error);
     }
-    
+
     // Biarkan aplikasi tetap berjalan meskipun ada error
     return null;
   };
@@ -131,8 +131,8 @@ export function I18nProvider({
 
   return (
     <LocaleContext.Provider value={{ locale, changeLocale }}>
-      <NextIntlClientProvider 
-        locale={locale} 
+      <NextIntlClientProvider
+        locale={locale}
         messages={messages}
         onError={handleError}
         timeZone="Asia/Jakarta"

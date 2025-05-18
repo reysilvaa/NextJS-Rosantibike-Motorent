@@ -22,7 +22,7 @@ interface BlogPostDetailProps {
 }
 
 export default function BlogPostDetail({ slug, post: initialPost }: BlogPostDetailProps) {
-  const { t, _i18n  } = useAppTranslations();
+  const { t, _i18n } = useAppTranslations();
   const [blogPost, setBlogPost] = useState<BlogPost | null>(initialPost || null);
   const [isLoading, setIsLoading] = useState(!initialPost);
   const [error, setError] = useState<string | null>(null);

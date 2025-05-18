@@ -31,7 +31,7 @@ export default function DateRangeSearch({
   cardClassName,
   _usePopover = true,
 }: DateRangeSearchProps) {
-  const { t  } = useAppTranslations();
+  const { t } = useAppTranslations();
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
   // Inisialisasi tanggal dari props jika tersedia

@@ -17,4 +17,4 @@ export const config = {
   // Cocokkan semua rute yang harus ditangani oleh middleware ini
   // Kecualikan path yang bukan bagian dari aplikasi (api, _next, file statis)
   matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)'],
-}; 
+};

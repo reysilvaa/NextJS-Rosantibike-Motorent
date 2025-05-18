@@ -18,7 +18,7 @@ export default function FeaturedMotorcycles() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState('all');
-  const { t  } = useAppTranslations();
+  const { t } = useAppTranslations();
 
   useEffect(() => {
     const getMotorcycles = async () => {
@@ -91,17 +91,19 @@ export default function FeaturedMotorcycles() {
   return (
     <section className="py-24 relative overflow-hidden">
       {/* Simplified local accents, allowing global gradient to show */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/5 to-background/80 -z-10"> {/* Above global -z-20 */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/5 to-background/80 -z-10">
+        {' '}
+        {/* Above global -z-20 */}
         <motion.div
           className="absolute inset-0"
           initial={{ opacity: 0.3 }}
           animate={{ opacity: [0.3, 0.5, 0.3] }}
           transition={{ repeat: Infinity, duration: 6, ease: 'easeInOut' }}
         >
-           <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,theme(colors.primary/5),transparent_50%)]"></div>
-           <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_50%,theme(colors.primary/5),transparent_50%)]"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(var(--primary),0.05),transparent_50%)]"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_50%,rgba(var(--primary),0.05),transparent_50%)]"></div>
         </motion.div>
-        <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_70%_30%,theme(colors.primary/5),transparent_60%)] opacity-30"></div>
+        <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_70%_30%,rgba(var(--primary),0.05),transparent_60%)] opacity-30"></div>
       </div>
 
       <div className="container mx-auto px-4">

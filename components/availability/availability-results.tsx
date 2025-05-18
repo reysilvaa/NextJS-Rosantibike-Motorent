@@ -37,7 +37,7 @@ export default function AvailabilityResults({
   _isLoading,
   _onBook,
 }: AvailabilityResultsProps) {
-  const { t  } = useAppTranslations();
+  const { t } = useAppTranslations();
   const router = useRouter();
   const { sortOption, setSortOption, rentalDays, calculateTotalPrice } = useAvailability();
 
