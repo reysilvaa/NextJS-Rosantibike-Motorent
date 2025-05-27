@@ -3,7 +3,7 @@ module.exports = {
   apps: [
     {
       name: 'rental-frontend',
-      script: 'node_modules/next/dist/bin/next',
+      script: 'pnpm',
       args: 'start -p 3001',
       cwd: './',
       instances: 'max',

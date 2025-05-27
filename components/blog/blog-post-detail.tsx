@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 import { fetchBlogPostBySlug } from '@/lib/network/api';
 import type { BlogPost } from '@/lib/types/blog';
 import { calculateReadingTime } from '@/lib/utils/blog-utils';
@@ -22,7 +22,7 @@ interface BlogPostDetailProps {
 }
 
 export default function BlogPostDetail({ slug, post: initialPost }: BlogPostDetailProps) {
-  const { t, _i18n } = useTranslation();
+  const { t, _i18n } = useAppTranslations();
   const [blogPost, setBlogPost] = useState<BlogPost | null>(initialPost || null);
   const [isLoading, setIsLoading] = useState(!initialPost);
   const [error, setError] = useState<string | null>(null);

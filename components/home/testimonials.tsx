@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 import reviewsData from '@/lib/data/reviews.json';
 
 interface Review {
@@ -21,7 +21,7 @@ interface Review {
 export default function Testimonials() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [autoplay, setAutoplay] = useState(true);
-  const { t } = useTranslation();
+  const { t } = useAppTranslations();
   const [reviews, setReviews] = useState<Review[]>([]);
   const autoplayRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -80,11 +80,13 @@ export default function Testimonials() {
 
   return (
     <section className="py-24 relative overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background/80 to-background -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(var(--primary),0.05),transparent_70%)]"></div>
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl"></div>
+      {/* Simplified local accents */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/5 to-background/80 -z-10">
+        {' '}
+        {/* Above global -z-20 */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(var(--primary),0.05),transparent_70%)] opacity-30"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl opacity-50"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl opacity-50"></div>
       </div>
 
       <div className="container mx-auto px-4" ref={containerRef}>

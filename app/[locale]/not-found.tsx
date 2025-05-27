@@ -5,10 +5,10 @@ import { AlertTriangle, ArrowLeft, Home } from 'lucide-react';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 
 export default function NotFound() {
-  const { t } = useTranslation();
+  const { t } = useAppTranslations();
 
   return (
     <div className="bg-gradient-to-b from-accent to-background min-h-screen flex flex-col items-center justify-center px-4">

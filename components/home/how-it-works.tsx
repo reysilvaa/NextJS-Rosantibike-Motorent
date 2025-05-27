@@ -3,10 +3,10 @@
 import { motion } from 'framer-motion';
 import { BikeIcon as Motorcycle, Calendar, CheckCircle, CreditCard } from 'lucide-react';
 
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 
 export default function HowItWorks() {
-  const { t } = useTranslation();
+  const { t } = useAppTranslations();
 
   const steps = [
     {
@@ -42,7 +42,7 @@ export default function HowItWorks() {
   return (
     <section className="py-24 relative overflow-hidden">
       {/* Enhanced Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background to-background/90 -z-10">
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/5 to-background/80 -z-10">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(var(--primary),0.05),transparent_70%)]">
           <motion.div
             className="absolute inset-0"

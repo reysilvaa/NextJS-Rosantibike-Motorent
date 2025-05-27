@@ -10,10 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 
 export default function ContactSection() {
-  const { t } = useTranslation();
+  const { t } = useAppTranslations();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -72,7 +72,7 @@ export default function ContactSection() {
   return (
     <section className="py-24 relative overflow-hidden">
       {/* Background elements */}
-      <div className="absolute inset-0 bg-gradient-to-b from-accent/10 to-background -z-10">
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/5 to-background/80 -z-10">
         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_20%,rgba(var(--primary),0.1),transparent_40%)]"></div>
         <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(circle_at_70%_80%,rgba(var(--primary),0.05),transparent_40%)]"></div>
       </div>

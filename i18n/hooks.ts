@@ -1,26 +1,30 @@
+import { useTranslations } from 'next-intl';
 import { useContext } from 'react';
-import { useTranslation as useReactI18nTranslation } from 'react-i18next';
 
-import { languages } from './index';
-import { LanguageContext } from './provider';
+import { locales } from './locales';
+import { LocaleContext } from './provider';
 
 // Key untuk menyimpan preferensi bahasa di localStorage
 const _LANGUAGE_KEY = 'preferred_language';
 
 // Hook untuk menggunakan terjemahan dan fungsi i18n lainnya
-export const useTranslation = () => {
-  // Gunakan context untuk mengakses bahasa dan fungsi changeLanguage
-  const { language, changeLanguage } = useContext(LanguageContext);
+export const useAppTranslations = () => {
+  // Gunakan context untuk mengakses bahasa dan fungsi changeLocale
+  const { locale, changeLocale } = useContext(LocaleContext);
 
-  // Gunakan hook useTranslation dari react-i18next untuk mendapatkan fungsi terjemahan
-  const { t, i18n } = useReactI18nTranslation();
+  // Gunakan hook useTranslations dari next-intl untuk mendapatkan fungsi terjemahan
+  const t = useTranslations();
 
   return {
     t,
-    language,
-    changeLanguage,
-    languages,
-    i18n,
+    locale,
+    changeLocale,
+    locales,
     isReady: true,
   };
 };
+
+// Fungsi untuk kompatibilitas dengan kode lama
+export function useTranslation() {
+  return useAppTranslations();
+}

@@ -9,7 +9,6 @@ import PWAInstallPrompt from '@/components/shared/pwa/pwa-install-prompt';
 import SchemaOrg from '@/components/shared/seo/schema-org';
 
 import { inter } from './fonts';
-import { metadata as seoMetadata } from './metadata';
 import { Providers } from './providers';
 
 // Viewport untuk Next.js
@@ -26,7 +25,6 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  ...seoMetadata,
   title: 'Rosantibike Motorent | Rental Motor Berkualitas di Malang',
   description: 'Rental motor terpercaya dengan harga terjangkau dan layanan terbaik di Malang',
   icons: {
@@ -52,11 +50,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  params,
 }: Readonly<{
   children: React.ReactNode;
+  params?: { locale?: string };
 }>) {
+  // Dynamically set the language based on the route or default to 'id'
+  const lang = params?.locale || 'id';
+
   return (
-    <html lang="id" suppressHydrationWarning className={inter.variable}>
+    <html lang={lang} suppressHydrationWarning className={inter.variable}>
       <head>
         {/* Meta tags dasar untuk mobile */}
         <meta name="format-detection" content="telephone=no" />
@@ -181,7 +184,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen flex flex-col antialiased font-sans">
-        <Providers>
+        <Providers locale={lang}>
           <SchemaOrg />
           <Navbar />
           <main className="flex-grow">{children}</main>

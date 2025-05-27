@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 import { cn } from '@/lib/utils/utils';
 
 interface ThemeToggleProps {
@@ -18,7 +18,7 @@ interface ThemeToggleProps {
 
 export function ThemeToggle({ useWhiteStyle = false }: ThemeToggleProps) {
   const { setTheme, theme } = useTheme();
-  const { t } = useTranslation();
+  const { t } = useAppTranslations();
 
   return (
     <DropdownMenu>

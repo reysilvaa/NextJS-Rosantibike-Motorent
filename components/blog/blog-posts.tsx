@@ -11,11 +11,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBlogPosts } from '@/hooks/blog/use-blog';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 import { formatDate } from '@/lib/utils';
 
 export function BlogPosts() {
-  const { t } = useTranslation();
+  const { t } = useAppTranslations();
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const { data: posts, isLoading, meta } = useBlogPosts(currentPage, 6, search);

@@ -20,7 +20,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
 import { useMotorcycleFilters } from '@/contexts/motorcycle-filter-context';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 import { cn } from '@/lib/utils/utils';
 
 // Tambahkan StatusMotor enum sesuai dengan yang di backend
@@ -32,7 +32,7 @@ enum StatusMotor {
 }
 
 export default function MotorcycleFilters() {
-  const { t } = useTranslation();
+  const { t } = useAppTranslations();
   const [isOpen, setIsOpen] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
 

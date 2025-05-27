@@ -4,10 +4,10 @@ import { motion } from 'framer-motion';
 import { Clock, Mail, MapPin, Phone } from 'lucide-react';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 
 export default function ContactInfo() {
-  const { t } = useTranslation();
+  const { t } = useAppTranslations();
 
   const contactInfo = [
     {

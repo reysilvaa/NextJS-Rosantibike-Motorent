@@ -2,10 +2,10 @@
 
 import BlogList from '@/components/blog/blog-list';
 import BlogSidebar from '@/components/blog/blog-sidebar';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 
 export default function BlogPageContent() {
-  const { t } = useTranslation();
+  const { t } = useAppTranslations();
 
   return (
     <div className="container mx-auto px-4 py-20">

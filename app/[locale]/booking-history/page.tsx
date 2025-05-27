@@ -16,6 +16,7 @@ import {
   Search,
   Tag,
 } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -377,7 +378,7 @@ export default function BookingHistoryPage() {
                       {t('noBookingHistoryFoundMessage')}
                     </p>
                     <Button asChild>
-                      <a href="/availability">{t('findAvailableMotorcycles')}</a>
+                      <Link href="/availability">{t('findAvailableMotorcycles')}</Link>
                     </Button>
                   </motion.div>
                 )}

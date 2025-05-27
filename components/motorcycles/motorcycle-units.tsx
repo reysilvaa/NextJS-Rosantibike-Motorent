@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useAvailability, useMotorcycleUnits } from '@/hooks/use-motorcycles';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 import { StatusMotor } from '@/lib/types/enums';
 
 interface MotorcycleUnitsProps {
@@ -20,7 +20,7 @@ interface MotorcycleUnitsProps {
 }
 
 export default function MotorcycleUnits({ typeId, startDate, endDate }: MotorcycleUnitsProps) {
-  const { t } = useTranslation();
+  const { t } = useAppTranslations();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 

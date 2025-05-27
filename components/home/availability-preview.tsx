@@ -19,7 +19,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 import { fetchMotorcycleTypes } from '@/lib/network/api';
 import { MotorcycleType } from '@/lib/types/motorcycle';
 import { cn } from '@/lib/utils/utils';
@@ -31,7 +31,7 @@ export default function AvailabilityPreview() {
   const [selectedMotorcycleId, setSelectedMotorcycleId] = useState('');
   const [motorcycleTypes, setMotorcycleTypes] = useState<MotorcycleType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { t } = useTranslation();
+  const { t } = useAppTranslations();
 
   // Fetch motorcycle types from API
   useEffect(() => {
@@ -108,9 +108,11 @@ export default function AvailabilityPreview() {
 
   return (
     <section className="py-24 relative overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background to-background/80 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(var(--primary),0.1),transparent_70%)]"></div>
+      {/* Simplified local accent */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/5 to-background/80 -z-10">
+        {' '}
+        {/* Above global -z-20 */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,theme(colors.primary/5),transparent_70%)] opacity-50"></div>
       </div>
 
       <div className="container mx-auto px-4">

@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 import { fetchBlogPosts } from '@/lib/network/api';
 import type { BlogPost } from '@/lib/types/';
 
@@ -19,7 +19,7 @@ export default function BlogPreview() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState('all');
-  const { t } = useTranslation();
+  const { t } = useAppTranslations();
 
   useEffect(() => {
     const getBlogPosts = async () => {
@@ -90,9 +90,11 @@ export default function BlogPreview() {
 
   return (
     <section className="py-24 relative overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background to-background/90 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(var(--primary),0.05),transparent_70%)]"></div>
+      {/* Simplified local accent */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/5 to-background/80 -z-10">
+        {' '}
+        {/* Above global -z-20 */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,theme(colors.primary/5),transparent_70%)] opacity-40"></div>
       </div>
 
       <div className="container mx-auto px-4">

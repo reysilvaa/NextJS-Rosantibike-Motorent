@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useVideoContext } from '@/contexts/video-context';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 import { fetchMotorcycleTypes } from '@/lib/network/api';
 import { MotorcycleType } from '@/lib/types/motorcycle';
 
@@ -41,7 +41,7 @@ interface SlideType {
 }
 
 export default function Hero() {
-  const { t, language: _language } = useTranslation();
+  const { t } = useAppTranslations();
   const { theme } = useTheme();
   const {
     videoRefs,
@@ -339,7 +339,7 @@ export default function Hero() {
                 aria-label={slide.imageAlt || `Video slide ${index + 1}`}
               />
               <div
-                className={`absolute inset-0 ${theme === 'light' ? 'bg-black/65' : 'bg-black/50'}`}
+                className={`absolute inset-0 ${theme === 'light' ? 'bg-black/60' : 'bg-black/50'} bg-gradient-to-b from-black/70 via-black/40 to-transparent`}
               />
             </div>
           </div>
@@ -347,7 +347,7 @@ export default function Hero() {
       })}
 
       {/* Content */}
-      <div className="absolute inset-0 flex items-center justify-center px-4 sm:px-6 lg:px-8 z-20">
+      <div className="absolute inset-0 flex items-center justify-center px-4 sm:px-6 lg:px-8 z-20 bg-gradient-to-b from-transparent via-primary/5 to-background/80 dark:to-background/60">
         <div className="max-w-7xl w-full mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left side - Hero text */}

@@ -12,11 +12,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBlogPosts } from '@/hooks/blog/use-blog';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 import { BlogPost } from '@/lib/types/blog';
 
 export default function BlogList() {
-  const { t } = useTranslation();
+  const { t } = useAppTranslations();
   const _router = useRouter();
   const searchParams = useSearchParams();
 

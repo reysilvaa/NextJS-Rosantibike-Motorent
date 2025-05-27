@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 import { cn } from '@/lib/utils/utils';
 
 type BeforeInstallPromptEvent = Event & {
@@ -21,7 +21,7 @@ type BeforeInstallPromptEvent = Event & {
 };
 
 const PWAInstallPrompt = () => {
-  const { t } = useTranslation();
+  const { t } = useAppTranslations();
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [isIOSDevice, setIsIOSDevice] = useState(false);

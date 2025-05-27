@@ -22,7 +22,7 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/use-toast';
 import { SocketEvents, useSocketContext } from '@/contexts/socket-context';
-import { useTranslation } from '@/i18n/hooks';
+import { useAppTranslations } from '@/i18n/hooks';
 import { checkAvailability, fetchMotorcycleTypeBySlug } from '@/lib/network/api';
 import { StatusMotor } from '@/lib/types/enums';
 import type { MotorcycleType, MotorcycleUnit } from '@/lib/types/motorcycle';
@@ -50,7 +50,7 @@ interface AvailabilityResponse {
 }
 
 export default function MotorcycleDetail({ slug }: { slug: string }) {
-  const { t } = useTranslation();
+  const { t } = useAppTranslations();
   const router = useRouter();
   const [motorcycle, setMotorcycle] = useState<ExtendedMotorcycleType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
