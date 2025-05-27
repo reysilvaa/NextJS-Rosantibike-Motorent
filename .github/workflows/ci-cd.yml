@@ -9,6 +9,9 @@ on:
 jobs:
   build-test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
 
     strategy:
       matrix:
@@ -45,7 +48,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            ${{ github.workspace }}/.next/cache
+            ${{ github.workspace }}/frontend/.next/cache
           key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-
@@ -67,21 +70,39 @@ jobs:
       - name: Create deployment package
         run: |
           mkdir -p deployment
+          # Salin build output
           cp -r .next deployment/
           cp -r public deployment/
+          
+          # Salin file konfigurasi
           cp package.json deployment/
           cp pnpm-lock.yaml deployment/
           cp next.config.mjs deployment/
+          cp ecosystem.config.js deployment/ || true
+          
+          # Salin kode sumber dan direktori penting
+          cp -r app deployment/ || true
+          cp -r components deployment/ || true
+          cp -r contexts deployment/ || true
+          cp -r hooks deployment/ || true
           cp -r i18n deployment/ || true
           cp -r intl deployment/ || true
-          cp ecosystem.config.js deployment/ || true
+          cp -r lib deployment/ || true
+          cp -r styles deployment/ || true
+          cp -r middleware.ts deployment/ || true
+          
+          # Tambahan file penting lain jika ada
+          cp .env.production deployment/.env || true
+          cp .env deployment/ || true
+          cp .npmrc deployment/ || true
+          
           tar -czf deployment.tar.gz deployment
           
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: frontend-build
-          path: deployment.tar.gz
+          path: frontend/deployment.tar.gz
           retention-days: 1
           
   deploy:
@@ -113,6 +134,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
+            # Hapus folder temporary jika ada
             rm -rf /var/www/rosantibike/frontend-deploy-temp || true
             mkdir -p /var/www/rosantibike/frontend-deploy-temp
             tar -xzf /tmp/deployment.tar.gz -C /var/www/rosantibike/frontend-deploy-temp
@@ -126,6 +148,7 @@ jobs:
             
             mkdir -p /var/www/rosantibike/frontend
             cp -r ./* /var/www/rosantibike/frontend/
+            cp -r ./.next /var/www/rosantibike/frontend/ || true
             
             # Restart atau buat proses PM2 jika belum ada
             cd /var/www/rosantibike/frontend
@@ -133,4 +156,8 @@ jobs:
               pm2 restart rental-frontend --update-env
             else
               pm2 start ecosystem.config.js
-            fi 
+            fi
+            
+            # Bersihkan folder temporary dan file artifacts
+            rm -rf /var/www/rosantibike/frontend-deploy-temp
+            rm -f /tmp/deployment.tar.gz 
