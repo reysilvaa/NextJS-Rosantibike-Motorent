@@ -57,8 +57,8 @@ jobs:
       - name: Lint Check
         run: pnpm lint || echo "Linting issues found"
 
-      - name: Build
-        run: pnpm build
+      - name: Build Production Bundle
+        run: NODE_ENV=production pnpm build
         env:
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
           NEXT_PUBLIC_WS_URL: ${{ secrets.NEXT_PUBLIC_WS_URL }}
@@ -152,7 +152,8 @@ jobs:
             if pm2 list | grep -q "rental-frontend"; then
               pm2 restart rental-frontend --update-env
             else
-              pm2 start ecosystem.config.js
+              # Pastikan menggunakan konfigurasi PM2 yang benar
+              pm2 start ecosystem.config.js || pm2 start npm --name rental-frontend -- start
             fi
             
             # Bersihkan folder temporary dan file artifacts
