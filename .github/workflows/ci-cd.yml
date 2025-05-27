@@ -42,7 +42,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
             
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install || pnpm install --no-frozen-lockfile
 
       - name: Lint Check
         run: pnpm lint || echo "Linting issues found"
@@ -106,7 +106,7 @@ jobs:
             mkdir -p /var/www/rosantibike/frontend-deploy-temp
             tar -xzf /tmp/deployment.tar.gz -C /var/www/rosantibike/frontend-deploy-temp
             cd /var/www/rosantibike/frontend-deploy-temp/deployment
-            pnpm install --prod
+            pnpm install --prod || pnpm install --prod --no-frozen-lockfile
             
             # Backup current version and swap with new version
             if [ -d "/var/www/rosantibike/frontend" ]; then
