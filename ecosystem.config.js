@@ -4,7 +4,7 @@ module.exports = {
     {
       name: 'rental-frontend',
       script: 'pnpm',
-      args: 'start -p 3001',
+      args: 'start',
       cwd: './',
       instances: 'max',
       exec_mode: 'cluster',
