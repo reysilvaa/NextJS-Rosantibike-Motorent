@@ -64,6 +64,7 @@ jobs:
           cp next.config.mjs deployment/
           cp -r i18n deployment/ || true
           cp -r intl deployment/ || true
+          cp ecosystem.config.js deployment/ || true
           tar -czf deployment.tar.gz deployment
           
       - name: Upload build artifact
@@ -116,5 +117,10 @@ jobs:
             mkdir -p /var/www/rosantibike/frontend
             cp -r ./* /var/www/rosantibike/frontend/
             
-            # Restart service
-            pm2 restart frontend 
+            # Restart atau buat proses PM2 jika belum ada
+            cd /var/www/rosantibike/frontend
+            if pm2 list | grep -q "rental-frontend"; then
+              pm2 restart rental-frontend --update-env
+            else
+              pm2 start ecosystem.config.js
+            fi 
